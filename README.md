@@ -1,154 +1,138 @@
-# 💻 Lab Desk Web Workspace
+# 💰 Divvy – Sổ Quỹ Thông Minh Cho Nhóm
 
-> Enterprise-grade Web Application built with **React 19**, **TypeScript**, **Vite 8**, **Fluent UI v9**, **TanStack Query v5**, and **Storybook 8**.
+> Ứng dụng web hiện đại giúp các nhóm bạn, gia đình hoặc đồng nghiệp quản lý chi tiêu chung, tự động tính toán đối trừ công nợ và thanh toán minh bạch.
 
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![TypeScript 5](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)
 ![Vite 8](https://img.shields.io/badge/Vite-8.1-646CFF?logo=vite&logoColor=white)
-![Fluent UI v9](https://img.shields.io/badge/Fluent_UI-v9-0078D4?logo=microsoft&logoColor=white)
+![MUI v6](https://img.shields.io/badge/MUI-v6-007FFF?logo=mui&logoColor=white)
 ![TanStack Query v5](https://img.shields.io/badge/TanStack_Query-v5-FF4154?logo=reactquery&logoColor=white)
 ![Storybook 8](https://img.shields.io/badge/Storybook-v8.6-FF4785?logo=storybook&logoColor=white)
 
----
-
-## 🌟 Overview
-
-**Lab Desk Web Workspace** is a modern, modular, enterprise-ready web application setup designed for scalability, zero Git merge conflicts, and exceptional UI/UX standards.
-
-Repository URL: `https://github.com/LabDeskProject/website.git`
+Repository: `https://github.com/Khoi-Nghiep-HK253/website.git`
 
 ---
 
-## ✨ Key Architectural Highlights
+## 🌟 Giới Thiệu Tính Năng
 
-- ⚡ **Vite 8 & React 19 Engine**: Lightning-fast hot module replacement (HMR) and production builds.
-- 🎨 **Fluent UI v9 Custom Design System**:
-  - Custom 16-shade Brand Palette (`BrandVariants`) with `customLightTheme` and `customDarkTheme`.
-  - `CustomThemeProvider` supporting **Light Mode ☀️**, **Dark Mode 🌙**, and **System Mode 🖥️** with `localStorage` persistence.
-  - Native token overrides (`fontFamilyBase`, `borderRadiusMedium`, `spacingHorizontalM`).
-- 🔀 **Decentralized Modular Routing (Zero Git Conflict)**:
-  - Feature routes declared locally inside `src/pages/[feature]/[feature].routes.tsx`.
-  - Automatic dynamic discovery via Vite's `import.meta.glob` — zero manual edits to main router files.
-- 🔄 **Server State Auth Session Management**:
-  - Session state managed via **TanStack Query v5** (`useQuery`, `useMutation`, `setQueryData`, `invalidateQueries`).
-  - Axios Singleton client with JWT Bearer token request interceptor and global error handling.
-- 🛡️ **Higher-Order Components (HOCs)**:
-  - Clean `@/hocs` module featuring `withSuspense` and `withProtectedRoute`.
+**Divvy** giúp giải quyết bài toán chia tiền & quản lý công nợ cho các nhóm đi du lịch, nhóm ở chung nhà, nhóm đá bóng hoặc dự án làm việc:
+
+- 👥 **Quản lý Nhóm & Thành viên**: Tạo nhóm chi tiêu theo danh mục (Ăn uống, Du lịch, Sinh hoạt, Học tập...), mời thành viên và quản lý vai trò.
+- 💵 **Tạo & Chia Khoản Chi Đa Dạng (5 Split Modes)**:
+  - `EQUAL`: Chia đều cho các thành viên tham gia.
+  - `EXACT`: Nhập số tiền chính xác từng người gánh chịu.
+  - `PERCENTAGE`: Chia theo tỷ lệ phần trăm (tổng = 100%).
+  - `SHARES`: Chia theo khẩu phần/tỷ lệ (ratio).
+  - `ADJUSTMENT`: Chia đều kèm điều chỉnh ± (tổng điều chỉnh = 0).
+- 💳 **Hỗ trợ Nhiều Người Ứng Tiền (Multi-Payer)**: Cho phép nhiều thành viên cùng ứng trước tiền trong một hóa đơn.
+- ⚡ **Thuật Toán Cấn Trừ Công Nợ Tự Động (Min-cut Settlement Algorithm)**: Tự động tính toán đối trừ để giảm tối đa số giao dịch chuyển tiền giữa các thành viên ("Ai Nợ Ai").
+- 🤝 **Lịch Sử Thanh Toán**: Đánh dấu trả nợ từng khoản chi tiêu, xem chi tiết lịch sử thanh toán.
+- 🧮 **Bộ Mô Phỏng Divvy Simulator**: Trải nghiệm thử thuật toán chia tiền tự động trực tiếp trên giao diện.
+
+---
+
+## ✨ Kiến Trúc Mã Nguồn & Công Nghệ
+
+- ⚡ **Vite 8 & React 19 Engine**: HMR siêu tốc, tối ưu đóng gói bundle sản phẩm.
+- 🎨 **Material UI (MUI v6) Custom Design System**:
+  - Hệ màu tailored harmonious (Emerald Green & Sleek Dark theme).
+  - Component hóa theo mô hình Barrel Export (`components/index.ts`).
+- 🔀 **Decentralized Modular Routing (Không lo Xung đột Git)**:
+  - Tự động phát hiện Route theo tính năng (`import.meta.glob`).
+- 🔄 **Strict Separation of Services & React Query Hooks**:
+  - **Services**: `authService`, `userService`, `groupService`, `expenseService`, `debtService`, `settlementService`, `categoryService`, `currencyService`.
+  - **Hooks**: `useAuthQuery`, `useGroupQuery`, `useExpenseQuery`, `useDebtQuery`, `useSettlementQuery`, `useMasterQuery`.
 - 📚 **Storybook 8 Integration**:
-  - Component library development environment with interactive theme switcher decorator.
-- 🧩 **Separation of Concerns (SoC)**:
-  - Feature ViewModel Store Hooks (e.g. `useDashboardStore`) separating 100% of business logic from UI JSX elements.
+  - Hỗ trợ xây dựng và phát triển UI component độc lập với `DebtSimulator.stories.tsx`.
 
 ---
 
-## 📂 Project Architecture
+## 📂 Cấu Trúc Thư Mục Dự Án
 
 ```text
 website/
-├── .storybook/              # Storybook configuration & preview decorators
-├── public/                  # Static assets & favicon icons
+├── .storybook/              # Cấu hình Storybook & Preview decorator
+├── public/                  # Tài nguyên tĩnh & favicon icons
 ├── src/
-│   ├── components/          # Reusable UI components (Alert, PageLoader, etc.)
-│   ├── constants/           # Centralized constants (routes, storage keys)
+│   ├── components/          # UI Component dùng chung (Alert, PageLoader, DivvySimulator)
+│   ├── constants/           # Hằng số hệ thống (PATHS, STORAGE_KEYS)
 │   ├── context/             # React Contexts (AuthContext)
 │   ├── hocs/                # Higher-Order Components (withSuspense, withProtectedRoute)
-│   ├── hooks/               # Custom React & TanStack Query hooks (useAuthQuery, useUserQuery)
-│   ├── layouts/             # Application layouts (RootLayout, AuthLayout)
-│   ├── lib/                 # Third-party configurations (queryClient singleton)
-│   ├── pages/               # Feature-based pages & route modules
-│   │   ├── auth/            # LoginPage, RegisterPage, auth.routes.tsx
-│   │   ├── dashboard/       # DashboardPage, useDashboardStore, dashboard.routes.tsx
-│   │   ├── error/           # ErrorPage, NotFoundPage, error.routes.tsx
-│   │   └── home/            # HomePage, home.routes.tsx
-│   ├── providers/           # App-level providers (QueryProvider)
-│   ├── router/              # Router shell & Vite auto-discovery registry
-│   ├── services/            # API service layer (axiosClient, authService, userService)
-│   ├── theme/               # Fluent UI Custom Theme (brand, index, ThemeProvider)
-│   ├── App.tsx              # Application root
-│   ├── index.css            # Minimal global CSS reset
-│   └── main.tsx             # Application entry point
-├── .env.example             # Environment variables template
-├── package.json             # NPM dependencies & scripts
-├── THEME.md                 # Theme documentation links
+│   ├── hooks/               # React Query hooks chuyên biệt
+│   │   ├── useGroupQuery.ts # Hooks cho Nhóm & Thành viên
+│   │   ├── useExpenseQuery.ts # Hooks cho Khoản chi
+│   │   ├── useDebtQuery.ts   # Hooks cho Công nợ
+│   │   ├── useSettlementQuery.ts # Hooks cho Thanh toán
+│   │   ├── useMasterQuery.ts # Hooks cho Master Data (Categories, Currencies)
+│   │   └── index.ts
+│   ├── layouts/             # Layouts ứng dụng (RootLayout, AuthLayout)
+│   ├── pages/               # Trang và mô-đun theo tính năng
+│   │   ├── auth/            # LoginPage, RegisterPage
+│   │   ├── dashboard/       # DashboardPage & Dashboard Components
+│   │   ├── groups/          # GroupsListPage, GroupDetailPage & Group Components
+│   │   └── home/            # HomePage
+│   ├── providers/           # App Providers (QueryProvider)
+│   ├── router/              # Router shell & tự động phát hiện Route
+│   ├── services/            # Tầng giao tiếp APIs chuyên biệt
+│   │   ├── authService.ts
+│   │   ├── userService.ts
+│   │   ├── groupService.ts
+│   │   ├── expenseService.ts
+│   │   ├── debtService.ts
+│   │   ├── settlementService.ts
+│   │   ├── categoryService.ts
+│   │   └── currencyService.ts
+│   ├── theme/               # MUI Design System Theme Config
+│   ├── App.tsx              # Root component
+│   └── main.tsx             # Application entrypoint
+├── package.json             # NPM scripts & dependencies
 ├── tsconfig.json            # TypeScript configuration
 └── vite.config.ts           # Vite build configuration with `@/` alias
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Hướng Dẫn Cài Đặt & Chạy Ứng Dụng
 
-### Prerequisites
+### Yêu Cầu Cần Có
 
-- **Node.js**: `v18.0.0` or higher
-- **npm**: `v9.0.0` or higher
+- **Node.js**: `v18.0.0` trở lên
+- **npm**: `v9.0.0` trở lên
+- **Backend Service**: Spring Boot API đang chạy trên `http://localhost:8080` (hoặc cấu hình URL trong `.env`)
 
-### Installation
+### Cài Đặt
 
-1. Clone the repository:
+1. Clone repository:
    ```bash
-   git clone https://github.com/LabDeskProject/website.git
+   git clone https://github.com/Khoi-Nghiep-HK253/website.git
    cd website
    ```
 
-2. Install dependencies:
+2. Cài đặt dependencies:
    ```bash
    npm install
    ```
 
-3. Environment Setup:
+3. Cấu hình môi trường:
    ```bash
    cp .env.example .env
    ```
 
 ---
 
-## 🛠️ Available NPM Scripts
+## 🛠️ Danh Sách NPM Scripts
 
-| Script | Description |
+| Lệnh | Mô tả |
 | :--- | :--- |
-| `npm run dev` | Starts the Vite development server with HMR |
-| `npm run build` | Runs TypeScript type checking (`tsc -b`) and builds production bundle |
-| `npm run preview` | Previews the production build locally |
-| `npm run storybook` | Starts Storybook UI component explorer on port `6006` |
-| `npm run build-storybook` | Builds static Storybook documentation bundle (`storybook-static`) |
-| `npm run lint` | Runs ESLint analysis across codebase |
+| `npm run dev` | Khởi chạy Vite Dev Server cho ứng dụng Frontend |
+| `npm run build` | Kiểm tra TypeScript strict (`tsc -b`) và biên dịch đóng gói sản phẩm (`vite build`) |
+| `npm run preview` | Xem trước bản build sản phẩm local |
+| `npm run storybook` | Mở Storybook UI Component Explorer trên cổng `6006` |
+| `npm run build-storybook` | Biên dịch trang Storybook tĩnh |
+| `npm run lint` | Chạy phân tích mã nguồn với ESLint |
 
 ---
 
-## ⚙️ Development Guidelines
+## 📄 Giấy Phép
 
-### Absolute Imports
-Use the `@/` path alias pointing to `src/`:
-```typescript
-import { PATHS, STORAGE_KEYS } from '@/constants';
-import { useAuth } from '@/context/AuthContext';
-import { Alert } from '@/components';
-import { withSuspense } from '@/hocs';
-```
-
-### Adding New Feature Routes (Conflict-Free)
-To add a new page or feature module, create `src/pages/my-feature/my-feature.routes.tsx`:
-```typescript
-import { lazy } from 'react';
-import type { RouteObject } from 'react-router-dom';
-import { withSuspense } from '@/hocs';
-
-const MyFeaturePage = lazy(() => import('./MyFeaturePage'));
-
-export const myFeatureRoutes: RouteObject[] = [
-  {
-    path: '/my-feature',
-    element: withSuspense(MyFeaturePage),
-  },
-];
-
-export default myFeatureRoutes;
-```
-*Vite's auto-discovery (`import.meta.glob`) will automatically register your route without touching any main router files.*
-
----
-
-## 📄 License
-
-Distributed under the **MIT License**. See `LICENSE` for more information.
+Distributed under the **MIT License**.

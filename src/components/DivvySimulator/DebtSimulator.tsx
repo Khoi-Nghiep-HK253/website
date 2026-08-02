@@ -280,7 +280,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
                     borderRadius: 2,
                     display: 'flex',
                     alignItems: 'center',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     borderLeft: 4,
                     borderColor: debt.status === 'SETTLED' ? 'success.main' : 'warning.main',
                   }}
@@ -301,7 +301,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
                   {debt.status === 'SETTLED' ? (
                     <Chip
                       icon={<CheckCircleIcon />}
-                      label="Đã tất toán"
+                      label="Đã thanh toán"
                       color="success"
                       size="small"
                       sx={{ fontWeight: 'bold' }}

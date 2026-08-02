@@ -42,7 +42,7 @@ export const RecordSettlementModal: React.FC<RecordSettlementModalProps> = ({
     setSettleError(null);
 
     if (!debtId || settleAmount <= 0) {
-      setSettleError('Số tiền tất toán không hợp lệ.');
+      setSettleError('Số tiền thanh toán không hợp lệ.');
       return;
     }
 
@@ -57,12 +57,12 @@ export const RecordSettlementModal: React.FC<RecordSettlementModalProps> = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontWeight: 'bold' }}>Ghi Nhận Trả Nợ / Tất Toán</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold' }}>Ghi Nhận Trả Nợ / Thanh Toán</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           {settleError && <Alert intent="error">{settleError}</Alert>}
 
           <TextField
-            label="Số tiền tất toán (VNĐ)"
+            label="Số tiền thanh toán (VNĐ)"
             type="number"
             variant="outlined"
             fullWidth
@@ -83,7 +83,7 @@ export const RecordSettlementModal: React.FC<RecordSettlementModalProps> = ({
           </TextField>
 
           <TextField
-            label="Ghi chú tất toán"
+            label="Ghi chú thanh toán"
             variant="outlined"
             fullWidth
             value={settleNote}
@@ -96,7 +96,7 @@ export const RecordSettlementModal: React.FC<RecordSettlementModalProps> = ({
             Hủy
           </Button>
           <Button type="submit" variant="contained" color="success" disabled={isPending}>
-            {isPending ? <CircularProgress size={20} color="inherit" /> : 'Xác Nhận Tất Toán'}
+            {isPending ? <CircularProgress size={20} color="inherit" /> : 'Xác Nhận Thanh Toán'}
           </Button>
         </DialogActions>
       </Box>

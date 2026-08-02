@@ -10,7 +10,6 @@ import {
   AccountBalanceWallet as WalletIcon,
   Home as HomeIcon,
   HomeOutlined as HomeOutlinedIcon,
-  TrendingUp as TrendingUpIcon,
   Group as GroupIcon,
   GroupOutlined as GroupOutlinedIcon,
   LightMode as LightModeIcon,
@@ -112,22 +111,6 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 )}
               </NavLink>
 
-              <NavLink to={PATHS.DASHBOARD} style={{ textDecoration: 'none' }}>
-                {({ isActive }) => (
-                  <Button
-                    startIcon={<TrendingUpIcon />}
-                    sx={{
-                      color: isActive ? 'primary.main' : 'text.secondary',
-                      fontWeight: isActive ? 700 : 500,
-                      borderBottom: isActive ? 2 : 0,
-                      borderColor: 'primary.main',
-                      borderRadius: 0,
-                    }}
-                  >
-                    Bảng điều khiển
-                  </Button>
-                )}
-              </NavLink>
 
               <NavLink to={PATHS.GROUPS} style={{ textDecoration: 'none' }}>
                 {({ isActive }) => (

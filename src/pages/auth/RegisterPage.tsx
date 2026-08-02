@@ -71,7 +71,7 @@ export default function RegisterPage() {
         phone: phone.trim() || undefined,
       },
       () => {
-        navigate(PATHS.DASHBOARD, { replace: true });
+        navigate(PATHS.GROUPS, { replace: true });
       },
       (err) => {
         setErrorMsg(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.');
@@ -91,10 +91,10 @@ export default function RegisterPage() {
         <Button
           variant="contained"
           endIcon={<ArrowForwardIcon />}
-          onClick={() => navigate(PATHS.DASHBOARD)}
+          onClick={() => navigate(PATHS.GROUPS)}
           sx={{ borderRadius: 3, fontWeight: 700 }}
         >
-          Đi tới Bảng điều khiển
+          Đi tới Danh sách Nhóm
         </Button>
       </Card>
     );

@@ -13,6 +13,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { PATHS } from '@/router/routes';
 import { Alert } from '@/components';
 
@@ -22,10 +23,11 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { login, isAuthenticated, isLoggingIn, loginError } = useAuth();
+  const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || PATHS.DASHBOARD;
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || PATHS.GROUPS;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,10 +45,13 @@ export default function LoginPage() {
     login(
       { usernameOrEmail, password },
       () => {
+        showSuccess('Đăng nhập thành công!');
         navigate(from, { replace: true });
       },
       (err) => {
-        setErrorMsg(err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.');
+        const msg = err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.';
+        setErrorMsg(msg);
+        showError(msg);
       }
     );
   };
@@ -58,15 +63,15 @@ export default function LoginPage() {
           Bạn đã đăng nhập Divvy!
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ my: 2 }}>
-          Chuyển tới Bảng điều khiển để quản lý nhóm chi tiêu.
+          Chuyển tới Danh sách Nhóm để quản lý khoản chi.
         </Typography>
         <Button
           variant="contained"
           endIcon={<ArrowForwardIcon />}
-          onClick={() => navigate(PATHS.DASHBOARD)}
+          onClick={() => navigate(PATHS.GROUPS)}
           sx={{ borderRadius: 3, fontWeight: 700 }}
         >
-          Đi tới Bảng điều khiển
+          Đi tới Danh sách Nhóm
         </Button>
       </Card>
     );

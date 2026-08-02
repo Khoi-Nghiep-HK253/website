@@ -1,9 +1,0 @@
-- https://storybooks.fluentui.dev/react/?path=/docs/concepts-developer-theming--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-border-radii--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-colors--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-fonts--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-shadows--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-spacing--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-stroke-widths--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-typography--docs
-- https://storybooks.fluentui.dev/react/?path=/docs/theme-theme-designer--docs

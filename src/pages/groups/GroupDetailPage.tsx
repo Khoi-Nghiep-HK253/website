@@ -38,6 +38,7 @@ import {
   useCreateSettlementMutation,
 } from '@/hooks/useSettlementQuery';
 import { useCurrencies } from '@/hooks/useMasterQuery';
+import { useToast } from '@/context/ToastContext';
 import type { CreateExpensePayload } from '@/services/expenseService';
 import type { CreateSettlementPayload } from '@/services/settlementService';
 import { useAuth } from '@/context/AuthContext';
@@ -74,6 +75,7 @@ export default function GroupDetailPage() {
   const groupId = Number(groupIdStr);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -129,6 +131,10 @@ export default function GroupDetailPage() {
       {
         onSuccess: () => {
           setOpenExpenseModal(false);
+          showSuccess('Tạo khoản chi mới thành công!');
+        },
+        onError: (err: any) => {
+          showError(`Tạo khoản chi thất bại: ${err.message || 'Vui lòng thử lại'}`);
         },
       }
     );
@@ -140,6 +146,10 @@ export default function GroupDetailPage() {
       {
         onSuccess: () => {
           setOpenMemberModal(false);
+          showSuccess('Thêm thành viên vào nhóm thành công!');
+        },
+        onError: (err: any) => {
+          showError(`Thêm thành viên thất bại: ${err.message || 'Vui lòng thử lại'}`);
         },
       }
     );
@@ -156,6 +166,34 @@ export default function GroupDetailPage() {
     setOpenDetailModal(true);
   };
 
+  const handleDeleteExpense = (expenseId: number) => {
+    deleteExpenseMutation.mutate(
+      { groupId, expenseId },
+      {
+        onSuccess: () => {
+          showSuccess('Xóa khoản chi thành công!');
+        },
+        onError: (err: any) => {
+          showError(`Xóa khoản chi thất bại: ${err.message || 'Bạn không có quyền hoặc khoản chi không tồn tại'}`);
+        },
+      }
+    );
+  };
+
+  const handleRemoveMember = (memberId: number) => {
+    removeMemberMutation.mutate(
+      { groupId, memberId },
+      {
+        onSuccess: () => {
+          showSuccess('Đã xóa thành viên khỏi nhóm!');
+        },
+        onError: (err: any) => {
+          showError(`Xóa thành viên thất bại: ${err.message || 'Vui lòng thử lại'}`);
+        },
+      }
+    );
+  };
+
   const handleSettleSubmit = (payload: CreateSettlementPayload) => {
     createSettlementMutation.mutate(
       { groupId, payload },
@@ -163,6 +201,10 @@ export default function GroupDetailPage() {
         onSuccess: () => {
           setOpenSettleModal(false);
           setSelectedDebtId(null);
+          showSuccess('Ghi nhận thanh toán thành công!');
+        },
+        onError: (err: any) => {
+          showError(`Ghi nhận thanh toán thất bại: ${err.message || 'Vui lòng thử lại'}`);
         },
       }
     );
@@ -240,7 +282,7 @@ export default function GroupDetailPage() {
             expenses={expensesList}
             onOpenCreateModal={() => setOpenExpenseModal(true)}
             onSelectExpense={handleOpenExpenseDetail}
-            onDeleteExpense={(expId) => deleteExpenseMutation.mutate({ groupId, expenseId: expId })}
+            onDeleteExpense={handleDeleteExpense}
           />
         </CustomTabPanel>
 
@@ -258,7 +300,7 @@ export default function GroupDetailPage() {
           <MembersTabContent
             members={members}
             onOpenAddMemberModal={() => setOpenMemberModal(true)}
-            onRemoveMember={(mId) => removeMemberMutation.mutate({ groupId, memberId: mId })}
+            onRemoveMember={handleRemoveMember}
           />
         </CustomTabPanel>
 

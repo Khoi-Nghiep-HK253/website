@@ -85,10 +85,10 @@ export default function HomePage() {
             size="large"
             color="primary"
             endIcon={<ArrowForwardIcon />}
-            onClick={() => navigate(PATHS.DASHBOARD)}
+            onClick={() => navigate(PATHS.GROUPS)}
             sx={{ px: 4, py: 1.5, borderRadius: 3, fontSize: '1.05rem', fontWeight: 700 }}
           >
-            {isAuthenticated ? 'Vào Bảng Điều Khiển' : 'Trải Nghiệm Bảng Điều Khiển'}
+            {isAuthenticated ? 'Vào Danh Sách Nhóm' : 'Khám Phá Các Nhóm Chi Tiêu'}
           </Button>
 
           {!isAuthenticated && (
@@ -216,7 +216,7 @@ export default function HomePage() {
               <CheckCircleIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              5. Tất Toán Trả Nợ (Settlement)
+              5. Thanh Toán Trả Nợ (Settlement)
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Ghi nhận giao dịch trả nợ qua tiền mặt hoặc chuyển khoản. Cập nhật trạng thái công nợ ngay khi hoàn tất.
@@ -231,7 +231,7 @@ export default function HomePage() {
               6. Nhật Ký Lịch Sử (Activity Log)
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Sổ nhật ký lưu lại toàn bộ thao tác: tạo nhóm, thêm khoản chi, sửa số tiền, tất toán... Đảm bảo minh bạch 100%.
+              Sổ nhật ký lưu lại toàn bộ thao tác: tạo nhóm, thêm khoản chi, sửa số tiền, thanh toán... Đảm bảo minh bạch 100%.
             </Typography>
           </Paper>
         </Box>
@@ -263,7 +263,7 @@ export default function HomePage() {
             { step: '02', title: 'Xác Định Người Trả (Payers)', desc: 'Ghi nhận ai đã ứng tiền trước (ví dụ: A trả 800k, B trả 200k).' },
             { step: '03', title: 'Chia Tiền Thành Viên (Shares)', desc: 'Chọn những người tham gia hóa đơn (4 người A, B, C, D -> 250k/người).' },
             { step: '04', title: 'Cấn Trừ Nợ Tự Động (Debts)', desc: 'Divvy tính toán A là chủ nợ, C và D bị ghi nhận nợ A (PENDING).' },
-            { step: '05', title: 'Trả Nợ & Tất Toán (Settlement)', desc: 'C và D chuyển khoản trả A, bấm "Tất toán" để hoàn thành nợ.' },
+            { step: '05', title: 'Trả Nợ & Thanh Toán (Settlement)', desc: 'C và D chuyển khoản trả A, bấm "Thanh toán" để hoàn thành nợ.' },
           ].map((item, index) => (
             <Paper key={index} variant="outlined" sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', height: '100%' }}>
               <Typography variant="h4" color="primary" sx={{ mb: 1, fontWeight: 'bold' }}>
@@ -300,10 +300,10 @@ export default function HomePage() {
         <Button
           variant="contained"
           size="large"
-          onClick={() => navigate(PATHS.DASHBOARD)}
+          onClick={() => navigate(PATHS.GROUPS)}
           sx={{ bgcolor: '#ffffff', color: 'primary.main', fontWeight: 800, px: 4, py: 1.5, borderRadius: 3, '&:hover': { bgcolor: '#f0fdf4' } }}
         >
-          Truy Cập Bảng Điều Khiển Divvy
+          Truy Cập Danh Sách Nhóm Divvy
         </Button>
       </Card>
     </Container>

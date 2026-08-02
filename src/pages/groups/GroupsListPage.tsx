@@ -12,6 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 import { useMyGroups, useCreateGroupMutation } from '@/hooks/useGroupQuery';
 import { useCategories } from '@/hooks/useMasterQuery';
+import { useToast } from '@/context/ToastContext';
 import { Alert } from '@/components';
 import { GroupCardItem, CreateGroupModal } from './components';
 
@@ -20,6 +21,7 @@ export default function GroupsListPage() {
   const { data: myGroupsData, isPending, error } = useMyGroups();
   const { data: categories = [] } = useCategories();
   const createGroupMutation = useCreateGroupMutation();
+  const { showSuccess, showError } = useToast();
 
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,7 +44,11 @@ export default function GroupsListPage() {
     createGroupMutation.mutate(data, {
       onSuccess: (newGroup) => {
         setOpenCreateDialog(false);
+        showSuccess(`Tạo nhóm "${newGroup.name}" thành công!`);
         navigate(`/groups/${newGroup.id}`);
+      },
+      onError: (err) => {
+        showError(`Tạo nhóm thất bại: ${err.message || 'Vui lòng thử lại'}`);
       },
     });
   };

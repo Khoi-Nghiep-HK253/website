@@ -34,7 +34,7 @@ export const SettlementsTabContent: React.FC<SettlementsTabContentProps> = ({ se
       {settlements.length === 0 ? (
         <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
           <PaymentsIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-          <Typography variant="body1">Chưa có giao dịch tất toán nợ nào được ghi nhận.</Typography>
+          <Typography variant="body1">Chưa có giao dịch thanh toán nợ nào được ghi nhận.</Typography>
         </Box>
       ) : (
         <List disablePadding>
@@ -54,7 +54,7 @@ export const SettlementsTabContent: React.FC<SettlementsTabContentProps> = ({ se
                   <ListItemText
                     primary={
                       <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                        {fromName} đã tất toán cho {toName}
+                        {fromName} đã thanh toán cho {toName}
                       </Typography>
                     }
                     secondary={`Phương thức: ${st.method || 'TIỀN MẶT'} • Ghi chú: ${st.note || 'Không có'}`}

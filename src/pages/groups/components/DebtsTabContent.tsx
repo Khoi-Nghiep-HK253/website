@@ -138,7 +138,7 @@ export const DebtsTabContent: React.FC<DebtsTabContentProps> = ({
                               color="success"
                               onClick={() => onOpenSettleModal(debts[0].id, debts[0].amount)}
                             >
-                              Tất toán
+                              Thanh toán
                             </Button>
                           </Box>
                         ) : (

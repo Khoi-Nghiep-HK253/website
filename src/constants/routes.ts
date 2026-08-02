@@ -3,7 +3,6 @@
  */
 export const PATHS = {
   HOME: '/',
-  DASHBOARD: '/dashboard',
   GROUPS: '/groups',
   GROUP_DETAIL: '/groups/:groupId',
   LOGIN: '/login',
@@ -23,6 +22,5 @@ export interface NavigationItem {
 
 export const NAV_ITEMS: NavigationItem[] = [
   { path: PATHS.HOME, label: 'Trang chủ' },
-  { path: PATHS.DASHBOARD, label: 'Bảng điều khiển', isProtected: true },
   { path: PATHS.GROUPS, label: 'Danh sách nhóm', isProtected: true },
 ];
