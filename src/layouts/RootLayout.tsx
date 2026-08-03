@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
+
 import {
   AccountBalanceWallet as WalletIcon,
   Home as HomeIcon,
@@ -17,7 +27,10 @@ import {
   Person as PersonIcon,
   Logout as LogoutIcon,
   ArrowForward as ArrowForwardIcon,
+  Menu as MenuIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
+
 import { PATHS } from '@/router/routes';
 import { useAuth } from '@/context/AuthContext';
 import { useAppTheme } from '@/theme/ThemeProvider';
@@ -31,6 +44,14 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { isDark, toggleTheme } = useAppTheme();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const userInitial = user?.username ? user.username.charAt(0).toUpperCase() : 'U';
+  const userDisplayName = user?.username || user?.email || 'Người dùng';
 
   return (
     <Box
@@ -55,15 +76,16 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
           backdropFilter: 'blur(8px)',
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, sm: 4 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1.5, sm: 3, md: 4 } }}>
+          {/* Logo & Desktop Nav Links */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 3 } }}>
             <Box
               onClick={() => navigate(PATHS.HOME)}
               sx={{
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1.2,
+                gap: 1,
               }}
             >
               <Box
@@ -77,23 +99,15 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                   justifyContent: 'center',
                 }}
               >
-                <WalletIcon sx={{ fontSize: 24 }} />
+                <WalletIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="h6" component="span" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                  Divvy
-                </Typography>
-                <Chip
-                  label="Sổ quỹ thông minh"
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, display: { xs: 'none', sm: 'inline-flex' } }}
-                />
-              </Box>
+              <Typography variant="h6" component="span" sx={{ fontWeight: 800, color: 'primary.main', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+                Divvy
+              </Typography>
             </Box>
 
-            <Box component="nav" sx={{ display: 'flex', gap: 1, ml: 2 }}>
+            {/* Desktop Navigation Links */}
+            <Box component="nav" sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, ml: 2 }}>
               <NavLink to={PATHS.HOME} style={{ textDecoration: 'none' }}>
                 {({ isActive }) => (
                   <Button
@@ -104,13 +118,13 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                       borderBottom: isActive ? 2 : 0,
                       borderColor: 'primary.main',
                       borderRadius: 0,
+                      whitespace: 'nowrap',
                     }}
                   >
                     Trang chủ
                   </Button>
                 )}
               </NavLink>
-
 
               <NavLink to={PATHS.GROUPS} style={{ textDecoration: 'none' }}>
                 {({ isActive }) => (
@@ -122,6 +136,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                       borderBottom: isActive ? 2 : 0,
                       borderColor: 'primary.main',
                       borderRadius: 0,
+                      whitespace: 'nowrap',
                     }}
                   >
                     Quản lý nhóm
@@ -131,25 +146,56 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Button
-              size="small"
-              startIcon={isDark ? <LightModeIcon /> : <DarkModeIcon />}
-              onClick={toggleTheme}
-              color="inherit"
-              sx={{ textTransform: 'none' }}
-            >
-              {isDark ? 'Giao diện Sáng' : 'Giao diện Tối'}
-            </Button>
+          {/* Desktop & Mobile Actions */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 } }}>
+            {/* Theme Toggle Button (Desktop & Tablet) */}
+            <Tooltip title={isDark ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'}>
+              <IconButton onClick={toggleTheme} color="inherit" size="small">
+                {isDark ? <LightModeIcon color="warning" /> : <DarkModeIcon color="primary" />}
+              </IconButton>
+            </Tooltip>
 
             {isAuthenticated ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.5, borderRadius: 2, bgcolor: 'action.hover' }}>
+              <>
+                {/* Desktop User Pill */}
+                <Box
+                  onClick={() => navigate(PATHS.PROFILE)}
+                  sx={{
+                    display: { xs: 'none', sm: 'flex' },
+                    alignItems: 'center',
+                    gap: 1,
+                    px: 1.5,
+                    py: 0.8,
+                    borderRadius: 3,
+                    bgcolor: 'action.hover',
+                    cursor: 'pointer',
+                    transition: 'all 200ms ease',
+                    '&:hover': {
+                      bgcolor: 'action.selected',
+                      transform: 'translateY(-1px)',
+                    },
+                  }}
+                >
                   <PersonIcon color="primary" fontSize="small" />
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {user?.username || user?.email}
+                  <Typography variant="body2" sx={{ fontWeight: 600, maxWidth: 120 }} noWrap>
+                    {userDisplayName}
                   </Typography>
                 </Box>
+
+                {/* Mobile Profile Icon */}
+                <Tooltip title="Trang cá nhân">
+                  <IconButton
+                    onClick={() => navigate(PATHS.PROFILE)}
+                    size="small"
+                    sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
+                  >
+                    <Avatar sx={{ width: 30, height: 30, bgcolor: 'primary.main', fontSize: '0.85rem', fontWeight: 700 }}>
+                      {userInitial}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
+
+                {/* Desktop Logout Button */}
                 <Button
                   size="small"
                   variant="outlined"
@@ -159,32 +205,197 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                     logout();
                     navigate(PATHS.LOGIN);
                   }}
+                  sx={{ display: { xs: 'none', md: 'inline-flex' }, whitespace: 'nowrap' }}
                 >
                   Đăng xuất
                 </Button>
-              </Box>
+              </>
             ) : (
               <Button
                 size="small"
                 variant="contained"
                 endIcon={<ArrowForwardIcon />}
                 onClick={() => navigate(PATHS.LOGIN)}
-                sx={{ borderRadius: 3, fontWeight: 700 }}
+                sx={{ borderRadius: 3, fontWeight: 700, px: { xs: 1.5, sm: 2 } }}
               >
-                Đăng nhập / Đăng ký
+                Đăng nhập
               </Button>
             )}
+
+            {/* Mobile Hamburger Menu Icon */}
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="end"
+              onClick={handleDrawerToggle}
+              sx={{ display: { md: 'none' }, ml: 0.5 }}
+            >
+              <MenuIcon />
+            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Mobile Drawer Menu */}
+      <Drawer
+        anchor="right"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        slotProps={{
+          paper: {
+            sx: { width: 280, bgcolor: 'background.paper' },
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                p: 0.6,
+                borderRadius: 1.5,
+                bgcolor: 'primary.main',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <WalletIcon sx={{ fontSize: 20 }} />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
+              Divvy
+            </Typography>
+          </Box>
+          <IconButton onClick={handleDrawerToggle}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Divider />
+
+        {isAuthenticated && (
+          <Box
+            onClick={() => {
+              navigate(PATHS.PROFILE);
+              setMobileOpen(false);
+            }}
+            sx={{
+              p: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              bgcolor: 'action.hover',
+              cursor: 'pointer',
+            }}
+          >
+            <Avatar sx={{ bgcolor: 'primary.main', fontWeight: 700 }}>
+              {userInitial}
+            </Avatar>
+            <Box sx={{ overflow: 'hidden' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }} noWrap>
+                {userDisplayName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+                {user?.email || 'Xem trang cá nhân'}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        <Divider />
+
+        <List sx={{ pt: 1 }}>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                navigate(PATHS.HOME);
+                setMobileOpen(false);
+              }}
+            >
+              <ListItemIcon>
+                <HomeIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Trang chủ"
+                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                navigate(PATHS.GROUPS);
+                setMobileOpen(false);
+              }}
+            >
+              <ListItemIcon>
+                <GroupIcon color="primary" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Quản lý nhóm"
+                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          {isAuthenticated && (
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  navigate(PATHS.PROFILE);
+                  setMobileOpen(false);
+                }}
+              >
+                <ListItemIcon>
+                  <PersonIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Trang cá nhân & Lời mời"
+                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                />
+              </ListItemButton>
+            </ListItem>
+          )}
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={toggleTheme}>
+              <ListItemIcon>
+                {isDark ? <LightModeIcon color="warning" /> : <DarkModeIcon color="primary" />}
+              </ListItemIcon>
+              <ListItemText
+                primary={isDark ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
+                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
+
+        {isAuthenticated && (
+          <Box sx={{ p: 2, mt: 'auto' }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="error"
+              startIcon={<LogoutIcon />}
+              onClick={() => {
+                logout();
+                navigate(PATHS.LOGIN);
+                setMobileOpen(false);
+              }}
+            >
+              Đăng xuất
+            </Button>
+          </Box>
+        )}
+      </Drawer>
 
       {/* Main Content View */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          py: 4,
-          px: { xs: 2, sm: 4 },
+          py: { xs: 2.5, sm: 4 },
+          px: { xs: 1.5, sm: 3, md: 4 },
           boxSizing: 'border-box',
         }}
       >

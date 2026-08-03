@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -21,7 +21,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   useGroupDetail,
   useGroupMembers,
-  useAddMemberMutation,
   useRemoveMemberMutation,
 } from '@/hooks/useGroupQuery';
 import {
@@ -38,12 +37,13 @@ import {
   useCreateSettlementMutation,
 } from '@/hooks/useSettlementQuery';
 import { useCurrencies } from '@/hooks/useMasterQuery';
+import { useSendInvitationMutation } from '@/hooks/useInvitationQuery';
 import { useToast } from '@/context/ToastContext';
 import type { CreateExpensePayload } from '@/services/expenseService';
 import type { CreateSettlementPayload } from '@/services/settlementService';
 import { useAuth } from '@/context/AuthContext';
 import { PATHS } from '@/router/routes';
-import { Alert } from '@/components';
+import { Alert, CustomTabPanel } from '@/components';
 import {
   ExpenseTabContent,
   DebtsTabContent,
@@ -54,21 +54,6 @@ import {
   RecordSettlementModal,
   ExpenseDetailModal,
 } from './components';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`group-tabpanel-${index}`} {...other}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 export default function GroupDetailPage() {
   const { groupId: groupIdStr } = useParams<{ groupId: string }>();
@@ -91,9 +76,9 @@ export default function GroupDetailPage() {
   // Mutations
   const createExpenseMutation = useCreateExpenseMutation();
   const deleteExpenseMutation = useDeleteExpenseMutation();
-  const addMemberMutation = useAddMemberMutation();
   const removeMemberMutation = useRemoveMemberMutation();
   const createSettlementMutation = useCreateSettlementMutation();
+  const sendInvitationMutation = useSendInvitationMutation();
 
   // Modals state
   const [openExpenseModal, setOpenExpenseModal] = useState(false);
@@ -140,16 +125,23 @@ export default function GroupDetailPage() {
     );
   };
 
-  const handleAddMemberSubmit = (targetUserId: number) => {
-    addMemberMutation.mutate(
-      { groupId, userId: targetUserId },
+  const handleAddMemberSubmit = (payload: { userId: number; message?: string; expiresAt?: string }) => {
+    sendInvitationMutation.mutate(
+      {
+        groupId,
+        payload: {
+          inviteeId: payload.userId,
+          message: payload.message,
+          expiresAt: payload.expiresAt,
+        },
+      },
       {
         onSuccess: () => {
           setOpenMemberModal(false);
-          showSuccess('Thêm thành viên vào nhóm thành công!');
+          showSuccess('Đã gửi lời mời vào nhóm thành công! Vui lòng chờ người dùng chấp nhận.');
         },
         onError: (err: any) => {
-          showError(`Thêm thành viên thất bại: ${err.message || 'Vui lòng thử lại'}`);
+          showError(`Gửi lời mời thất bại: ${err.message || 'Người dùng đã có lời mời chờ xử lý hoặc đã ở trong nhóm'}`);
         },
       }
     );
@@ -213,6 +205,14 @@ export default function GroupDetailPage() {
   const expensesList = expensesData?.content || [];
   const settlementsList = settlementsData?.content || [];
 
+  const currentUserMember = members.find(
+    (m) =>
+      (user?.id && m.userId === user.id) ||
+      (user?.username && (m.username === user.username || m.user?.username === user.username)) ||
+      (user?.email && (m.email === user.email || m.user?.email === user.email))
+  );
+  const isOwner = currentUserMember?.role === 'OWNER';
+
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header Bar */}
@@ -253,22 +253,31 @@ export default function GroupDetailPage() {
             Thêm Khoản Chi Mới
           </Button>
 
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<PersonAddIcon />}
-            onClick={() => setOpenMemberModal(true)}
-            sx={{ borderRadius: 3, fontWeight: 700 }}
-          >
-            Mời Thành Viên
-          </Button>
+          {isOwner && (
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<PersonAddIcon />}
+              onClick={() => setOpenMemberModal(true)}
+              sx={{ borderRadius: 3, fontWeight: 700 }}
+            >
+              Mời Thành Viên
+            </Button>
+          )}
         </Box>
       </Card>
 
       {/* Tabs Navigation */}
       <Paper sx={{ borderRadius: 4, overflow: 'hidden' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
-          <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} color="primary">
+          <Tabs
+            value={activeTab}
+            onChange={(_, val) => setActiveTab(val)}
+            color="primary"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
             <Tab icon={<ReceiptLongIcon />} label="Khoản Chi (Expenses)" iconPosition="start" />
             <Tab icon={<AccountBalanceIcon />} label="Công Nợ (Debts)" iconPosition="start" />
             <Tab icon={<GroupIcon />} label="Thành Viên (Members)" iconPosition="start" />
@@ -301,6 +310,7 @@ export default function GroupDetailPage() {
             members={members}
             onOpenAddMemberModal={() => setOpenMemberModal(true)}
             onRemoveMember={handleRemoveMember}
+            isOwner={isOwner}
           />
         </CustomTabPanel>
 
@@ -325,7 +335,8 @@ export default function GroupDetailPage() {
         open={openMemberModal}
         onClose={() => setOpenMemberModal(false)}
         onSubmit={handleAddMemberSubmit}
-        isPending={addMemberMutation.isPending}
+        isPending={sendInvitationMutation.isPending}
+        existingMembers={members}
       />
 
       <RecordSettlementModal

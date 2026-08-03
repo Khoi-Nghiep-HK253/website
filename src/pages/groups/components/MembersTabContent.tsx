@@ -18,6 +18,7 @@ interface MembersTabContentProps {
   members: GroupMemberResponse[];
   onOpenAddMemberModal: () => void;
   onRemoveMember: (memberId: number) => void;
+  isOwner?: boolean;
 }
 
 const getMemberUsername = (m: GroupMemberResponse): string => {
@@ -43,16 +44,34 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
   members,
   onOpenAddMemberModal,
   onRemoveMember,
+  isOwner = false,
 }) => {
   return (
     <Box sx={{ px: 3, pb: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 1.5,
+          mb: 2.5,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
           Danh Sách Thành Viên ({members.length})
         </Typography>
-        <Button size="small" variant="contained" startIcon={<PersonAddIcon />} onClick={onOpenAddMemberModal}>
-          Thêm Thành Viên
-        </Button>
+        {isOwner && (
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<PersonAddIcon />}
+            onClick={onOpenAddMemberModal}
+            sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
+          >
+            Thêm Thành Viên
+          </Button>
+        )}
       </Box>
 
       <List disablePadding>
@@ -67,7 +86,7 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
               <ListItem
                 sx={{ py: 1.5 }}
                 secondaryAction={
-                  m.role !== 'OWNER' && (
+                  isOwner && m.role !== 'OWNER' && (
                     <IconButton color="error" onClick={() => onRemoveMember(m.id)}>
                       <DeleteIcon />
                     </IconButton>

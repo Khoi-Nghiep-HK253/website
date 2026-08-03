@@ -44,11 +44,26 @@ export const ExpenseTabContent: React.FC<ExpenseTabContentProps> = ({
 
   return (
     <Box sx={{ px: 3, pb: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 1.5,
+          mb: 2.5,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
           Danh Sách Khoản Chi Nhóm ({expenses.length})
         </Typography>
-        <Button size="small" variant="contained" startIcon={<AddIcon />} onClick={onOpenCreateModal}>
+        <Button
+          size="small"
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={onOpenCreateModal}
+          sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
+        >
           Tạo Khoản Chi
         </Button>
       </Box>
