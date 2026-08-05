@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -21,6 +21,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useTranslation } from 'react-i18next';
 import type { CurrencyResponse } from '@/services/currencyService';
 import type { GroupMemberResponse } from '@/services/groupService';
 import type { CreateExpensePayload, ExpenseSharePayload } from '@/services/expenseService';
@@ -65,15 +66,6 @@ const getMemberDisplayName = (m: GroupMemberResponse): string => {
 
 const getMemberUserId = (m: GroupMemberResponse): number =>
   m.user?.id || m.userId || m.id;
-
-// ── SplitType metadata ────────────────────────────────────────────────────────
-const SPLIT_TYPES: { value: SplitType; label: string; desc: string }[] = [
-  { value: 'EQUAL', label: 'Chia đều (EQUAL)', desc: 'Tất cả tham gia trả phần bằng nhau' },
-  { value: 'EXACT', label: 'Số tiền cụ thể (EXACT)', desc: 'Nhập số tiền chính xác cho từng người' },
-  { value: 'PERCENTAGE', label: 'Theo phần trăm (PERCENTAGE)', desc: 'Nhập % phần trả, tổng phải = 100%' },
-  { value: 'SHARES', label: 'Theo khẩu phần (SHARES)', desc: 'Nhập số phần chia, backend tự tính tỷ lệ' },
-  { value: 'ADJUSTMENT', label: 'Điều chỉnh thêm (ADJUSTMENT)', desc: 'Chia đều + điều chỉnh ±, tổng điều chỉnh = 0' },
-];
 
 // ── Client-side amount preview calculator ────────────────────────────────────
 function previewShares(
@@ -136,6 +128,40 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
   onSubmit,
   isPending,
 }) => {
+  const { t } = useTranslation();
+
+  // Dynamic split types definition with i18n
+  const splitTypes: { value: SplitType; label: string; desc: string }[] = useMemo(
+    () => [
+      {
+        value: 'EQUAL',
+        label: t('createExpenseModal.splitType.equalLabel'),
+        desc: t('createExpenseModal.splitType.equalDesc'),
+      },
+      {
+        value: 'EXACT',
+        label: t('createExpenseModal.splitType.exactLabel'),
+        desc: t('createExpenseModal.splitType.exactDesc'),
+      },
+      {
+        value: 'PERCENTAGE',
+        label: t('createExpenseModal.splitType.percentageLabel'),
+        desc: t('createExpenseModal.splitType.percentageDesc'),
+      },
+      {
+        value: 'SHARES',
+        label: t('createExpenseModal.splitType.sharesLabel'),
+        desc: t('createExpenseModal.splitType.sharesDesc'),
+      },
+      {
+        value: 'ADJUSTMENT',
+        label: t('createExpenseModal.splitType.adjustmentLabel'),
+        desc: t('createExpenseModal.splitType.adjustmentDesc'),
+      },
+    ],
+    [t]
+  );
+
   // Basic info
   const [description, setDescription] = useState('');
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -148,35 +174,38 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
   // Shares
   const [shareEntries, setShareEntries] = useState<ShareEntry[]>([]);
-
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Initialise payers & shares when members load or modal opens
-  useEffect(() => {
-    if (!open || members.length === 0) return;
+  const [prevOpen, setPrevOpen] = useState(open);
 
-    const myId = currentUserId;
-    const defaultPayerId = myId && members.some((m) => getMemberUserId(m) === myId)
-      ? myId
-      : getMemberUserId(members[0]);
+  if (open && !prevOpen) {
+    setPrevOpen(true);
+    if (members.length > 0) {
+      const myId = currentUserId;
+      const defaultPayerId = myId && members.some((m) => getMemberUserId(m) === myId)
+        ? myId
+        : getMemberUserId(members[0]);
 
-    setPayers([{ userId: defaultPayerId, amount: 0 }]);
-    setShareEntries(
-      members.map((m) => ({
-        userId: getMemberUserId(m),
-        amount: 0,
-        percentage: 0,
-        ratio: 1,
-        adjustment: 0,
-      }))
-    );
-    setTotalAmount(0);
-    setDescription('');
-    setExpenseDate(new Date().toISOString().slice(0, 10));
-    setSplitType('EQUAL');
-    setCurrencyId(currencies[0]?.id ?? 1);
-    setSubmitError(null);
-  }, [open, members, currentUserId, currencies]);
+      setPayers([{ userId: defaultPayerId, amount: 0 }]);
+      setShareEntries(
+        members.map((m) => ({
+          userId: getMemberUserId(m),
+          amount: 0,
+          percentage: 0,
+          ratio: 1,
+          adjustment: 0,
+        }))
+      );
+      setTotalAmount(0);
+      setDescription('');
+      setExpenseDate(new Date().toISOString().slice(0, 10));
+      setSplitType('EQUAL');
+      setCurrencyId(currencies[0]?.id ?? 1);
+      setSubmitError(null);
+    }
+  } else if (!open && prevOpen) {
+    setPrevOpen(false);
+  }
 
   // Payer helpers
   const payerTotal = useMemo(() => payers.reduce((s, p) => s + (p.amount || 0), 0), [payers]);
@@ -234,22 +263,22 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
     switch (splitType) {
       case 'EXACT': {
         const sum = shareEntries.reduce((s, e) => s + (e.amount ?? 0), 0);
-        return { ok: Math.abs(sum - totalAmount) < 0.01, hint: `Tổng: ${sum.toLocaleString()} / ${totalAmount.toLocaleString()}` };
+        return { ok: Math.abs(sum - totalAmount) < 0.01, hint: `Total: ${sum.toLocaleString()} / ${totalAmount.toLocaleString()}` };
       }
       case 'PERCENTAGE': {
         const sum = shareEntries.reduce((s, e) => s + (e.percentage ?? 0), 0);
-        return { ok: Math.abs(sum - 100) < 0.01, hint: `Tổng %: ${sum.toFixed(1)}% / 100%` };
+        return { ok: Math.abs(sum - 100) < 0.01, hint: `Total %: ${sum.toFixed(1)}% / 100%` };
       }
       case 'SHARES': {
         const sum = shareEntries.reduce((s, e) => s + (e.ratio ?? 0), 0);
-        return { ok: sum > 0 && shareEntries.every((e) => (e.ratio ?? 0) > 0), hint: `Tổng khẩu phần: ${sum}` };
+        return { ok: sum > 0 && shareEntries.every((e) => (e.ratio ?? 0) > 0), hint: `Total ratio: ${sum}` };
       }
       case 'ADJUSTMENT': {
         const sum = shareEntries.reduce((s, e) => s + (e.adjustment ?? 0), 0);
-        return { ok: Math.abs(sum) < 0.01, hint: `Tổng điều chỉnh: ${sum > 0 ? '+' : ''}${sum.toLocaleString()} (phải = 0)` };
+        return { ok: Math.abs(sum) < 0.01, hint: `Total adjustment: ${sum > 0 ? '+' : ''}${sum.toLocaleString()}` };
       }
       default:
-        return { ok: shareEntries.length > 0, hint: `${shareEntries.length} thành viên tham gia` };
+        return { ok: shareEntries.length > 0, hint: `${shareEntries.length} members` };
     }
   }, [splitType, shareEntries, totalAmount]);
 
@@ -258,12 +287,15 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
     e.preventDefault();
     setSubmitError(null);
 
-    if (!description.trim()) { setSubmitError('Vui lòng nhập mô tả khoản chi.'); return; }
-    if (totalAmount <= 0) { setSubmitError('Tổng số tiền phải lớn hơn 0.'); return; }
-    if (!currencyId) { setSubmitError('Vui lòng chọn loại tiền tệ.'); return; }
-    if (!payerOk) { setSubmitError(`Tổng tiền người ứng (${payerTotal.toLocaleString()}) chưa khớp với tổng chi phí (${totalAmount.toLocaleString()}). Vui lòng điều chỉnh.`); return; }
-    if (!shareValidation.ok) { setSubmitError(`Chia tiền chưa hợp lệ: ${shareValidation.hint}`); return; }
-    if (shareEntries.length === 0) { setSubmitError('Phải có ít nhất 1 người tham gia chia tiền.'); return; }
+    if (!description.trim()) { setSubmitError(t('createExpenseModal.descRequired')); return; }
+    if (totalAmount <= 0) { setSubmitError(t('createExpenseModal.amountPositive')); return; }
+    if (!currencyId) { setSubmitError(t('createExpenseModal.currencyRequired')); return; }
+    if (!payerOk) {
+      setSubmitError(t('createExpenseModal.payerMismatch', { payerTotal: payerTotal.toLocaleString(), totalAmount: totalAmount.toLocaleString() }));
+      return;
+    }
+    if (!shareValidation.ok) { setSubmitError(`${t('createExpenseModal.invalidShares')}: ${shareValidation.hint}`); return; }
+    if (shareEntries.length === 0) { setSubmitError(t('createExpenseModal.shareRequired')); return; }
 
     const sharesPayload: ExpenseSharePayload[] = shareEntries.map((e) => {
       const base: ExpenseSharePayload = { userId: e.userId };
@@ -287,13 +319,13 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
   const selectedCurr = currencies.find((c) => c.id === currencyId);
   const currencySymbol = selectedCurr?.code || selectedCurr?.acronym || selectedCurr?.symbol || 'VND';
-  const splitTypeInfo = SPLIT_TYPES.find((s) => s.value === splitType);
+  const splitTypeInfo = splitTypes.find((s) => s.value === splitType);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <Box component="form" onSubmit={handleSubmit}>
         <DialogTitle sx={{ fontWeight: 'bold', pb: 1, fontSize: { xs: '1.15rem', sm: '1.3rem' } }}>
-          Thêm Khoản Chi Mới
+          {t('createExpenseModal.title')}
         </DialogTitle>
 
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1, px: { xs: 2, sm: 3 } }}>
@@ -302,12 +334,12 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
           {/* ── SECTION 1: Thông tin cơ bản ───────────────────────────────── */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-              Thông Tin Khoản Chi
+              {t('createExpenseModal.sectionInfo')}
             </Typography>
 
             <TextField
-              label="Mô tả khoản chi *"
-              placeholder="VD: Tiền lẩu, Xăng xe, Phòng khách sạn..."
+              label={t('createExpenseModal.descLabel')}
+              placeholder={t('createExpenseModal.descPlaceholder')}
               fullWidth
               required
               value={description}
@@ -323,7 +355,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
               }}
             >
               <TextField
-                label="Tổng số tiền *"
+                label={t('createExpenseModal.totalLabel')}
                 type="number"
                 fullWidth
                 required
@@ -332,7 +364,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 slotProps={{ input: { inputProps: { min: 0 } } }}
               />
               <TextField
-                label="Loại tiền tệ"
+                label={t('createExpenseModal.currencyLabel')}
                 select
                 fullWidth
                 value={currencyId}
@@ -348,7 +380,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 })}
               </TextField>
               <TextField
-                label="Ngày chi tiêu *"
+                label={t('createExpenseModal.dateLabel')}
                 type="date"
                 required
                 fullWidth
@@ -359,14 +391,14 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
             </Box>
 
             <TextField
-              label="Cách chia tiền"
+              label={t('createExpenseModal.splitTypeLabel')}
               select
               fullWidth
               value={splitType}
               onChange={(e) => setSplitType(e.target.value as SplitType)}
               helperText={splitTypeInfo?.desc}
             >
-              {SPLIT_TYPES.map((s) => (
+              {splitTypes.map((s) => (
                 <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
               ))}
             </TextField>
@@ -378,12 +410,12 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                Người Ứng Tiền Trước
+                {t('createExpenseModal.sectionPayers')}
               </Typography>
               <Chip
                 label={payerOk
-                  ? `✓ Khớp: ${payerTotal.toLocaleString()} ${currencySymbol}`
-                  : `Còn thiếu: ${payerRemainder.toLocaleString()} ${currencySymbol}`
+                  ? `✓ ${t('createExpenseModal.matched')}: ${payerTotal.toLocaleString()} ${currencySymbol}`
+                  : `${t('createExpenseModal.missing')}: ${payerRemainder.toLocaleString()} ${currencySymbol}`
                 }
                 color={payerOk ? 'success' : 'error'}
                 size="small"
@@ -414,7 +446,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 }}
               >
                 <TextField
-                  label="Người ứng"
+                  label={t('createExpenseModal.payerLabel')}
                   select
                   size="small"
                   sx={{ flex: 1 }}
@@ -433,7 +465,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
                 <Box sx={{ display: 'flex', gap: 1, flex: 1, alignItems: 'center' }}>
                   <TextField
-                    label={`Số tiền đã ứng (${currencySymbol})`}
+                    label={t('createExpenseModal.payerAmountLabel', { symbol: currencySymbol })}
                     type="number"
                     size="small"
                     fullWidth
@@ -462,7 +494,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 onClick={addPayer}
                 sx={{ alignSelf: 'flex-start', mt: 0.5, borderRadius: 2 }}
               >
-                Thêm người ứng tiền
+                {t('createExpenseModal.addPayerBtn')}
               </Button>
             )}
           </Box>
@@ -473,7 +505,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                Chia Tiền Cho Từng Người
+                {t('createExpenseModal.sectionShares')}
               </Typography>
               <Chip
                 label={shareValidation.hint}
@@ -489,7 +521,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 /* EQUAL: Simple checkboxes */
                 <FormGroup>
                   <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                    Tích chọn những người sẽ chia đều khoản chi này:
+                    {t('createExpenseModal.equalCheckPrompt')}
                   </Typography>
                   {members.map((m) => {
                     const uid = getMemberUserId(m);
@@ -512,10 +544,10 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 /* EXACT / PERCENTAGE / SHARES / ADJUSTMENT: Input per member */
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                    {splitType === 'EXACT' && 'Nhập số tiền chính xác mỗi người trả. Tổng phải = tổng chi phí.'}
-                    {splitType === 'PERCENTAGE' && 'Nhập % của tổng chi phí. Tổng phải = 100%.'}
-                    {splitType === 'SHARES' && 'Nhập số khẩu phần (≥1) của từng người. Tỷ lệ tự động tính.'}
-                    {splitType === 'ADJUSTMENT' && 'Nhập điều chỉnh ± so với chia đều. Tổng điều chỉnh phải = 0.'}
+                    {splitType === 'EXACT' && t('createExpenseModal.exactHint')}
+                    {splitType === 'PERCENTAGE' && t('createExpenseModal.percentageHint')}
+                    {splitType === 'SHARES' && t('createExpenseModal.sharesHint')}
+                    {splitType === 'ADJUSTMENT' && t('createExpenseModal.adjustmentHint')}
                   </Typography>
 
                   {/* Add/Remove members toggle */}
@@ -562,7 +594,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flex: 1 }}>
                           {splitType === 'EXACT' && (
                             <TextField
-                              label={`Số tiền (${currencySymbol})`}
+                              label={t('createExpenseModal.exactLabel', { symbol: currencySymbol })}
                               type="number"
                               size="small"
                               fullWidth
@@ -574,7 +606,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
                           {splitType === 'PERCENTAGE' && (
                             <TextField
-                              label="Phần trăm (%)"
+                              label={t('createExpenseModal.percentageLabel')}
                               type="number"
                               size="small"
                               fullWidth
@@ -586,7 +618,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
                           {splitType === 'SHARES' && (
                             <TextField
-                              label="Số phần (ratio)"
+                              label={t('createExpenseModal.sharesLabel')}
                               type="number"
                               size="small"
                               fullWidth
@@ -598,7 +630,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
                           {splitType === 'ADJUSTMENT' && (
                             <TextField
-                              label={`Điều chỉnh (${currencySymbol})`}
+                              label={t('createExpenseModal.adjustmentLabel', { symbol: currencySymbol })}
                               type="number"
                               size="small"
                               fullWidth
@@ -607,7 +639,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                             />
                           )}
 
-                          <Tooltip title={`Dự kiến: ${previewAmt.toLocaleString()} ${currencySymbol}`}>
+                          <Tooltip title={`${t('createExpenseModal.estimated')}: ${previewAmt.toLocaleString()} ${currencySymbol}`}>
                             <Chip
                               label={totalAmount > 0 ? `≈ ${previewAmt.toLocaleString()}` : '—'}
                               size="small"
@@ -628,7 +660,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
           {totalAmount > 0 && shareEntries.length > 0 && (
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, bgcolor: 'action.hover' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                Preview – Từng Người Phải Trả
+                {t('createExpenseModal.previewTitle')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {shareEntries.map((entry) => {
@@ -652,7 +684,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                       </Typography>
                       {isPayer && payerPaid > 0 && (
                         <Typography variant="caption" color={net > 0 ? 'error.main' : 'success.main'} sx={{ display: 'block' }}>
-                          {net > 0 ? `Cần thu: ${net.toLocaleString()}` : `Nhận lại: ${Math.abs(net).toLocaleString()}`}
+                          {net > 0 ? `${t('createExpenseModal.collect')}: ${net.toLocaleString()}` : `${t('createExpenseModal.refund')}: ${Math.abs(net).toLocaleString()}`}
                         </Typography>
                       )}
                     </Paper>
@@ -665,7 +697,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
         <DialogActions sx={{ p: 2, px: 3, gap: 1 }}>
           <Button onClick={onClose} color="inherit" disabled={isPending}>
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button
             type="submit"
@@ -673,7 +705,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
             disabled={isPending || !payerOk || !shareValidation.ok || totalAmount <= 0}
             startIcon={isPending ? <CircularProgress size={18} color="inherit" /> : undefined}
           >
-            {isPending ? 'Đang tạo...' : 'Tạo Khoản Chi'}
+            {isPending ? t('createExpenseModal.submitting') : t('createExpenseModal.submit')}
           </Button>
         </DialogActions>
       </Box>

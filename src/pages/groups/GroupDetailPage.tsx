@@ -18,31 +18,33 @@ import {
   Payments as PaymentsIcon,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   useGroupDetail,
   useGroupMembers,
   useRemoveMemberMutation,
-} from '@/hooks/useGroupQuery';
+} from '@/hooks/query/useGroupQuery';
 import {
   useGroupExpenses,
   useCreateExpenseMutation,
   useDeleteExpenseMutation,
-} from '@/hooks/useExpenseQuery';
+} from '@/hooks/query/useExpenseQuery';
 import {
   useGroupDebtSummary,
   useMyDebts,
-} from '@/hooks/useDebtQuery';
+} from '@/hooks/query/useDebtQuery';
 import {
   useGroupSettlements,
   useCreateSettlementMutation,
-} from '@/hooks/useSettlementQuery';
-import { useCurrencies } from '@/hooks/useMasterQuery';
-import { useSendInvitationMutation } from '@/hooks/useInvitationQuery';
-import { useToast } from '@/context/ToastContext';
+} from '@/hooks/query/useSettlementQuery';
+import { useCurrencies } from '@/hooks/query/useMasterQuery';
+import { useSendInvitationMutation } from '@/hooks/query/useInvitationQuery';
+import { useToast } from '@/hooks/common/useToast';
 import type { CreateExpensePayload } from '@/services/expenseService';
 import type { CreateSettlementPayload } from '@/services/settlementService';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/common/useAuth';
 import { PATHS } from '@/router/routes';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { Alert, CustomTabPanel } from '@/components';
 import {
   ExpenseTabContent,
@@ -56,6 +58,7 @@ import {
 } from './components';
 
 export default function GroupDetailPage() {
+  const { t } = useTranslation();
   const { groupId: groupIdStr } = useParams<{ groupId: string }>();
   const groupId = Number(groupIdStr);
   const navigate = useNavigate();
@@ -66,6 +69,7 @@ export default function GroupDetailPage() {
 
   // Queries
   const { data: group, isPending: isGroupPending, error: groupError } = useGroupDetail(groupId);
+  useDocumentTitle(group?.name ? `${group.name}` : t('groups.title'));
   const { data: members = [] } = useGroupMembers(groupId);
   const { data: currencies = [] } = useCurrencies();
   const { data: expensesData } = useGroupExpenses(groupId);
@@ -100,11 +104,11 @@ export default function GroupDetailPage() {
   if (groupError || !group) {
     return (
       <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <Alert intent="error" title="Không tìm thấy nhóm">
-          {groupError?.message || 'Nhóm không tồn tại hoặc bạn chưa có quyền truy cập.'}
+        <Alert intent="error" title={t('groupDetail.groupNotFound')}>
+          {groupError?.message || t('groupDetail.groupNotFoundSub')}
         </Alert>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(PATHS.GROUPS)} sx={{ mt: 2 }}>
-          Quay lại Danh sách Nhóm
+          {t('groupDetail.backToList')}
         </Button>
       </Box>
     );
@@ -116,10 +120,10 @@ export default function GroupDetailPage() {
       {
         onSuccess: () => {
           setOpenExpenseModal(false);
-          showSuccess('Tạo khoản chi mới thành công!');
+          showSuccess(t('groupDetail.createExpenseSuccess'));
         },
-        onError: (err: any) => {
-          showError(`Tạo khoản chi thất bại: ${err.message || 'Vui lòng thử lại'}`);
+        onError: (err: Error) => {
+          showError(`${t('groupDetail.createExpenseFailed')}: ${err.message || ''}`);
         },
       }
     );
@@ -138,10 +142,10 @@ export default function GroupDetailPage() {
       {
         onSuccess: () => {
           setOpenMemberModal(false);
-          showSuccess('Đã gửi lời mời vào nhóm thành công! Vui lòng chờ người dùng chấp nhận.');
+          showSuccess(t('groupDetail.sendInviteSuccess'));
         },
-        onError: (err: any) => {
-          showError(`Gửi lời mời thất bại: ${err.message || 'Người dùng đã có lời mời chờ xử lý hoặc đã ở trong nhóm'}`);
+        onError: (err: Error) => {
+          showError(`${t('groupDetail.sendInviteFailed')}: ${err.message || ''}`);
         },
       }
     );
@@ -163,10 +167,10 @@ export default function GroupDetailPage() {
       { groupId, expenseId },
       {
         onSuccess: () => {
-          showSuccess('Xóa khoản chi thành công!');
+          showSuccess(t('groupDetail.deleteExpenseSuccess'));
         },
-        onError: (err: any) => {
-          showError(`Xóa khoản chi thất bại: ${err.message || 'Bạn không có quyền hoặc khoản chi không tồn tại'}`);
+        onError: (err: Error) => {
+          showError(`${t('groupDetail.deleteExpenseFailed')}: ${err.message || ''}`);
         },
       }
     );
@@ -177,10 +181,10 @@ export default function GroupDetailPage() {
       { groupId, memberId },
       {
         onSuccess: () => {
-          showSuccess('Đã xóa thành viên khỏi nhóm!');
+          showSuccess(t('groupDetail.removeMemberSuccess'));
         },
-        onError: (err: any) => {
-          showError(`Xóa thành viên thất bại: ${err.message || 'Vui lòng thử lại'}`);
+        onError: (err: Error) => {
+          showError(`${t('groupDetail.removeMemberFailed')}: ${err.message || ''}`);
         },
       }
     );
@@ -193,10 +197,10 @@ export default function GroupDetailPage() {
         onSuccess: () => {
           setOpenSettleModal(false);
           setSelectedDebtId(null);
-          showSuccess('Ghi nhận thanh toán thành công!');
+          showSuccess(t('groupDetail.recordSettlementSuccess'));
         },
-        onError: (err: any) => {
-          showError(`Ghi nhận thanh toán thất bại: ${err.message || 'Vui lòng thử lại'}`);
+        onError: (err: Error) => {
+          showError(`${t('groupDetail.recordSettlementFailed')}: ${err.message || ''}`);
         },
       }
     );
@@ -206,10 +210,7 @@ export default function GroupDetailPage() {
   const settlementsList = settlementsData?.content || [];
 
   const currentUserMember = members.find(
-    (m) =>
-      (user?.id && m.userId === user.id) ||
-      (user?.username && (m.username === user.username || m.user?.username === user.username)) ||
-      (user?.email && (m.email === user.email || m.user?.email === user.email))
+    (m) => m.user?.id === user?.id || m.userId === user?.id
   );
   const isOwner = currentUserMember?.role === 'OWNER';
 
@@ -218,7 +219,7 @@ export default function GroupDetailPage() {
       {/* Header Bar */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(PATHS.GROUPS)} color="inherit">
-          Trở về Danh sách
+          {t('groupDetail.backToList')}
         </Button>
       </Box>
 
@@ -235,7 +236,7 @@ export default function GroupDetailPage() {
                 {group.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {group.note || 'Không có ghi chú.'}
+                {group.note || t('groups.noNote')}
               </Typography>
             </Box>
           </Box>
@@ -250,7 +251,7 @@ export default function GroupDetailPage() {
             onClick={() => setOpenExpenseModal(true)}
             sx={{ borderRadius: 3, fontWeight: 700 }}
           >
-            Thêm Khoản Chi Mới
+            {t('groupDetail.addExpenseBtn')}
           </Button>
 
           {isOwner && (
@@ -261,7 +262,7 @@ export default function GroupDetailPage() {
               onClick={() => setOpenMemberModal(true)}
               sx={{ borderRadius: 3, fontWeight: 700 }}
             >
-              Mời Thành Viên
+              {t('groupDetail.inviteMemberBtn')}
             </Button>
           )}
         </Box>
@@ -278,10 +279,10 @@ export default function GroupDetailPage() {
             scrollButtons="auto"
             allowScrollButtonsMobile
           >
-            <Tab icon={<ReceiptLongIcon />} label="Khoản Chi (Expenses)" iconPosition="start" />
-            <Tab icon={<AccountBalanceIcon />} label="Công Nợ (Debts)" iconPosition="start" />
-            <Tab icon={<GroupIcon />} label="Thành Viên (Members)" iconPosition="start" />
-            <Tab icon={<PaymentsIcon />} label="Lịch Sử Thanh Toán" iconPosition="start" />
+            <Tab icon={<ReceiptLongIcon />} label={t('groupDetail.tabExpenses')} iconPosition="start" />
+            <Tab icon={<AccountBalanceIcon />} label={t('groupDetail.tabDebts')} iconPosition="start" />
+            <Tab icon={<GroupIcon />} label={t('groupDetail.tabMembers')} iconPosition="start" />
+            <Tab icon={<PaymentsIcon />} label={t('groupDetail.tabSettlements')} iconPosition="start" />
           </Tabs>
         </Box>
 

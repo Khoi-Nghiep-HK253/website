@@ -7,6 +7,7 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
+import { useTranslation } from 'react-i18next';
 
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -55,6 +56,8 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
   onChangePassword,
   isChangingPassword,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Grid container spacing={3}>
@@ -63,24 +66,24 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
           <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, height: '100%' }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               <PersonIcon color="primary" />
-              Cập Nhật Thông Tin Hồ Sơ
+              {t('profile.updateProfileTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Thay đổi tên hiển thị và số điện thoại liên lạc của bạn.
+              {t('profile.updateProfileSub')}
             </Typography>
 
             <Box component="form" onSubmit={onUpdateProfile} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <TextField
-                label="Tên tài khoản (Username)"
+                label={t('auth.username')}
                 value={user?.username || ''}
                 disabled
                 size="small"
                 fullWidth
-                helperText="Username là định danh không thể thay đổi."
+                helperText={t('profile.usernameHelper')}
               />
 
               <TextField
-                label="Địa chỉ Email"
+                label={t('auth.email')}
                 value={user?.email || ''}
                 disabled
                 size="small"
@@ -98,25 +101,25 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
 
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <TextField
-                  label="Họ"
+                  label={t('auth.lastname')}
                   value={lastname}
                   onChange={(e) => setLastname(e.target.value)}
                   size="small"
                   fullWidth
-                  placeholder="Nguyễn"
+                  placeholder="..."
                 />
                 <TextField
-                  label="Tên"
+                  label={t('auth.firstname')}
                   value={firstname}
                   onChange={(e) => setFirstname(e.target.value)}
                   size="small"
                   fullWidth
-                  placeholder="Văn A"
+                  placeholder="..."
                 />
               </Box>
 
               <TextField
-                label="Số điện thoại"
+                label={t('auth.phone')}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 size="small"
@@ -141,7 +144,7 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
                 disabled={isUpdatingProfile}
                 sx={{ mt: 1, borderRadius: 2.5, fontWeight: 700 }}
               >
-                Lưu Thay Đổi Thông Tin
+                {t('profile.saveProfileBtn')}
               </Button>
             </Box>
           </Paper>
@@ -152,15 +155,15 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
           <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, height: '100%' }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               <VpnKeyIcon color="secondary" />
-              Đổi Mật Khẩu
+              {t('profile.changePasswordTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Cập nhật mật khẩu mới định kỳ để bảo vệ an toàn tài khoản của bạn.
+              {t('profile.changePasswordSub')}
             </Typography>
 
             <Box component="form" onSubmit={onChangePassword} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <TextField
-                label="Mật khẩu hiện tại"
+                label={t('profile.currentPassword')}
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
@@ -179,14 +182,14 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
               />
 
               <TextField
-                label="Mật khẩu mới"
+                label={t('profile.newPassword')}
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 size="small"
                 fullWidth
                 required
-                placeholder="Tối thiểu 6 ký tự"
+                placeholder={t('profile.newPasswordPlaceholder')}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -199,7 +202,7 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
               />
 
               <TextField
-                label="Xác nhận mật khẩu mới"
+                label={t('profile.confirmNewPassword')}
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -225,7 +228,7 @@ export const PersonalInfoTabContent: React.FC<PersonalInfoTabContentProps> = ({
                 disabled={isChangingPassword}
                 sx={{ mt: 1, borderRadius: 2.5, fontWeight: 700 }}
               >
-                Đổi Mật Khẩu
+                {t('profile.changePasswordBtn')}
               </Button>
             </Box>
           </Paper>

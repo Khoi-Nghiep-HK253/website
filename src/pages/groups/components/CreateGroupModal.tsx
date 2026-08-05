@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import { useTranslation } from 'react-i18next';
 import type { CategoryResponse } from '@/services/categoryService';
 import { Alert } from '@/components';
 
@@ -33,6 +34,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onSubmit,
   isPending,
 }) => {
+  const { t } = useTranslation();
   const [formName, setFormName] = useState('');
   const [formNote, setFormNote] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | ''>('');
@@ -45,7 +47,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     setFormError(null);
 
     if (!formName.trim()) {
-      setFormError('Vui lòng nhập tên nhóm.');
+      setFormError(t('createGroupModal.nameRequired'));
       return;
     }
 
@@ -61,28 +63,28 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontWeight: 'bold' }}>Tạo Nhóm Chi Tiêu Mới</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold' }}>{t('createGroupModal.title')}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           {formError && <Alert intent="error">{formError}</Alert>}
 
           <TextField
-            label="Tên Nhóm (VD: Du Lịch Vũng Tàu 2026)"
+            label={t('createGroupModal.nameLabel')}
             variant="outlined"
             fullWidth
             required
             value={formName}
             onChange={(e) => setFormName(e.target.value)}
-            placeholder="Nhập tên nhóm..."
+            placeholder={t('createGroupModal.namePlaceholder')}
           />
 
           <TextField
-            label="Danh Mục Nhóm"
+            label={t('createGroupModal.categoryLabel')}
             select
             fullWidth
             value={selectedCategoryId}
             onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
           >
-            <MenuItem value="">-- Không chọn danh mục --</MenuItem>
+            <MenuItem value="">{t('createGroupModal.noCategory')}</MenuItem>
             {categories.map((cat) => (
               <MenuItem key={cat.id} value={cat.id}>
                 {cat.name}
@@ -92,7 +94,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="Ngày bắt đầu"
+              label={t('createGroupModal.startDate')}
               type="date"
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
@@ -100,7 +102,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setStartDate(e.target.value)}
             />
             <TextField
-              label="Ngày kết thúc"
+              label={t('createGroupModal.endDate')}
               type="date"
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
@@ -110,18 +112,18 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           </Box>
 
           <TextField
-            label="Ghi chú nhóm"
+            label={t('createGroupModal.noteLabel')}
             multiline
             rows={2}
             fullWidth
             value={formNote}
             onChange={(e) => setFormNote(e.target.value)}
-            placeholder="Mô tả mục đích nhóm..."
+            placeholder={t('createGroupModal.notePlaceholder')}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={onClose} color="inherit">
-            Hủy
+            {t('createGroupModal.cancel')}
           </Button>
 
           <Button
@@ -130,7 +132,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             disabled={isPending}
             startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : <GroupAddIcon />}
           >
-            {isPending ? 'Đang tạo...' : 'Tạo Nhóm'}
+            {isPending ? t('createGroupModal.submitting') : t('createGroupModal.submit')}
           </Button>
         </DialogActions>
       </Box>

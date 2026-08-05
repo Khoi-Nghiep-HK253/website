@@ -12,6 +12,7 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useTranslation } from 'react-i18next';
 import type { GroupMemberResponse } from '@/services/groupService';
 
 interface MembersTabContentProps {
@@ -22,7 +23,7 @@ interface MembersTabContentProps {
 }
 
 const getMemberUsername = (m: GroupMemberResponse): string => {
-  return m.user?.username || m.username || (m.userId ? `User #${m.userId}` : 'Thành viên');
+  return m.user?.username || m.username || (m.userId ? `User #${m.userId}` : 'Member');
 };
 
 const getMemberInitial = (m: GroupMemberResponse): string => {
@@ -46,6 +47,8 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
   onRemoveMember,
   isOwner = false,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ px: 3, pb: 3 }}>
       <Box
@@ -54,22 +57,29 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
           justifyContent: 'space-between',
           alignItems: { xs: 'stretch', sm: 'center' },
           flexDirection: { xs: 'column', sm: 'row' },
-          gap: 1.5,
+          gap: 2,
           mb: 2.5,
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-          Danh Sách Thành Viên ({members.length})
+          {t('groupDetail.tabMembers')} ({members.length})
         </Typography>
         {isOwner && (
           <Button
-            size="small"
+            size="medium"
             variant="contained"
             startIcon={<PersonAddIcon />}
             onClick={onOpenAddMemberModal}
-            sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
+            sx={{
+              whiteSpace: 'nowrap',
+              width: { xs: '100%', sm: 'auto' },
+              px: 2.5,
+              py: 0.8,
+              borderRadius: 2.5,
+              fontWeight: 700,
+            }}
           >
-            Thêm Thành Viên
+            {t('groupDetail.inviteMemberBtn')}
           </Button>
         )}
       </Box>
@@ -98,13 +108,17 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
                 </ListItemAvatar>
                 <ListItemText
                   primary={
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                      {displayName}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                        {displayName}
+                      </Typography>
+                      {m.role === 'OWNER' && (
+                        <Chip label="OWNER" size="small" color="primary" sx={{ fontWeight: 'bold' }} />
+                      )}
+                    </Box>
                   }
-                  secondary={email || undefined}
+                  secondary={email}
                 />
-                <Chip label={m.role} color={m.role === 'OWNER' ? 'primary' : 'default'} size="small" sx={{ mr: 2 }} />
               </ListItem>
             </React.Fragment>
           );

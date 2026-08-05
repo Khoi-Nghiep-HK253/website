@@ -199,7 +199,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     gap: 2,
                     p: 1.2,
                     borderRadius: 2,

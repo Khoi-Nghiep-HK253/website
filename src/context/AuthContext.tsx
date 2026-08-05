@@ -1,21 +1,6 @@
-import React, { createContext, useContext } from 'react';
-import { useCurrentUser, useLoginMutation, useRegisterMutation, useLogoutMutation } from '@/hooks/useAuthQuery';
-import type { UserResponse, LoginPayload, RegisterPayload } from '@/services/authService';
-
-interface AuthContextType {
-  user: UserResponse | null;
-  isAuthenticated: boolean;
-  isAuthLoading: boolean;
-  login: (payload: LoginPayload, onSuccess?: () => void, onError?: (err: Error) => void) => void;
-  register: (payload: RegisterPayload, onSuccess?: () => void, onError?: (err: Error) => void) => void;
-  logout: () => void;
-  isLoggingIn: boolean;
-  isRegistering: boolean;
-  loginError: Error | null;
-  registerError: Error | null;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import React from 'react';
+import { useCurrentUser, useLoginMutation, useRegisterMutation, useLogoutMutation } from '@/hooks/query/useAuthQuery';
+import { AuthContext, type AuthContextType } from './createAuthContext';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isPending: isAuthLoading } = useCurrentUser();
@@ -23,7 +8,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
 
-  const login = (payload: LoginPayload, onSuccess?: () => void, onError?: (err: Error) => void) => {
+  const login = (payload: Parameters<AuthContextType['login']>[0], onSuccess?: () => void, onError?: (err: Error) => void) => {
     loginMutation.mutate(payload, {
       onSuccess: () => {
         if (onSuccess) onSuccess();
@@ -34,7 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const register = (payload: RegisterPayload, onSuccess?: () => void, onError?: (err: Error) => void) => {
+  const register = (payload: Parameters<AuthContextType['register']>[0], onSuccess?: () => void, onError?: (err: Error) => void) => {
     registerMutation.mutate(payload, {
       onSuccess: () => {
         if (onSuccess) onSuccess();
@@ -69,10 +54,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export type { AuthContextType };

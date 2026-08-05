@@ -1,4 +1,6 @@
 import { useRouteError, isRouteErrorResponse, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -7,14 +9,16 @@ import { WarningAmber as WarningAmberIcon, Refresh as RefreshIcon, Home as HomeI
 import { PATHS } from '@/router/routes';
 
 export default function ErrorPage() {
+  const { t } = useTranslation();
+  useDocumentTitle(t('common.error'));
   const error = useRouteError();
   const navigate = useNavigate();
 
-  let errorMessage = 'Đã xảy ra lỗi không xác định.';
-  let statusCode = 'Lỗi Ứng Dụng';
+  let errorMessage = t('errorPages.errorSub');
+  let statusCode = t('common.error');
 
   if (isRouteErrorResponse(error)) {
-    statusCode = `Lỗi ${error.status}`;
+    statusCode = `Error ${error.status}`;
     errorMessage = error.statusText || error.data?.message || errorMessage;
   } else if (error instanceof Error) {
     errorMessage = error.message;
@@ -52,7 +56,7 @@ export default function ErrorPage() {
           {errorMessage}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Ứng dụng đã bắt được ngoại lệ thông qua React Router Error Boundary.
+          {t('errorPages.errorTitle')}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
           <Button
@@ -61,14 +65,14 @@ export default function ErrorPage() {
             startIcon={<RefreshIcon />}
             onClick={() => window.location.reload()}
           >
-            Tải lại trang
+            {t('errorPages.reloadBtn')}
           </Button>
           <Button
             variant="outlined"
             startIcon={<HomeIcon />}
             onClick={() => navigate(PATHS.HOME)}
           >
-            Về Trang Chủ
+            {t('errorPages.backToHome')}
           </Button>
         </Box>
       </Card>

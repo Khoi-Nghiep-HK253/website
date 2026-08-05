@@ -3,10 +3,12 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useTranslation } from 'react-i18next';
 import { PATHS } from '@/router/routes';
 
 export const AuthLayout: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -27,7 +29,7 @@ export const AuthLayout: React.FC = () => {
           onClick={() => navigate(PATHS.HOME)}
           color="inherit"
         >
-          Quay về Trang chủ
+          {t('common.backToHome')}
         </Button>
       </Box>
 

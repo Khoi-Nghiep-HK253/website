@@ -15,17 +15,19 @@ import GroupIcon from '@mui/icons-material/Group';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 import EmailIcon from '@mui/icons-material/Email';
 
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/context/ToastContext';
-import { useUpdateProfileMutation, useChangePasswordMutation } from '@/hooks/useUserQuery';
-import { useMyGroups } from '@/hooks/useGroupQuery';
+import { useAuth } from '@/hooks/common/useAuth';
+import { useToast } from '@/hooks/common/useToast';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useUpdateProfileMutation, useChangePasswordMutation } from '@/hooks/query/useUserQuery';
+import { useMyGroups } from '@/hooks/query/useGroupQuery';
 import {
   useMyInvitations,
   useAcceptInvitationMutation,
   useDeclineInvitationMutation,
-} from '@/hooks/useInvitationQuery';
+} from '@/hooks/query/useInvitationQuery';
 import { useNavigate } from 'react-router-dom';
 
+import { useTranslation } from 'react-i18next';
 import { CustomTabPanel } from '@/components';
 import {
   PersonalInfoTabContent,
@@ -34,6 +36,8 @@ import {
 } from './components';
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
+  useDocumentTitle(t('profile.title'));
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
@@ -77,10 +81,10 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          showSuccess('Cập nhật thông tin cá nhân thành công!');
+          showSuccess(t('profile.profileUpdateSuccess'));
         },
         onError: (err) => {
-          showError(`Cập nhật thất bại: ${err.message || 'Vui lòng kiểm tra lại'}`);
+          showError(`${t('profile.profileUpdateFailed')}: ${err.message || 'Error'}`);
         },
       }
     );
@@ -91,15 +95,15 @@ export default function ProfilePage() {
     if (!user?.id) return;
 
     if (!currentPassword) {
-      showError('Vui lòng nhập mật khẩu hiện tại.');
+      showError(t('profile.valCurrentPasswordReq'));
       return;
     }
     if (!newPassword || newPassword.length < 6) {
-      showError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      showError(t('profile.valNewPasswordMin'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      showError('Xác nhận mật khẩu mới không khớp.');
+      showError(t('profile.valConfirmMismatch'));
       return;
     }
 
@@ -113,13 +117,13 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          showSuccess('Đổi mật khẩu thành công! Vui lòng dùng mật khẩu mới từ lần đăng nhập sau.');
+          showSuccess(t('profile.changePasswordSuccess'));
           setCurrentPassword('');
           setNewPassword('');
           setConfirmPassword('');
         },
         onError: (err) => {
-          showError(`Đổi mật khẩu thất bại: ${err.message || 'Mật khẩu hiện tại không đúng'}`);
+          showError(`${t('profile.changePasswordFailed')}: ${err.message}`);
         },
       }
     );
@@ -128,10 +132,10 @@ export default function ProfilePage() {
   const handleAcceptInvite = (invitationId: number, groupName: string) => {
     acceptInvitationMutation.mutate(invitationId, {
       onSuccess: () => {
-        showSuccess(`Đã tham gia nhóm "${groupName}" thành công!`);
+        showSuccess(`${t('profile.acceptInviteSuccess')} ("${groupName}")`);
       },
       onError: (err) => {
-        showError(`Không thể tham gia nhóm: ${err.message || 'Lời mời không hợp lệ'}`);
+        showError(`Error: ${err.message}`);
       },
     });
   };
@@ -139,10 +143,10 @@ export default function ProfilePage() {
   const handleDeclineInvite = (invitationId: number) => {
     declineInvitationMutation.mutate(invitationId, {
       onSuccess: () => {
-        showSuccess('Đã từ chối lời mời vào nhóm.');
+        showSuccess(t('profile.declineInviteSuccess'));
       },
       onError: (err) => {
-        showError(`Không thể từ chối lời mời: ${err.message}`);
+        showError(`Error: ${err.message}`);
       },
     });
   };
@@ -165,7 +169,7 @@ export default function ProfilePage() {
     if (firstname || lastname) {
       return `${lastname} ${firstname}`.trim();
     }
-    return user?.username || 'Thành viên Divvy';
+    return user?.username || 'Member';
   };
 
   return (
@@ -173,59 +177,61 @@ export default function ProfilePage() {
       {/* ── HEADER USER PROFILE CARD ─────────────────────────────────────── */}
       <Card
         sx={{
-          p: { xs: 3, md: 4 },
+          p: { xs: 2.5, md: 3.5 },
           borderRadius: 5,
-          boxShadow: '0 20px 40px -15px rgba(0,0,0,0.1)',
+          boxShadow: '0 8px 24px -8px rgba(16, 185, 129, 0.15)',
           background: (theme) =>
             theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
-              : 'linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%)',
-          border: '1px solid',
-          borderColor: 'divider',
+              ? 'rgba(16, 185, 129, 0.08)'
+              : 'rgba(16, 185, 129, 0.06)',
+          border: 'none',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, md: 2.5 }, justifyContent: 'space-between', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+          {/* Left: Avatar */}
           <Avatar
             sx={{
-              width: 80,
-              height: 80,
+              width: 70,
+              height: 70,
               bgcolor: 'primary.main',
-              fontSize: '2.2rem',
+              fontSize: '2rem',
               fontWeight: 'bold',
-              boxShadow: 3,
+              boxShadow: '0 4px 12px -4px rgba(16, 185, 129, 0.3)',
+              flexShrink: 0,
             }}
           >
             {getUserInitial()}
           </Avatar>
 
-          <Box sx={{ flexGrow: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mb: 0.5 }}>
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>
+          {/* Center: User Info */}
+          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mb: 0.75 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800 }}>
                 {getDisplayName()}
               </Typography>
               <Chip
                 label={user?.role || 'MEMBER'}
                 color="primary"
                 size="small"
-                sx={{ fontWeight: 700, borderRadius: 2 }}
+                sx={{ fontWeight: 700, borderRadius: 1.5, height: 24, fontSize: '0.75rem' }}
               />
             </Box>
 
-            <Typography variant="body1" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <EmailIcon fontSize="small" color="action" /> {user?.email}
-              {user?.username && ` • @${user.username}`}
+            <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <EmailIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+              <span>{user?.email}</span>
+              {user?.username && <span>• @{user.username}</span>}
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Paper variant="outlined" sx={{ p: 1.5, px: 2.5, borderRadius: 3, textAlign: 'center' }}>
-              <Typography variant="h6" color="primary" sx={{ fontWeight: 800 }}>
-                {groupsList.length}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Nhóm tham gia
-              </Typography>
-            </Paper>
+          {/* Right: Stats */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
+            <Typography variant="h6" color="primary" sx={{ fontWeight: 800, lineHeight: 1 }}>
+              {groupsList.length}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+              {t('profile.joinedGroupsCount')}
+            </Typography>
           </Box>
         </Box>
       </Card>
@@ -241,9 +247,9 @@ export default function ProfilePage() {
             scrollButtons="auto"
             allowScrollButtonsMobile
           >
-            <Tab icon={<PersonIcon />} label="Thông Tin Cá Nhân & Bảo Mật" iconPosition="start" />
-            <Tab icon={<GroupIcon />} label="Nhóm Của Tôi" iconPosition="start" />
-            <Tab icon={<MarkEmailUnreadIcon />} label="Lời Mời Vào Nhóm" iconPosition="start" />
+            <Tab icon={<PersonIcon />} label={t('profile.personalInfoTab')} iconPosition="start" />
+            <Tab icon={<GroupIcon />} label={t('profile.myGroupsTab')} iconPosition="start" />
+            <Tab icon={<MarkEmailUnreadIcon />} label={t('profile.invitationsTab')} iconPosition="start" />
           </Tabs>
         </Box>
 

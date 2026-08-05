@@ -21,11 +21,15 @@ import {
   Work as WorkIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PATHS } from '@/router/routes';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/common/useAuth';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { DebtSimulator } from '@/components/DivvySimulator/DebtSimulator';
 
 export default function HomePage() {
+  const { t } = useTranslation();
+  useDocumentTitle(t('common.appName') + ' — ' + t('common.appTagline'));
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
 
@@ -48,14 +52,14 @@ export default function HomePage() {
       >
         <Chip
           icon={<StarIcon sx={{ color: '#f59e0b !important' }} />}
-          label="Ứng dụng quản lý chi tiêu nhóm minh bạch #1"
+          label={t('home.badge')}
           color="primary"
           variant="outlined"
           sx={{ mb: 2, fontWeight: 700, px: 1, py: 0.5 }}
         />
 
         <Typography variant="h2" component="h1" color="primary.main" sx={{ fontSize: { xs: '2rem', md: '3.25rem' }, mb: 2, fontWeight: 800 }}>
-          Divvy – Sổ Quỹ Thông Minh Cho Mọi Nhóm Bạn & Gia Đình
+          {t('home.heroTitle')}
         </Typography>
 
         <Typography
@@ -63,15 +67,14 @@ export default function HomePage() {
           color="text.secondary"
           sx={{ maxWidth: 800, mx: 'auto', mb: 4, fontWeight: 400, lineHeight: 1.6 }}
         >
-          Quản lý chi tiêu chung một cách <strong>minh bạch, tự động và tiện lợi</strong>. Tự động cấn trừ công nợ giữa các
-          thành viên, xóa bỏ nhầm lẫn và dẹp tan tranh cãi tiền bạc sau mỗi chuyến du lịch, ăn uống hay sinh hoạt nhóm.
+          {t('home.heroSub')}
         </Typography>
 
         {isAuthenticated && (
           <Box sx={{ mb: 3 }}>
             <Chip
               icon={<CheckCircleIcon color="success" />}
-              label={`Xin chào ${user?.username || user?.email}! Bạn đã sẵn sàng quản lý nhóm.`}
+              label={t('home.welcomeUser', { username: user?.username || user?.email })}
               color="success"
               variant="outlined"
               sx={{ fontWeight: 'bold', fontSize: '0.95rem', py: 2, px: 1 }}
@@ -88,7 +91,7 @@ export default function HomePage() {
             onClick={() => navigate(PATHS.GROUPS)}
             sx={{ px: 4, py: 1.5, borderRadius: 3, fontSize: '1.05rem', fontWeight: 700 }}
           >
-            {isAuthenticated ? 'Vào Danh Sách Nhóm' : 'Khám Phá Các Nhóm Chi Tiêu'}
+            {isAuthenticated ? t('home.enterGroups') : t('home.exploreGroups')}
           </Button>
 
           {!isAuthenticated && (
@@ -99,7 +102,7 @@ export default function HomePage() {
               onClick={() => navigate(PATHS.REGISTER)}
               sx={{ px: 4, py: 1.5, borderRadius: 3, fontSize: '1.05rem', fontWeight: 700 }}
             >
-              Đăng Ký Tài Khoản Miễn Phí
+              {t('home.registerFree')}
             </Button>
           )}
         </Box>
@@ -119,25 +122,25 @@ export default function HomePage() {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
             <FlightTakeoffIcon color="primary" />
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-              Du Lịch & Dã Ngoại
+              {t('home.tagTravel')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
             <HomeWorkIcon color="primary" />
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-              Ở Chung Nhà / Phòng Trọ
+              {t('home.tagHome')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
             <SportsSoccerIcon color="primary" />
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-              Nhóm Đá Bóng & CLB
+              {t('home.tagSports')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
             <WorkIcon color="primary" />
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-              Dự Án & Làm Việc
+              {t('home.tagWork')}
             </Typography>
           </Box>
         </Box>
@@ -146,12 +149,12 @@ export default function HomePage() {
       {/* ── CORE ENTITIES & FEATURES SHOWCASE ────────────────────────────── */}
       <Box>
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Chip label="Kiến trúc hệ thống minh bạch" color="primary" size="small" sx={{ mb: 1, fontWeight: 700 }} />
+          <Chip label={t('home.archBadge')} color="primary" size="small" sx={{ mb: 1, fontWeight: 700 }} />
           <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold' }}>
-            Các Thành Phần Cốt Lõi Tạo Nên Divvy
+            {t('home.archTitle')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-            Dữ liệu được tổ chức chặt chẽ giúp bạn dễ dàng theo dõi từ khoản chi nhỏ nhất đến tổng công nợ nhóm.
+            {t('home.archSub')}
           </Typography>
         </Box>
 
@@ -167,11 +170,10 @@ export default function HomePage() {
               <GroupIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              1. Quản Lý Nhóm (Groups)
+              {t('home.feature1Title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Tạo nhóm theo chủ đề (Du lịch, Trọ, Thể thao...). Đặt loại tiền tệ mặc định (VND, USD...), ghi chú và khoảng
-              thời gian hoạt động.
+              {t('home.feature1Desc')}
             </Typography>
           </Paper>
 
@@ -180,10 +182,10 @@ export default function HomePage() {
               <PersonAddIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              2. Thành Viên & Lời Mời
+              {t('home.feature2Title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Mời bạn bè qua đường dẫn hoặc mã token có thời hạn. Phân quyền Admin / Thành viên linh hoạt.
+              {t('home.feature2Desc')}
             </Typography>
           </Paper>
 
@@ -192,10 +194,10 @@ export default function HomePage() {
               <ReceiptLongIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              3. Khoản Chi Multi-Payer
+              {t('home.feature3Title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Ghi nhận 1 hoặc nhiều người cùng đứng ra trả tiền trước. Chọn chính xác danh sách những ai tham gia chia tiền.
+              {t('home.feature3Desc')}
             </Typography>
           </Paper>
 
@@ -204,10 +206,10 @@ export default function HomePage() {
               <AccountBalanceIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              4. Tự Động Tính Công Nợ
+              {t('home.feature4Title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Thuật toán tự động cấn trừ giữa tiền đã ứng trước và tiền phải chịu để đưa ra danh sách "Ai nợ Ai bao nhiêu".
+              {t('home.feature4Desc')}
             </Typography>
           </Paper>
 
@@ -216,10 +218,10 @@ export default function HomePage() {
               <CheckCircleIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              5. Thanh Toán Trả Nợ (Settlement)
+              {t('home.feature5Title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Ghi nhận giao dịch trả nợ qua tiền mặt hoặc chuyển khoản. Cập nhật trạng thái công nợ ngay khi hoàn tất.
+              {t('home.feature5Desc')}
             </Typography>
           </Paper>
 
@@ -228,10 +230,10 @@ export default function HomePage() {
               <HistoryIcon />
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-              6. Nhật Ký Lịch Sử (Activity Log)
+              {t('home.feature6Title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Sổ nhật ký lưu lại toàn bộ thao tác: tạo nhóm, thêm khoản chi, sửa số tiền, thanh toán... Đảm bảo minh bạch 100%.
+              {t('home.feature6Desc')}
             </Typography>
           </Paper>
         </Box>
@@ -245,9 +247,9 @@ export default function HomePage() {
       {/* ── 5-STEP WORKFLOW SECTION ───────────────────────────────────────── */}
       <Box sx={{ py: 2 }}>
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Chip label="Quy trình 5 bước đơn giản" color="secondary" size="small" sx={{ mb: 1, fontWeight: 700 }} />
+          <Chip label={t('home.workflowBadge')} color="secondary" size="small" sx={{ mb: 1, fontWeight: 700 }} />
           <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold' }}>
-            Divvy Xử Lý Nghiệp Vụ Như Thế Nào?
+            {t('home.workflowTitle')}
           </Typography>
         </Box>
 
@@ -259,11 +261,11 @@ export default function HomePage() {
           }}
         >
           {[
-            { step: '01', title: 'Tạo Khoản Chi (Expense)', desc: 'Nhập mô tả ("Ăn lẩu thái"), tổng tiền (1.000.000đ), danh mục và loại tiền.' },
-            { step: '02', title: 'Xác Định Người Trả (Payers)', desc: 'Ghi nhận ai đã ứng tiền trước (ví dụ: A trả 800k, B trả 200k).' },
-            { step: '03', title: 'Chia Tiền Thành Viên (Shares)', desc: 'Chọn những người tham gia hóa đơn (4 người A, B, C, D -> 250k/người).' },
-            { step: '04', title: 'Cấn Trừ Nợ Tự Động (Debts)', desc: 'Divvy tính toán A là chủ nợ, C và D bị ghi nhận nợ A (PENDING).' },
-            { step: '05', title: 'Trả Nợ & Thanh Toán (Settlement)', desc: 'C và D chuyển khoản trả A, bấm "Thanh toán" để hoàn thành nợ.' },
+            { step: '01', title: t('home.step1Title'), desc: t('home.step1Desc') },
+            { step: '02', title: t('home.step2Title'), desc: t('home.step2Desc') },
+            { step: '03', title: t('home.step3Title'), desc: t('home.step3Desc') },
+            { step: '04', title: t('home.step4Title'), desc: t('home.step4Desc') },
+            { step: '05', title: t('home.step5Title'), desc: t('home.step5Desc') },
           ].map((item, index) => (
             <Paper key={index} variant="outlined" sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', height: '100%' }}>
               <Typography variant="h4" color="primary" sx={{ mb: 1, fontWeight: 'bold' }}>
@@ -292,10 +294,10 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-          Sẵn Sàng Quản Lý Quỹ Nhóm Minh Bạch Cùng Divvy?
+          {t('home.ctaTitle')}
         </Typography>
         <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 650, mx: 'auto', mb: 3 }}>
-          Không còn phải tự ghi chép hay tính toán thủ công. Hãy trải nghiệm ngay ứng dụng Divvy!
+          {t('home.ctaSub')}
         </Typography>
         <Button
           variant="contained"
@@ -303,7 +305,7 @@ export default function HomePage() {
           onClick={() => navigate(PATHS.GROUPS)}
           sx={{ bgcolor: '#ffffff', color: 'primary.main', fontWeight: 800, px: 4, py: 1.5, borderRadius: 3, '&:hover': { bgcolor: '#f0fdf4' } }}
         >
-          Truy Cập Danh Sách Nhóm Divvy
+          {t('home.ctaBtn')}
         </Button>
       </Card>
     </Container>

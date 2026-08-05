@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { useTranslation } from 'react-i18next';
 import type { ExpenseSummaryResponse } from '@/services/expenseService';
 
 interface ExpenseTabContentProps {
@@ -33,6 +34,7 @@ export const ExpenseTabContent: React.FC<ExpenseTabContentProps> = ({
   onSelectExpense,
   onDeleteExpense,
 }) => {
+  const { t } = useTranslation();
   const [deleteTarget, setDeleteTarget] = useState<ExpenseSummaryResponse | null>(null);
 
   const handleConfirmDelete = () => {
@@ -50,28 +52,35 @@ export const ExpenseTabContent: React.FC<ExpenseTabContentProps> = ({
           justifyContent: 'space-between',
           alignItems: { xs: 'stretch', sm: 'center' },
           flexDirection: { xs: 'column', sm: 'row' },
-          gap: 1.5,
+          gap: 2,
           mb: 2.5,
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-          Danh Sách Khoản Chi Nhóm ({expenses.length})
+          {t('groupDetail.tabExpenses')} ({expenses.length})
         </Typography>
         <Button
-          size="small"
+          size="medium"
           variant="contained"
           startIcon={<AddIcon />}
           onClick={onOpenCreateModal}
-          sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
+          sx={{
+            whiteSpace: 'nowrap',
+            width: { xs: '100%', sm: 'auto' },
+            px: 2.5,
+            py: 0.8,
+            borderRadius: 2.5,
+            fontWeight: 700,
+          }}
         >
-          Tạo Khoản Chi
+          {t('groupDetail.addExpenseBtn')}
         </Button>
       </Box>
 
       {expenses.length === 0 ? (
         <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
           <ReceiptLongIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-          <Typography variant="body1">Chưa có khoản chi nào trong nhóm này.</Typography>
+          <Typography variant="body1">{t('groups.noExpenses', { defaultValue: 'Chưa có khoản chi nào trong nhóm này.' })}</Typography>
         </Box>
       ) : (
         <List disablePadding>
@@ -82,6 +91,7 @@ export const ExpenseTabContent: React.FC<ExpenseTabContentProps> = ({
                 sx={{
                   py: 2,
                   px: 2,
+                  pr: { xs: 7, sm: 8 },
                   borderRadius: 2,
                   cursor: 'pointer',
                   transition: 'background-color 150ms ease',
@@ -91,7 +101,7 @@ export const ExpenseTabContent: React.FC<ExpenseTabContentProps> = ({
                 }}
                 onClick={() => onSelectExpense(exp.id)}
                 secondaryAction={
-                  <Tooltip title="Xóa khoản chi">
+                  <Tooltip title={t('common.delete')}>
                     <IconButton
                       edge="end"
                       color="error"
@@ -118,46 +128,36 @@ export const ExpenseTabContent: React.FC<ExpenseTabContentProps> = ({
                   }
                   secondary={
                     <Typography variant="caption" color="text.secondary">
-                      Người tạo: {exp.createdByName || 'Thành viên'} • Ngày: {exp.expenseDate || exp.createdAt || 'Mới'} • Loại: {exp.splitType || 'EQUAL'}
+                      {exp.expenseDate || ''} • {t('groups.createdBy')}: {exp.createdByName || '—'}
                     </Typography>
                   }
                 />
-                <Box sx={{ mr: 4, textAlign: 'right' }}>
-                  <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                    {exp.totalAmount.toLocaleString('vi-VN')} {exp.currency?.acronym || exp.currency?.code || exp.currencyCode || 'VNĐ'}
-                  </Typography>
-                </Box>
+                <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 'bold', ml: 2, whiteSpace: 'nowrap' }}>
+                  {exp.totalAmount ? exp.totalAmount.toLocaleString() : 0} {exp.currencyCode || 'VND'}
+                </Typography>
               </ListItem>
             </React.Fragment>
           ))}
         </List>
       )}
 
-      {/* Delete Confirmation Modal */}
-      <Dialog
-        open={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <WarningAmberIcon color="error" />
-          Xác Nhận Xóa Khoản Chi
+          {t('common.confirm')} {t('common.delete')}
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ pt: 1 }}>
-            Bạn có chắc chắn muốn xóa khoản chi <strong>"{deleteTarget?.description}"</strong>?
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
-            Các công nợ phát sinh từ khoản chi này cũng sẽ bị xóa. Hành động này không thể hoàn tác.
+          <Typography variant="body2">
+            {t('groups.deleteConfirmMsg', { defaultValue: 'Bạn có chắc chắn muốn xóa khoản chi này?' })} "{deleteTarget?.description}"?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
+        <DialogActions>
           <Button onClick={() => setDeleteTarget(null)} color="inherit">
-            Hủy
+            {t('common.cancel')}
           </Button>
-          <Button variant="contained" color="error" onClick={handleConfirmDelete}>
-            Xóa Khoản Chi
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            {t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

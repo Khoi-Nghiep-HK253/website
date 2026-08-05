@@ -10,13 +10,17 @@ import Paper from '@mui/material/Paper';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
-import { useMyGroups, useCreateGroupMutation } from '@/hooks/useGroupQuery';
-import { useCategories } from '@/hooks/useMasterQuery';
-import { useToast } from '@/context/ToastContext';
+import { useTranslation } from 'react-i18next';
+import { useMyGroups, useCreateGroupMutation } from '@/hooks/query/useGroupQuery';
+import { useCategories } from '@/hooks/query/useMasterQuery';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useToast } from '@/hooks/common/useToast';
 import { Alert } from '@/components';
 import { GroupCardItem, CreateGroupModal } from './components';
 
 export default function GroupsListPage() {
+  const { t } = useTranslation();
+  useDocumentTitle(t('groups.title'));
   const navigate = useNavigate();
   const { data: myGroupsData, isPending, error } = useMyGroups();
   const { data: categories = [] } = useCategories();
@@ -59,11 +63,11 @@ export default function GroupsListPage() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-            Danh Sách Nhóm Chi Tiêu
+            {t('groups.title')}
           </Typography>
 
           <Typography variant="subtitle1" color="text.secondary">
-            Tạo nhóm, mời bạn bè và quản lý khoản chi chung minh bạch cùng Divvy
+            {t('groups.subTitle')}
           </Typography>
         </Box>
 
@@ -74,14 +78,14 @@ export default function GroupsListPage() {
           onClick={() => setOpenCreateDialog(true)}
           sx={{ borderRadius: 3, fontWeight: 700, px: 3 }}
         >
-          Tạo Nhóm Mới
+          {t('groups.createGroup')}
         </Button>
       </Box>
 
       {/* Search & Filter Bar */}
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <TextField
-          placeholder="Tìm kiếm theo tên nhóm hoặc ghi chú..."
+          placeholder={t('groups.searchPlaceholder')}
           size="small"
           fullWidth
           value={searchQuery}
@@ -100,7 +104,7 @@ export default function GroupsListPage() {
 
       {/* Error Alert */}
       {error && (
-        <Alert intent="error" title="Không thể tải danh sách nhóm">
+        <Alert intent="error" title={t('groups.loadError')}>
           {error.message}
         </Alert>
       )}
@@ -118,11 +122,11 @@ export default function GroupsListPage() {
           </Avatar>
 
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Chưa có nhóm chi tiêu nào
+            {t('groups.emptyTitle')}
           </Typography>
 
           <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 450, mx: 'auto', mb: 3 }}>
-            Tạo nhóm mới để bắt đầu ghi nhận các khoản ăn uống, du lịch, sinh hoạt chung cùng bạn bè!
+            {t('groups.emptySub')}
           </Typography>
 
           <Button
@@ -131,7 +135,7 @@ export default function GroupsListPage() {
             onClick={() => setOpenCreateDialog(true)}
             sx={{ borderRadius: 3, fontWeight: 700 }}
           >
-            Tạo Nhóm Đầu Tiên
+            {t('groups.createFirstGroup')}
           </Button>
         </Paper>
       ) : (

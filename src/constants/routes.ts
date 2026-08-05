@@ -9,6 +9,7 @@ export const PATHS = {
   REGISTER: '/register',
   PROFILE: '/profile',
   SETTINGS: '/settings',
+  INVITATION_ACCEPT: '/invitations/accept',
   NOT_FOUND: '*',
 } as const;
 

@@ -11,6 +11,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import WorkIcon from '@mui/icons-material/Work';
 import CategoryIcon from '@mui/icons-material/Category';
+import { useTranslation } from 'react-i18next';
 import type { GroupResponse } from '@/services/groupService';
 
 interface GroupCardItemProps {
@@ -19,6 +20,7 @@ interface GroupCardItemProps {
 }
 
 export const GroupCardItem: React.FC<GroupCardItemProps> = ({ group, onNavigateDetail }) => {
+  const { t } = useTranslation();
   const categoryName = group.category?.name || group.categoryName;
 
   const getCategoryIcon = (name?: string) => {
@@ -61,14 +63,14 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({ group, onNavigateD
         )}
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
-          {group.note || 'Không có ghi chú thêm.'}
+          {group.note || t('groups.noNote')}
         </Typography>
       </Box>
 
       <Box sx={{ pt: 2, borderTop: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box>
           <Typography variant="caption" color="text.secondary">
-            Tạo bởi: {group.createdBy?.username || 'Thành viên'}
+            {t('groups.createdBy')}: {group.createdBy?.username || '—'}
           </Typography>
         </Box>
         <Button
@@ -78,7 +80,7 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({ group, onNavigateD
           onClick={() => onNavigateDetail(group.id)}
           sx={{ borderRadius: 2 }}
         >
-          Vào Nhóm
+          {t('groups.enterGroup')}
         </Button>
       </Box>
     </Card>

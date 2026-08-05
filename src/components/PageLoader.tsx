@@ -1,8 +1,12 @@
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
+import { useTranslation } from 'react-i18next';
 
-export const PageLoader = ({ label = 'Đang tải trang...' }: { label?: string }) => {
+export const PageLoader = ({ label }: { label?: string }) => {
+  const { t } = useTranslation();
+  const displayLabel = label || t('common.pageLoading');
+
   return (
     <Box
       sx={{
@@ -16,9 +20,9 @@ export const PageLoader = ({ label = 'Đang tải trang...' }: { label?: string 
       }}
     >
       <CircularProgress size={48} />
-      {label && (
+      {displayLabel && (
         <Typography variant="body2" color="text.secondary">
-          {label}
+          {displayLabel}
         </Typography>
       )}
     </Box>

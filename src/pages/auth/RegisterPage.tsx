@@ -15,11 +15,15 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import BadgeIcon from '@mui/icons-material/Badge';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/hooks/common/useAuth';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { PATHS } from '@/router/routes';
 import { Alert } from '@/components';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
+  useDocumentTitle(t('nav.register'));
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,27 +41,27 @@ export default function RegisterPage() {
     setErrorMsg(null);
 
     if (!username.trim()) {
-      setErrorMsg('Vui lòng nhập Tên tài khoản (username).');
+      setErrorMsg(t('auth.valUsernameRequired'));
       return;
     }
 
     if (!email.trim()) {
-      setErrorMsg('Vui lòng nhập địa chỉ Email.');
+      setErrorMsg(t('auth.valEmailRequired'));
       return;
     }
 
     if (!password) {
-      setErrorMsg('Vui lòng nhập Mật khẩu.');
+      setErrorMsg(t('auth.valPasswordRequired'));
       return;
     }
 
     if (password.length < 6) {
-      setErrorMsg('Mật khẩu phải có ít nhất 6 ký tự.');
+      setErrorMsg(t('auth.valPasswordMinLength'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMsg('Mật khẩu xác nhận không khớp.');
+      setErrorMsg(t('auth.valPasswordMismatch'));
       return;
     }
 
@@ -74,7 +78,7 @@ export default function RegisterPage() {
         navigate(PATHS.GROUPS, { replace: true });
       },
       (err) => {
-        setErrorMsg(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.');
+        setErrorMsg(err.message || t('auth.regFailed'));
       }
     );
   };
@@ -83,10 +87,10 @@ export default function RegisterPage() {
     return (
       <Card sx={{ maxWidth: 400, mx: 'auto', mt: 4, p: 4, textAlign: 'center', borderRadius: 4 }}>
         <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Bạn đã đăng nhập Divvy!
+          {t('auth.alreadyLoggedIn')}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ my: 2 }}>
-          Tài khoản hiện tại của bạn đã sẵn sàng sử dụng trên hệ thống.
+          {t('auth.goToGroupsMsg')}
         </Typography>
         <Button
           variant="contained"
@@ -94,7 +98,7 @@ export default function RegisterPage() {
           onClick={() => navigate(PATHS.GROUPS)}
           sx={{ borderRadius: 3, fontWeight: 700 }}
         >
-          Đi tới Danh sách Nhóm
+          {t('auth.goToGroupsBtn')}
         </Button>
       </Card>
     );
@@ -109,10 +113,10 @@ export default function RegisterPage() {
       </Box>
 
       <Typography variant="h5" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
-        Đăng Ký Tài Khoản Divvy
+        {t('auth.registerTitle')}
       </Typography>
       <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 3 }}>
-        Tạo tài khoản mới để trải nghiệm Sổ quỹ thông minh cho nhóm
+        {t('auth.registerSub')}
       </Typography>
 
       {(errorMsg || registerError) && (
@@ -124,14 +128,14 @@ export default function RegisterPage() {
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           id="username-input"
-          label="Tên đăng nhập (Username)"
+          label={t('auth.username')}
           type="text"
           variant="outlined"
           fullWidth
           required
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Nhập username của bạn..."
+          placeholder={t('auth.usernamePlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
@@ -146,14 +150,14 @@ export default function RegisterPage() {
 
         <TextField
           id="register-email-input"
-          label="Địa chỉ Email"
+          label={t('auth.email')}
           type="email"
           variant="outlined"
           fullWidth
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="nhap-email@domain.com"
+          placeholder={t('auth.emailPlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
@@ -169,13 +173,13 @@ export default function RegisterPage() {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
             id="firstname-input"
-            label="Họ (Firstname)"
+            label={t('auth.firstname')}
             type="text"
             variant="outlined"
             fullWidth
             value={firstname}
             onChange={(e) => setFirstname(e.target.value)}
-            placeholder="Họ..."
+            placeholder="..."
             disabled={isRegistering}
             slotProps={{
               input: {
@@ -190,13 +194,13 @@ export default function RegisterPage() {
 
           <TextField
             id="lastname-input"
-            label="Tên (Lastname)"
+            label={t('auth.lastname')}
             type="text"
             variant="outlined"
             fullWidth
             value={lastname}
             onChange={(e) => setLastname(e.target.value)}
-            placeholder="Tên..."
+            placeholder="..."
             disabled={isRegistering}
             slotProps={{
               input: {
@@ -212,7 +216,7 @@ export default function RegisterPage() {
 
         <TextField
           id="phone-input"
-          label="Số điện thoại"
+          label={t('auth.phone')}
           type="tel"
           variant="outlined"
           fullWidth
@@ -233,14 +237,14 @@ export default function RegisterPage() {
 
         <TextField
           id="password-input"
-          label="Mật khẩu"
+          label={t('auth.password')}
           type="password"
           variant="outlined"
           fullWidth
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)..."
+          placeholder={t('auth.passwordMinPlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
@@ -255,14 +259,14 @@ export default function RegisterPage() {
 
         <TextField
           id="confirm-password-input"
-          label="Xác nhận mật khẩu"
+          label={t('auth.confirmPassword')}
           type="password"
           variant="outlined"
           fullWidth
           required
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Nhập lại mật khẩu..."
+          placeholder={t('auth.confirmPasswordPlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
@@ -283,12 +287,12 @@ export default function RegisterPage() {
           disabled={isRegistering}
           sx={{ mt: 1, borderRadius: 3, fontWeight: 700 }}
         >
-          {isRegistering ? 'Đang tạo tài khoản...' : 'Tạo tài khoản ngay'}
+          {isRegistering ? t('auth.registering') : t('auth.registerBtn')}
         </Button>
       </Box>
 
       <Box sx={{ mt: 3, textAlign: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-        Đã có tài khoản Divvy?{' '}
+        {t('auth.hasAccount')}{' '}
         <Typography
           component="span"
           variant="body2"
@@ -296,7 +300,7 @@ export default function RegisterPage() {
           sx={{ fontWeight: 'bold', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
           onClick={() => navigate(PATHS.LOGIN)}
         >
-          Đăng nhập ngay
+          {t('auth.loginBtn')}
         </Typography>
       </Box>
     </Card>

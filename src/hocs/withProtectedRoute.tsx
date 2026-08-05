@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/hooks/common/useAuth';
 import { PATHS } from '@/constants';
 import { PageLoader } from '@/components/PageLoader';
 
@@ -12,11 +13,12 @@ interface ProtectedRouteProps {
  * ProtectedRoute Component Wrapper
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, isAuthLoading } = useAuth();
   const location = useLocation();
 
   if (isAuthLoading) {
-    return <PageLoader label="Đang kiểm tra phiên đăng nhập..." />;
+    return <PageLoader label={t('common.checkingSession')} />;
   }
 
   if (!isAuthenticated) {

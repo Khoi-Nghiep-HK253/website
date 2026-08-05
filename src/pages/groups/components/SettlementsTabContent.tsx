@@ -9,6 +9,7 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import { useTranslation } from 'react-i18next';
 import type { SettlementSummaryResponse } from '@/services/settlementService';
 import type { DebtUserInfo } from '@/services/debtService';
 
@@ -21,20 +22,22 @@ const getUserDisplayName = (u?: DebtUserInfo, fallbackId?: number, fallbackName?
   if (u?.fullname) return u.fullname;
   if (fallbackName) return fallbackName;
   if (fallbackId) return `User #${fallbackId}`;
-  return 'Thành viên';
+  return 'Member';
 };
 
 export const SettlementsTabContent: React.FC<SettlementsTabContentProps> = ({ settlements }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ px: 3, pb: 3 }}>
       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-        Lịch Sử Thanh Toán & Trả Nợ ({settlements.length})
+        {t('groupDetail.tabSettlements')} ({settlements.length})
       </Typography>
 
       {settlements.length === 0 ? (
         <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
           <PaymentsIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-          <Typography variant="body1">Chưa có giao dịch thanh toán nợ nào được ghi nhận.</Typography>
+          <Typography variant="body1">{t('groups.noSettlements', { defaultValue: 'Chưa có giao dịch thanh toán nợ nào được ghi nhận.' })}</Typography>
         </Box>
       ) : (
         <List disablePadding>
@@ -54,13 +57,13 @@ export const SettlementsTabContent: React.FC<SettlementsTabContentProps> = ({ se
                   <ListItemText
                     primary={
                       <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                        {fromName} đã thanh toán cho {toName}
+                        {fromName} ➔ {toName}
                       </Typography>
                     }
-                    secondary={`Phương thức: ${st.method || 'TIỀN MẶT'} • Ghi chú: ${st.note || 'Không có'}`}
+                    secondary={`${st.method || 'CASH'} • ${st.note || ''}`}
                   />
                   <Typography variant="h6" color="success.main" sx={{ fontWeight: 'bold' }}>
-                    +{st.amount.toLocaleString('vi-VN')} đ
+                    +{(st.amount || 0).toLocaleString()} {st.currencyCode || 'VND'}
                   </Typography>
                 </ListItem>
               </React.Fragment>

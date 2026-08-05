@@ -13,6 +13,7 @@ import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import MailIcon from '@mui/icons-material/Mail';
+import { useTranslation } from 'react-i18next';
 import type { InvitationResponse } from '@/services/invitationService';
 
 interface InvitationsTabContentProps {
@@ -36,35 +37,37 @@ export const InvitationsTabContent: React.FC<InvitationsTabContentProps> = ({
   isAcceptPending,
   isDeclinePending,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
           <MarkEmailUnreadIcon color="primary" />
-          Hộp Thư Lời Mời Vào Nhóm
+          {t('profile.invitationsTab')}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Chip
-            label="Chờ xử lý (PENDING)"
+            label={t('invitation.pending')}
             color={invitationFilter === 'PENDING' ? 'warning' : 'default'}
             onClick={() => setInvitationFilter('PENDING')}
             sx={{ fontWeight: 700 }}
           />
           <Chip
-            label="Đã chấp nhận (ACCEPTED)"
+            label={t('invitation.accepted')}
             color={invitationFilter === 'ACCEPTED' ? 'success' : 'default'}
             onClick={() => setInvitationFilter('ACCEPTED')}
             sx={{ fontWeight: 700 }}
           />
           <Chip
-            label="Đã từ chối (DECLINED)"
+            label={t('invitation.declined')}
             color={invitationFilter === 'DECLINED' ? 'error' : 'default'}
             onClick={() => setInvitationFilter('DECLINED')}
             sx={{ fontWeight: 700 }}
           />
           <Chip
-            label="Tất cả"
+            label={t('common.all')}
             color={invitationFilter === undefined ? 'primary' : 'default'}
             onClick={() => setInvitationFilter(undefined)}
             sx={{ fontWeight: 700 }}
@@ -80,7 +83,7 @@ export const InvitationsTabContent: React.FC<InvitationsTabContentProps> = ({
         <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
           <MailIcon sx={{ fontSize: 44, opacity: 0.4, mb: 1 }} />
           <Typography variant="body1" color="text.secondary">
-            Không có lời mời vào nhóm nào trong hộp thư.
+            {t('invitation.noInvitations')}
           </Typography>
         </Paper>
       ) : (
@@ -111,16 +114,16 @@ export const InvitationsTabContent: React.FC<InvitationsTabContentProps> = ({
                     </Avatar>
                     <Box>
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                        {inv.group?.name || 'Nhóm chi tiêu'}
+                        {inv.group?.name || 'Group'}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Người mời: {inv.inviter?.username || 'Admin nhóm'}
+                        {t('invitation.inviterName')}: {inv.inviter?.username || 'Admin'}
                       </Typography>
                     </Box>
                   </Box>
 
                   <Chip
-                    label={inv.status}
+                    label={t(`invitation.${inv.status.toLowerCase()}`)}
                     size="small"
                     color={
                       inv.status === 'ACCEPTED'
@@ -151,22 +154,22 @@ export const InvitationsTabContent: React.FC<InvitationsTabContentProps> = ({
                       onClick={() => onDeclineInvite(inv.id)}
                       disabled={isDeclinePending}
                     >
-                      Từ Chối
+                      {t('invitation.declineBtn')}
                     </Button>
                     <Button
                       size="small"
                       variant="contained"
                       color="success"
                       startIcon={<CheckCircleIcon />}
-                      onClick={() => onAcceptInvite(inv.id, inv.group?.name || 'Nhóm')}
+                      onClick={() => onAcceptInvite(inv.id, inv.group?.name || t('invitation.groupName'))}
                       disabled={isAcceptPending}
                     >
-                      Chấp Nhận Vào Nhóm
+                      {t('invitation.acceptBtn')}
                     </Button>
                   </Box>
                 ) : (
                   <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'right' }}>
-                    Ngày tạo: {inv.createdAt || 'N/A'}
+                    {inv.createdAt || ''}
                   </Typography>
                 )}
               </Paper>

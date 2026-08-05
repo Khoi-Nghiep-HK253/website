@@ -25,6 +25,7 @@ export interface SettlementSummaryResponse {
   note?: string;
   paidAt?: string;
   createdAt?: string;
+  currencyCode?: string;
 }
 
 export const settlementService = {

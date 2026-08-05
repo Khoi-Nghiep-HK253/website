@@ -31,9 +31,11 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 
+import { useTranslation } from 'react-i18next';
 import { PATHS } from '@/router/routes';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/common/useAuth';
 import { useAppTheme } from '@/theme/ThemeProvider';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface RootLayoutProps {
   isDarkTheme?: boolean;
@@ -41,6 +43,7 @@ interface RootLayoutProps {
 }
 
 export const RootLayout: React.FC<RootLayoutProps> = () => {
+  const { t } = useTranslation();
   const { isAuthenticated, user, logout } = useAuth();
   const { isDark, toggleTheme } = useAppTheme();
   const navigate = useNavigate();
@@ -51,7 +54,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
   };
 
   const userInitial = user?.username ? user.username.charAt(0).toUpperCase() : 'U';
-  const userDisplayName = user?.username || user?.email || 'Người dùng';
+  const userDisplayName = user?.username || user?.email || t('common.user');
 
   return (
     <Box
@@ -102,7 +105,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 <WalletIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
               </Box>
               <Typography variant="h6" component="span" sx={{ fontWeight: 800, color: 'primary.main', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
-                Divvy
+                {t('common.appName')}
               </Typography>
             </Box>
 
@@ -121,7 +124,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                       whitespace: 'nowrap',
                     }}
                   >
-                    Trang chủ
+                    {t('nav.home')}
                   </Button>
                 )}
               </NavLink>
@@ -139,7 +142,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                       whitespace: 'nowrap',
                     }}
                   >
-                    Quản lý nhóm
+                    {t('nav.groups')}
                   </Button>
                 )}
               </NavLink>
@@ -148,8 +151,11 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
 
           {/* Desktop & Mobile Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 } }}>
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Theme Toggle Button (Desktop & Tablet) */}
-            <Tooltip title={isDark ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'}>
+            <Tooltip title={isDark ? t('common.themeLight') : t('common.themeDark')}>
               <IconButton onClick={toggleTheme} color="inherit" size="small">
                 {isDark ? <LightModeIcon color="warning" /> : <DarkModeIcon color="primary" />}
               </IconButton>
@@ -183,7 +189,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 </Box>
 
                 {/* Mobile Profile Icon */}
-                <Tooltip title="Trang cá nhân">
+                <Tooltip title={t('nav.profile')}>
                   <IconButton
                     onClick={() => navigate(PATHS.PROFILE)}
                     size="small"
@@ -207,7 +213,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                   }}
                   sx={{ display: { xs: 'none', md: 'inline-flex' }, whitespace: 'nowrap' }}
                 >
-                  Đăng xuất
+                  {t('nav.logout')}
                 </Button>
               </>
             ) : (
@@ -218,7 +224,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 onClick={() => navigate(PATHS.LOGIN)}
                 sx={{ borderRadius: 3, fontWeight: 700, px: { xs: 1.5, sm: 2 } }}
               >
-                Đăng nhập
+                {t('nav.login')}
               </Button>
             )}
 
@@ -262,7 +268,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
               <WalletIcon sx={{ fontSize: 20 }} />
             </Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>
-              Divvy
+              {t('common.appName')}
             </Typography>
           </Box>
           <IconButton onClick={handleDrawerToggle}>
@@ -295,7 +301,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 {userDisplayName}
               </Typography>
               <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
-                {user?.email || 'Xem trang cá nhân'}
+                {user?.email || t('nav.viewProfile')}
               </Typography>
             </Box>
           </Box>
@@ -315,7 +321,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 <HomeIcon color="primary" />
               </ListItemIcon>
               <ListItemText
-                primary="Trang chủ"
+                primary={t('nav.home')}
                 slotProps={{ primary: { sx: { fontWeight: 600 } } }}
               />
             </ListItemButton>
@@ -332,7 +338,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 <GroupIcon color="primary" />
               </ListItemIcon>
               <ListItemText
-                primary="Quản lý nhóm"
+                primary={t('nav.groups')}
                 slotProps={{ primary: { sx: { fontWeight: 600 } } }}
               />
             </ListItemButton>
@@ -350,7 +356,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                   <PersonIcon color="primary" />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Trang cá nhân & Lời mời"
+                  primary={t('nav.profileAndInvitations')}
                   slotProps={{ primary: { sx: { fontWeight: 600 } } }}
                 />
               </ListItemButton>
@@ -363,7 +369,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 {isDark ? <LightModeIcon color="warning" /> : <DarkModeIcon color="primary" />}
               </ListItemIcon>
               <ListItemText
-                primary={isDark ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
+                primary={isDark ? t('common.themeLight') : t('common.themeDark')}
                 slotProps={{ primary: { sx: { fontWeight: 600 } } }}
               />
             </ListItemButton>
@@ -383,7 +389,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 setMobileOpen(false);
               }}
             >
-              Đăng xuất
+              {t('nav.logout')}
             </Button>
           </Box>
         )}
@@ -418,11 +424,11 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
       >
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mb: 1 }}>
           <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-            Divvy – Sổ quỹ thông minh cho nhóm
+            {t('common.appName')} – {t('common.appTagline')}
           </Typography>
         </Box>
         <Typography variant="caption" color="text.secondary">
-          Quản lý chi tiêu chung minh bạch, tự động chia tiền & cấn trừ công nợ © 2026
+          {t('common.footerTagline')}
         </Typography>
       </Box>
     </Box>

@@ -50,3 +50,23 @@ export function useDeclineInvitationMutation() {
     },
   });
 }
+
+export function useInvitationByToken(token?: string) {
+  return useQuery<InvitationResponse, Error>({
+    queryKey: ['invitation', 'token', token],
+    queryFn: () => invitationService.getInvitationByToken(token!),
+    enabled: Boolean(token),
+  });
+}
+
+export function useAcceptInvitationByTokenMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<AcceptInvitationResponse, Error, string>({
+    mutationFn: (token: string) => invitationService.acceptInvitationByToken(token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    },
+  });
+}

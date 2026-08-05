@@ -75,4 +75,24 @@ export const invitationService = {
     );
     return response.data;
   },
+
+  /**
+   * GET /api/invitations/by-token?token={token}
+   */
+  async getInvitationByToken(token: string): Promise<InvitationResponse> {
+    const response = await axiosClient.get<unknown, ApiResponse<InvitationResponse>>(
+      `/invitations/by-token?token=${encodeURIComponent(token)}`
+    );
+    return response.data;
+  },
+
+  /**
+   * PUT /api/invitations/accept-by-token?token={token}
+   */
+  async acceptInvitationByToken(token: string): Promise<AcceptInvitationResponse> {
+    const response = await axiosClient.put<unknown, ApiResponse<AcceptInvitationResponse>>(
+      `/invitations/accept-by-token?token=${encodeURIComponent(token)}`
+    );
+    return response.data;
+  },
 };

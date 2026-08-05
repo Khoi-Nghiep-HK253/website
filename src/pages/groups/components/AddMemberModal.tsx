@@ -16,13 +16,14 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import InputAdornment from '@mui/material/InputAdornment';
 import Divider from '@mui/material/Divider';
+import { useTranslation } from 'react-i18next';
 
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import { Alert } from '@/components';
-import { useAllUsers } from '@/hooks/useUserQuery';
+import { useAllUsers } from '@/hooks/query/useUserQuery';
 import type { UserResponse } from '@/services/authService';
 import type { GroupMemberResponse } from '@/services/groupService';
 
@@ -49,6 +50,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
   existingMembers = [],
   existingMemberUserIds = [],
 }) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
   const [invitationMessage, setInvitationMessage] = useState('');
@@ -98,7 +100,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
     setMemberError(null);
 
     if (!selectedUser) {
-      setMemberError('Vui lòng chọn một thành viên từ danh sách.');
+      setMemberError(t('invitation.selectUserMsg'));
       return;
     }
 
@@ -137,20 +139,20 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
       <Box component="form" onSubmit={handleSubmit}>
         <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
           <PersonAddIcon color="primary" />
-          Mời Thành Viên Vào Nhóm
+          {t('groupDetail.inviteMemberBtn')}
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           {memberError && <Alert intent="error">{memberError}</Alert>}
 
           <Typography variant="body2" color="text.secondary">
-            Tìm kiếm và chọn thành viên bên dưới để gửi lời mời tham gia nhóm chi tiêu.
+            {t('invitation.searchPrompt')}
           </Typography>
 
           {/* Search Input Field */}
           <TextField
             size="small"
             fullWidth
-            placeholder="Tìm theo Tên, Username hoặc Email..."
+            placeholder={t('common.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             slotProps={{
@@ -173,7 +175,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
             ) : filteredUsers.length === 0 ? (
               <Box sx={{ p: 4, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Không tìm thấy người dùng phù hợp.
+                  {t('invitation.noUserFound')}
                 </Typography>
               </Box>
             ) : (
@@ -182,7 +184,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                   const isSelected = selectedUser?.id === u.id;
                   const displayName = getDisplayName(u);
                   const initial = getInitial(u);
-                  const email = u.email || 'Chưa cập nhật email';
+                  const email = u.email || '';
 
                   return (
                     <React.Fragment key={u.id}>
@@ -222,24 +224,24 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
             )}
           </Paper>
 
-          {/* Optional Invitation Message Field (message) */}
+          {/* Optional Invitation Message Field */}
           <TextField
             size="small"
             fullWidth
-            label="Lời nhắn đính kèm"
-            placeholder="Ví dụ: Đi Đà Lạt cùng bọn mình nhé!"
+            label={t('invitation.messageLabel')}
+            placeholder={t('invitation.messagePlaceholder')}
             value={invitationMessage}
             onChange={(e) => setInvitationMessage(e.target.value)}
             multiline
             rows={2}
           />
 
-          {/* Optional Expiration Date Field (expires_at) */}
+          {/* Optional Expiration Date Field */}
           <TextField
             size="small"
             fullWidth
             type="datetime-local"
-            label="Thời hạn lời mời"
+            label={t('invitation.expiryLabel')}
             value={expiresAt}
             onChange={(e) => setExpiresAt(e.target.value)}
             slotProps={{
@@ -250,10 +252,10 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
         <DialogActions sx={{ p: 2, px: 3 }}>
           <Button onClick={handleCloseModal} color="inherit">
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="contained" disabled={isPending || !selectedUser}>
-            {isPending ? <CircularProgress size={20} color="inherit" /> : 'Gửi Lời Mời'}
+            {isPending ? <CircularProgress size={20} color="inherit" /> : t('invitation.sendInviteBtn')}
           </Button>
         </DialogActions>
       </Box>

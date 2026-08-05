@@ -20,7 +20,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import PieChartIcon from '@mui/icons-material/PieChart';
-import { useExpenseDetail } from '@/hooks/useExpenseQuery';
+import { useTranslation } from 'react-i18next';
+import { useExpenseDetail } from '@/hooks/query/useExpenseQuery';
 import { Alert } from '@/components';
 
 interface ExpenseDetailModalProps {
@@ -36,10 +37,11 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
   groupId,
   expenseId,
 }) => {
+  const { t } = useTranslation();
   const { data: expense, isPending, error } = useExpenseDetail(groupId, expenseId);
 
   const currencySymbol =
-    expense?.currency?.symbol || expense?.currency?.acronym || expense?.currency?.code || expense?.currencyCode || 'VNĐ';
+    expense?.currency?.symbol || expense?.currency?.acronym || expense?.currency?.code || expense?.currencyCode || 'VND';
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -47,7 +49,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
         <Avatar sx={{ bgcolor: 'primary.main' }}>
           <ReceiptLongIcon />
         </Avatar>
-        Chi Tiết Khoản Chi
+        {t('groups.expenseDetailTitle')}
       </DialogTitle>
 
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
@@ -56,11 +58,11 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             <CircularProgress size={40} />
           </Box>
         ) : error ? (
-          <Alert intent="error" title="Không thể tải chi tiết khoản chi">
+          <Alert intent="error" title={t('common.error')}>
             {error.message}
           </Alert>
         ) : !expense ? (
-          <Typography color="text.secondary">Không tìm thấy thông tin khoản chi.</Typography>
+          <Typography color="text.secondary">{t('groups.noExpenseFound')}</Typography>
         ) : (
           <>
             {/* Header info card */}
@@ -70,25 +72,25 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               </Typography>
 
               <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>
-                {expense.totalAmount.toLocaleString('vi-VN')} {currencySymbol}
+                {(expense.totalAmount || 0).toLocaleString()} {currencySymbol}
               </Typography>
 
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 <Chip
                   icon={<CalendarTodayIcon fontSize="small" />}
-                  label={`Ngày: ${expense.expenseDate || expense.createdAt || 'N/A'}`}
+                  label={`${expense.expenseDate || expense.createdAt || ''}`}
                   size="small"
                   variant="outlined"
                 />
                 <Chip
                   icon={<PieChartIcon fontSize="small" />}
-                  label={`Cách chia: ${expense.splitType || 'EQUAL'}`}
+                  label={`${expense.splitType || 'EQUAL'}`}
                   size="small"
                   color="secondary"
                 />
                 <Chip
                   icon={<PersonIcon fontSize="small" />}
-                  label={`Người tạo: ${expense.createdByName || 'Thành viên'}`}
+                  label={`${t('groups.createdBy')}: ${expense.createdByName || '—'}`}
                   size="small"
                   variant="outlined"
                 />
@@ -99,7 +101,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PaymentsIcon fontSize="small" />
-                Người Ứng Tiền ({expense.payers?.length || 0})
+                {t('groups.payers')} ({expense.payers?.length || 0})
               </Typography>
 
               <Paper variant="outlined" sx={{ borderRadius: 2 }}>
@@ -119,10 +121,10 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
                               {payer.username || `User #${payer.userId}`}
                             </Typography>
                           }
-                          secondary="Đã thanh toán trước"
+                          secondary={t('groups.paidBefore')}
                         />
                         <Typography variant="subtitle1" color="success.main" sx={{ fontWeight: 'bold' }}>
-                          +{payer.amount.toLocaleString('vi-VN')} {currencySymbol}
+                          +{(payer.amount || 0).toLocaleString()} {currencySymbol}
                         </Typography>
                       </ListItem>
                     </React.Fragment>
@@ -135,7 +137,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PieChartIcon fontSize="small" />
-                Thành Viên Chia Tiền ({expense.shares?.length || 0})
+                {t('groups.shares')} ({expense.shares?.length || 0})
               </Typography>
 
               <Paper variant="outlined" sx={{ borderRadius: 2 }}>
@@ -155,10 +157,10 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
                               {share.username || `User #${share.userId}`}
                             </Typography>
                           }
-                          secondary="Phần phải gánh"
+                          secondary={t('groups.owesShare')}
                         />
                         <Typography variant="subtitle1" color="error.main" sx={{ fontWeight: 'bold' }}>
-                          -{share.amount.toLocaleString('vi-VN')} {currencySymbol}
+                          -{(share.amount || 0).toLocaleString()} {currencySymbol}
                         </Typography>
                       </ListItem>
                     </React.Fragment>
@@ -172,7 +174,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
 
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} variant="contained">
-          Đóng
+          {t('common.close')}
         </Button>
       </DialogActions>
     </Dialog>

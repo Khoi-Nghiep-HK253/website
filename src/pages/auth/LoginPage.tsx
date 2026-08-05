@@ -12,12 +12,16 @@ import PersonIcon from '@mui/icons-material/Person';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/context/ToastContext';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/hooks/common/useAuth';
+import { useToast } from '@/hooks/common/useToast';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { PATHS } from '@/router/routes';
 import { Alert } from '@/components';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
+  useDocumentTitle(t('nav.login'));
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -34,22 +38,22 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     if (!usernameOrEmail.trim()) {
-      setErrorMsg('Vui lòng nhập Tên đăng nhập hoặc Email.');
+      setErrorMsg(t('auth.valUsernameOrEmailRequired'));
       return;
     }
     if (!password) {
-      setErrorMsg('Vui lòng nhập Mật khẩu.');
+      setErrorMsg(t('auth.valPasswordRequired'));
       return;
     }
 
     login(
       { usernameOrEmail, password },
       () => {
-        showSuccess('Đăng nhập thành công!');
+        showSuccess(t('auth.loginSuccess'));
         navigate(from, { replace: true });
       },
       (err) => {
-        const msg = err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.';
+        const msg = err.message || t('auth.loginFailed');
         setErrorMsg(msg);
         showError(msg);
       }
@@ -60,10 +64,10 @@ export default function LoginPage() {
     return (
       <Card sx={{ maxWidth: 400, mx: 'auto', mt: 4, p: 4, textAlign: 'center', borderRadius: 4 }}>
         <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Bạn đã đăng nhập Divvy!
+          {t('auth.alreadyLoggedIn')}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ my: 2 }}>
-          Chuyển tới Danh sách Nhóm để quản lý khoản chi.
+          {t('auth.goToGroupsMsg')}
         </Typography>
         <Button
           variant="contained"
@@ -71,7 +75,7 @@ export default function LoginPage() {
           onClick={() => navigate(PATHS.GROUPS)}
           sx={{ borderRadius: 3, fontWeight: 700 }}
         >
-          Đi tới Danh sách Nhóm
+          {t('auth.goToGroupsBtn')}
         </Button>
       </Card>
     );
@@ -86,10 +90,10 @@ export default function LoginPage() {
       </Box>
 
       <Typography variant="h5" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
-        Đăng Nhập Divvy
+        {t('auth.loginTitle')}
       </Typography>
       <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 3 }}>
-        Sổ quỹ thông minh quản lý chi tiêu nhóm minh bạch & tiện lợi
+        {t('auth.loginSub')}
       </Typography>
 
       {(errorMsg || loginError) && (
@@ -101,14 +105,14 @@ export default function LoginPage() {
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
         <TextField
           id="username-or-email-input"
-          label="Tên đăng nhập hoặc Email"
+          label={t('auth.usernameOrEmail')}
           type="text"
           variant="outlined"
           fullWidth
           required
           value={usernameOrEmail}
           onChange={(e) => setUsernameOrEmail(e.target.value)}
-          placeholder="Nhập username hoặc email..."
+          placeholder={t('auth.usernameOrEmailPlaceholder')}
           disabled={isLoggingIn}
           slotProps={{
             input: {
@@ -123,14 +127,14 @@ export default function LoginPage() {
 
         <TextField
           id="password-input"
-          label="Mật khẩu"
+          label={t('auth.password')}
           type="password"
           variant="outlined"
           fullWidth
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Nhập mật khẩu..."
+          placeholder={t('auth.passwordPlaceholder')}
           disabled={isLoggingIn}
           slotProps={{
             input: {
@@ -151,12 +155,12 @@ export default function LoginPage() {
           disabled={isLoggingIn}
           sx={{ mt: 1, borderRadius: 3, fontWeight: 700 }}
         >
-          {isLoggingIn ? 'Đang xác thực...' : 'Đăng nhập ngay'}
+          {isLoggingIn ? t('auth.loggingIn') : t('auth.loginBtn')}
         </Button>
       </Box>
 
       <Box sx={{ mt: 3, textAlign: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-        Chưa có tài khoản Divvy?{' '}
+        {t('auth.noAccount')}{' '}
         <Typography
           component="span"
           variant="body2"
@@ -164,7 +168,7 @@ export default function LoginPage() {
           sx={{ fontWeight: 'bold', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
           onClick={() => navigate(PATHS.REGISTER)}
         >
-          Đăng ký ngay
+          {t('auth.registerBtn')}
         </Typography>
       </Box>
     </Card>

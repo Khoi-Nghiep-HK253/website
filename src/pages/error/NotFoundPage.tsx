@@ -4,9 +4,13 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { HelpOutlined as HelpOutlineIcon, Home as HomeIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { PATHS } from '@/router/routes';
 
 export default function NotFoundPage() {
+  const { t } = useTranslation();
+  useDocumentTitle(`404 — ${t('errorPages.notFoundTitle')}`);
   const navigate = useNavigate();
 
   return (
@@ -35,13 +39,13 @@ export default function NotFoundPage() {
           <HelpOutlineIcon sx={{ fontSize: 48 }} />
         </Box>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Trang Không Tồn Tại (404)
+          {t('errorPages.notFoundTitle')}
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Đường dẫn bạn truy cập không tồn tại hoặc đã bị di chuyển.
+          {t('errorPages.notFoundSub')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Vui lòng kiểm tra lại URL hoặc quay về trang chủ.
+          {t('errorPages.notFoundDesc')}
         </Typography>
         <Button
           variant="contained"
@@ -50,7 +54,7 @@ export default function NotFoundPage() {
           onClick={() => navigate(PATHS.HOME)}
           sx={{ mt: 1 }}
         >
-          Quay về Trang Chủ
+          {t('errorPages.backToHome')}
         </Button>
       </Card>
     </Box>

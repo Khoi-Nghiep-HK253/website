@@ -10,6 +10,7 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import GroupIcon from '@mui/icons-material/Group';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useTranslation } from 'react-i18next';
 import type { GroupResponse } from '@/services/groupService';
 
 interface MyGroupsTabContentProps {
@@ -21,14 +22,16 @@ export const MyGroupsTabContent: React.FC<MyGroupsTabContentProps> = ({
   groupsList,
   onNavigateToGroup,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-        Danh Sách Nhóm Đã Tham Gia ({groupsList.length})
+        {t('profile.myGroupsTab')} ({groupsList.length})
       </Typography>
 
       {groupsList.length === 0 ? (
-        <Typography color="text.secondary">Chưa có nhóm nào.</Typography>
+        <Typography color="text.secondary">{t('groups.emptyGroups')}</Typography>
       ) : (
         <List disablePadding>
           {groupsList.map((g, idx) => (
@@ -45,7 +48,7 @@ export const MyGroupsTabContent: React.FC<MyGroupsTabContentProps> = ({
                 onClick={() => onNavigateToGroup(g.id)}
                 secondaryAction={
                   <Button size="small" variant="outlined" endIcon={<ArrowForwardIcon />}>
-                    Chi Tiết
+                    {t('groups.enterGroup')}
                   </Button>
                 }
               >
@@ -60,7 +63,7 @@ export const MyGroupsTabContent: React.FC<MyGroupsTabContentProps> = ({
                       {g.name}
                     </Typography>
                   }
-                  secondary={`Ghi chú: ${g.note || 'Không có'} • Danh mục: ${g.categoryName || 'Chung'}`}
+                  secondary={`${g.note || t('groups.noNote')} • ${g.categoryName || ''}`}
                 />
               </ListItem>
             </React.Fragment>

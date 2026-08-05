@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -29,13 +29,15 @@ export const RecordSettlementModal: React.FC<RecordSettlementModalProps> = ({
   isPending,
 }) => {
   const [settleAmount, setSettleAmount] = useState<number>(defaultAmount);
+  const [prevDefaultAmount, setPrevDefaultAmount] = useState<number>(defaultAmount);
   const [settleMethod, setSettleMethod] = useState<'CASH' | 'BANK_TRANSFER'>('CASH');
   const [settleNote, setSettleNote] = useState('');
   const [settleError, setSettleError] = useState<string | null>(null);
 
-  useEffect(() => {
+  if (defaultAmount !== prevDefaultAmount) {
+    setPrevDefaultAmount(defaultAmount);
     setSettleAmount(defaultAmount);
-  }, [defaultAmount]);
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -17,7 +17,7 @@ type Story = StoryObj<typeof PageLoader>;
 
 export const Default: Story = {
   args: {
-    label: 'Đang tải trang...',
+    label: undefined,
   },
 };
 
