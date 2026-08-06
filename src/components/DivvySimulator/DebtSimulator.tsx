@@ -14,27 +14,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
-export interface Member {
-  id: string;
-  name: string;
-  avatarColor: string;
-  paid: number;
-  share: number;
-}
-
-export interface CalculatedDebt {
-  id: string;
-  fromName: string;
-  toName: string;
-  amount: number;
-  status: 'PENDING' | 'SETTLED';
-}
-
-export interface DebtSimulatorProps {
-  initialDescription?: string;
-  initialTotalAmount?: number;
-  initialMembers?: Member[];
-}
+import type { Member, CalculatedDebt, DebtSimulatorProps } from './DebtSimulator.types';
 
 export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
   initialDescription = 'Ăn lẩu thái cùng nhóm',

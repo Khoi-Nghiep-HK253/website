@@ -1,4 +1,4 @@
-import { axiosClient, type ApiResponse } from '@/services/api/axiosClient';
+import { axiosClient, type ApiResponse } from '@/core/config/axiosClient';
 
 export interface CurrencyResponse {
   id: number;

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
-import { QueryProvider } from '@/providers/QueryProvider';
+import { QueryProvider } from '@/core/providers/QueryProvider';
 import { ToastProvider } from '@/context/ToastContext';
 import { CustomThemeProvider, useAppTheme } from '@/theme/ThemeProvider';
 import { createAppRouter } from '@/router';

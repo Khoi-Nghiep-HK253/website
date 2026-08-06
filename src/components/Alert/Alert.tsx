@@ -3,17 +3,7 @@ import MuiAlert from '@mui/material/Alert';
 import type { AlertColor } from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 
-export type AlertIntent = 'info' | 'success' | 'warning' | 'error' | 'danger';
-
-export interface AlertProps {
-  intent?: AlertIntent;
-  title?: string;
-  children: React.ReactNode;
-  icon?: React.ReactElement;
-  onDismiss?: () => void;
-  className?: string;
-  style?: React.CSSProperties;
-}
+import type { AlertProps } from './Alert.types';
 
 export const Alert: React.FC<AlertProps> = ({
   intent = 'info',

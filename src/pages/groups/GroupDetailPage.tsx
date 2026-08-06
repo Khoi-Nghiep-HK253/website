@@ -1,52 +1,21 @@
-import { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import CircularProgress from '@mui/material/CircularProgress';
 import Paper from '@mui/material/Paper';
-import Avatar from '@mui/material/Avatar';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import {
   ArrowBack as ArrowBackIcon,
   ReceiptLong as ReceiptLongIcon,
   AccountBalance as AccountBalanceIcon,
   Group as GroupIcon,
-  Add as AddIcon,
-  PersonAdd as PersonAddIcon,
   Payments as PaymentsIcon,
 } from '@mui/icons-material';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import {
-  useGroupDetail,
-  useGroupMembers,
-  useRemoveMemberMutation,
-} from '@/hooks/query/useGroupQuery';
-import {
-  useGroupExpenses,
-  useCreateExpenseMutation,
-  useDeleteExpenseMutation,
-} from '@/hooks/query/useExpenseQuery';
-import {
-  useGroupDebtSummary,
-  useMyDebts,
-} from '@/hooks/query/useDebtQuery';
-import {
-  useGroupSettlements,
-  useCreateSettlementMutation,
-} from '@/hooks/query/useSettlementQuery';
-import { useCurrencies } from '@/hooks/query/useMasterQuery';
-import { useSendInvitationMutation } from '@/hooks/query/useInvitationQuery';
-import { useToast } from '@/hooks/common/useToast';
-import type { CreateExpensePayload } from '@/services/expenseService';
-import type { CreateSettlementPayload } from '@/services/settlementService';
-import { useAuth } from '@/hooks/common';
-import { PATHS } from '@/router/routes';
-import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useParams } from 'react-router-dom';
 import { Alert, CustomTabPanel } from '@/components';
+import { useGroupDetailStore } from './hooks/useGroupDetailStore';
 import {
+  GroupDetailHeader,
   ExpenseTabContent,
   DebtsTabContent,
   MembersTabContent,
@@ -59,161 +28,43 @@ import {
 } from './components';
 
 export default function GroupDetailPage() {
-  const { t } = useTranslation();
   const { groupId: groupIdStr } = useParams<{ groupId: string }>();
   const groupId = Number(groupIdStr);
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { showSuccess, showError } = useToast();
 
-  const [activeTab, setActiveTab] = useState(0);
-
-  // Queries
-  const { data: group, isPending: isGroupPending, error: groupError } = useGroupDetail(groupId);
-  useDocumentTitle(group?.name ? `${group.name}` : t('groups.title'));
-  const { data: members = [] } = useGroupMembers(groupId);
-  const { data: currencies = [] } = useCurrencies();
-  const { data: expensesData } = useGroupExpenses(groupId);
-  const { data: debtsSummary } = useGroupDebtSummary(groupId);
-  const { data: myDebts } = useMyDebts(groupId);
-  const { data: settlementsData } = useGroupSettlements(groupId);
-
-  // Mutations
-  const createExpenseMutation = useCreateExpenseMutation();
-  const deleteExpenseMutation = useDeleteExpenseMutation();
-  const removeMemberMutation = useRemoveMemberMutation();
-  const createSettlementMutation = useCreateSettlementMutation();
-  const sendInvitationMutation = useSendInvitationMutation();
-
-  // Modals state
-  const [openExpenseModal, setOpenExpenseModal] = useState(false);
-  const [openMemberModal, setOpenMemberModal] = useState(false);
-  const [openShareLinkModal, setOpenShareLinkModal] = useState(false);
-  const [openSettleModal, setOpenSettleModal] = useState(false);
-  const [openDetailModal, setOpenDetailModal] = useState(false);
-  const [selectedExpenseId, setSelectedExpenseId] = useState<number | null>(null);
-  const [selectedDebtId, setSelectedDebtId] = useState<number | null>(null);
-  const [selectedDebtAmount, setSelectedDebtAmount] = useState<number>(0);
-
-  const expensesList = useMemo(() => expensesData?.content || [], [expensesData]);
-  const settlementsList = useMemo(() => settlementsData?.content || [], [settlementsData]);
-
-  const currentUserMember = useMemo(
-    () => members.find((m) => m.user?.id === user?.id || m.userId === user?.id),
-    [members, user?.id]
-  );
-  const isOwner = currentUserMember?.role === 'OWNER';
-
-  const handleCreateExpenseSubmit = useCallback(
-    (payload: CreateExpensePayload) => {
-      createExpenseMutation.mutate(
-        { groupId, payload },
-        {
-          onSuccess: () => {
-            setOpenExpenseModal(false);
-            showSuccess(t('groupDetail.createExpenseSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.createExpenseFailed')}: ${err.message || ''}`);
-          },
-        }
-      );
-    },
-    [createExpenseMutation, groupId, showError, showSuccess, t]
-  );
-
-  const handleAddMemberSubmit = useCallback(
-    (payload: { userId: number; message?: string; expiresAt?: string }) => {
-      sendInvitationMutation.mutate(
-        {
-          groupId,
-          payload: {
-            inviteeId: payload.userId,
-            message: payload.message,
-            expiresAt: payload.expiresAt,
-          },
-        },
-        {
-          onSuccess: () => {
-            setOpenMemberModal(false);
-            showSuccess(t('groupDetail.sendInviteSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.sendInviteFailed')}: ${err.message || ''}`);
-          },
-        }
-      );
-    },
-    [groupId, sendInvitationMutation, showError, showSuccess, t]
-  );
-
-  const handleOpenSettleModal = useCallback((debtId: number, amount: number) => {
-    setSelectedDebtId(debtId);
-    setSelectedDebtAmount(amount);
-    setOpenSettleModal(true);
-  }, []);
-
-  const handleOpenExpenseDetail = useCallback((expenseId: number) => {
-    setSelectedExpenseId(expenseId);
-    setOpenDetailModal(true);
-  }, []);
-
-  const handleDeleteExpense = useCallback(
-    (expenseId: number) => {
-      deleteExpenseMutation.mutate(
-        { groupId, expenseId },
-        {
-          onSuccess: () => {
-            showSuccess(t('groupDetail.deleteExpenseSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.deleteExpenseFailed')}: ${err.message || ''}`);
-          },
-        }
-      );
-    },
-    [deleteExpenseMutation, groupId, showError, showSuccess, t]
-  );
-
-  const handleRemoveMember = useCallback(
-    (memberId: number) => {
-      removeMemberMutation.mutate(
-        { groupId, memberId },
-        {
-          onSuccess: () => {
-            showSuccess(t('groupDetail.removeMemberSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.removeMemberFailed')}: ${err.message || ''}`);
-          },
-        }
-      );
-    },
-    [groupId, removeMemberMutation, showError, showSuccess, t]
-  );
-
-  const handleSettleSubmit = useCallback(
-    (payload: CreateSettlementPayload) => {
-      createSettlementMutation.mutate(
-        { groupId, payload },
-        {
-          onSuccess: () => {
-            setOpenSettleModal(false);
-            setSelectedDebtId(null);
-            showSuccess(t('groupDetail.recordSettlementSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.recordSettlementFailed')}: ${err.message || ''}`);
-          },
-        }
-      );
-    },
-    [createSettlementMutation, groupId, showError, showSuccess, t]
-  );
-
-  const handleBackToList = useCallback(() => {
-    navigate(PATHS.GROUPS.LIST);
-  }, [navigate]);
+  const {
+    t,
+    group,
+    isGroupPending,
+    groupError,
+    members,
+    currencies,
+    expensesList,
+    settlementsList,
+    debtsSummary,
+    myDebts,
+    isOwner,
+    user,
+    activeTab,
+    setActiveTab,
+    activeModal,
+    openModal,
+    closeModal,
+    selectedExpenseId,
+    selectedDebtId,
+    selectedDebtAmount,
+    handleBackToList,
+    handleCreateExpenseSubmit,
+    handleAddMemberSubmit,
+    handleOpenExpenseDetail,
+    handleCloseExpenseDetail,
+    handleOpenSettleModal,
+    handleDeleteExpense,
+    handleRemoveMember,
+    handleSettleSubmit,
+    isCreateExpensePending,
+    isSendInvitePending,
+    isSettlePending,
+  } = useGroupDetailStore(groupId);
 
   if (isGroupPending) {
     return (
@@ -238,57 +89,14 @@ export default function GroupDetailPage() {
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header Bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={handleBackToList} color="inherit">
-          {t('groupDetail.backToList')}
-        </Button>
-      </Box>
-
-      {/* Group Detail Card */}
-      <Card sx={{ p: { xs: 2.5, md: 4 }, borderRadius: 4, boxShadow: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
-              <GroupIcon sx={{ fontSize: 32 }} />
-            </Avatar>
-
-            <Box>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-                {group.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {group.note || t('groups.noNote')}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Quick Action Buttons */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenExpenseModal(true)}
-            sx={{ borderRadius: 3, fontWeight: 700 }}
-          >
-            {t('groupDetail.addExpenseBtn')}
-          </Button>
-
-          {isOwner && (
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<PersonAddIcon />}
-              onClick={() => setOpenMemberModal(true)}
-              sx={{ borderRadius: 3, fontWeight: 700 }}
-            >
-              {t('groupDetail.inviteMemberBtn')}
-            </Button>
-          )}
-        </Box>
-      </Card>
+      {/* Group Detail Header */}
+      <GroupDetailHeader
+        group={group}
+        isOwner={isOwner}
+        onBackToList={handleBackToList}
+        onOpenCreateExpense={() => openModal('CREATE_EXPENSE')}
+        onOpenAddMember={() => openModal('ADD_MEMBER')}
+      />
 
       {/* Tabs Navigation */}
       <Paper sx={{ borderRadius: 4, overflow: 'hidden' }}>
@@ -312,7 +120,7 @@ export default function GroupDetailPage() {
         <CustomTabPanel value={activeTab} index={0}>
           <ExpenseTabContent
             expenses={expensesList}
-            onOpenCreateModal={() => setOpenExpenseModal(true)}
+            onOpenCreateModal={() => openModal('CREATE_EXPENSE')}
             onSelectExpense={handleOpenExpenseDetail}
             onDeleteExpense={handleDeleteExpense}
           />
@@ -331,8 +139,8 @@ export default function GroupDetailPage() {
         <CustomTabPanel value={activeTab} index={2}>
           <MembersTabContent
             members={members}
-            onOpenAddMemberModal={() => setOpenMemberModal(true)}
-            onOpenShareLinkModal={() => setOpenShareLinkModal(true)}
+            onOpenAddMemberModal={() => openModal('ADD_MEMBER')}
+            onOpenShareLinkModal={() => openModal('SHARE_LINK')}
             onRemoveMember={handleRemoveMember}
             isOwner={isOwner}
           />
@@ -346,45 +154,42 @@ export default function GroupDetailPage() {
 
       {/* Modals */}
       <CreateExpenseModal
-        open={openExpenseModal}
-        onClose={() => setOpenExpenseModal(false)}
+        open={activeModal === 'CREATE_EXPENSE'}
+        onClose={closeModal}
         currencies={currencies}
         members={members}
         currentUserId={user?.id}
         onSubmit={handleCreateExpenseSubmit}
-        isPending={createExpenseMutation.isPending}
+        isPending={isCreateExpensePending}
       />
 
       <AddMemberModal
-        open={openMemberModal}
-        onClose={() => setOpenMemberModal(false)}
+        open={activeModal === 'ADD_MEMBER'}
+        onClose={closeModal}
         onSubmit={handleAddMemberSubmit}
-        isPending={sendInvitationMutation.isPending}
+        isPending={isSendInvitePending}
         existingMembers={members}
       />
 
       <RecordSettlementModal
-        open={openSettleModal}
-        onClose={() => setOpenSettleModal(false)}
+        open={activeModal === 'RECORD_SETTLEMENT'}
+        onClose={closeModal}
         debtId={selectedDebtId}
         defaultAmount={selectedDebtAmount}
         onSubmit={handleSettleSubmit}
-        isPending={createSettlementMutation.isPending}
+        isPending={isSettlePending}
       />
 
       <ExpenseDetailModal
-        open={openDetailModal}
-        onClose={() => {
-          setOpenDetailModal(false);
-          setSelectedExpenseId(null);
-        }}
+        open={activeModal === 'EXPENSE_DETAIL'}
+        onClose={handleCloseExpenseDetail}
         groupId={groupId}
         expenseId={selectedExpenseId}
       />
 
       <GroupShareLinkModal
-        open={openShareLinkModal}
-        onClose={() => setOpenShareLinkModal(false)}
+        open={activeModal === 'SHARE_LINK'}
+        onClose={closeModal}
         groupId={groupId}
         isOwner={isOwner}
       />

@@ -9,3 +9,4 @@ export * from './MembersTabContent';
 export * from './SettlementsTabContent';
 export * from './ExpenseDetailModal';
 export * from './GroupShareLinkModal';
+export * from './GroupDetailHeader';

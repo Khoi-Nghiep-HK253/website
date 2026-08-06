@@ -1,4 +1,3 @@
-import { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -9,78 +8,26 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Paper from '@mui/material/Paper';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SearchIcon from '@mui/icons-material/Search';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useMyGroups, useCreateGroupMutation } from '@/hooks/query/useGroupQuery';
-import { useCategories } from '@/hooks/query/useMasterQuery';
-import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { useToast } from '@/hooks/common/useToast';
 import { Alert } from '@/components';
-import { PATHS } from '@/router/routes';
+import { useGroupsListStore } from './hooks/useGroupsListStore';
 import { GroupCardItem, CreateGroupModal } from './components';
 
 export default function GroupsListPage() {
-  const { t } = useTranslation();
-  useDocumentTitle(t('groups.title'));
-  const navigate = useNavigate();
-  const { data: myGroupsData, isPending, error } = useMyGroups();
-  const { data: categories = [] } = useCategories();
-  const createGroupMutation = useCreateGroupMutation();
-  const { showSuccess, showError } = useToast();
-
-  const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const groupsList = useMemo(() => {
-    return myGroupsData?.content || [];
-  }, [myGroupsData]);
-
-  const filteredGroups = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return groupsList;
-    return groupsList.filter(
-      (g) =>
-        g.name.toLowerCase().includes(q) ||
-        (g.note && g.note.toLowerCase().includes(q))
-    );
-  }, [groupsList, searchQuery]);
-
-  const handleNavigateDetail = useCallback(
-    (groupId: number) => {
-      navigate(PATHS.GROUPS.DETAIL(groupId));
-    },
-    [navigate]
-  );
-
-  const handleCreateGroupSubmit = useCallback(
-    (data: {
-      name: string;
-      categoryId?: number;
-      note?: string;
-      startDate?: string;
-      endDate?: string;
-    }) => {
-      createGroupMutation.mutate(data, {
-        onSuccess: (newGroup) => {
-          setOpenCreateDialog(false);
-          showSuccess(`Tạo nhóm "${newGroup.name}" thành công!`);
-          navigate(PATHS.GROUPS.DETAIL(newGroup.id));
-        },
-        onError: (err) => {
-          showError(`Tạo nhóm thất bại: ${err.message || 'Vui lòng thử lại'}`);
-        },
-      });
-    },
-    [createGroupMutation, navigate, showError, showSuccess]
-  );
-
-  const handleOpenCreateDialog = useCallback(() => {
-    setOpenCreateDialog(true);
-  }, []);
-
-  const handleCloseCreateDialog = useCallback(() => {
-    setOpenCreateDialog(false);
-  }, []);
+  const {
+    t,
+    isPending,
+    error,
+    categories,
+    filteredGroups,
+    searchQuery,
+    setSearchQuery,
+    openCreateDialog,
+    handleNavigateDetail,
+    handleCreateGroupSubmit,
+    handleOpenCreateDialog,
+    handleCloseCreateDialog,
+    isCreatePending,
+  } = useGroupsListStore();
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -200,7 +147,7 @@ export default function GroupsListPage() {
         onClose={handleCloseCreateDialog}
         onSubmit={handleCreateGroupSubmit}
         categories={categories}
-        isPending={createGroupMutation.isPending}
+        isPending={isCreatePending}
       />
     </Box>
   );

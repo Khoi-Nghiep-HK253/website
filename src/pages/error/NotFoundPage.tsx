@@ -3,15 +3,10 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { HelpOutlined as HelpOutlineIcon, Home as HomeIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { PATHS } from '@/router/routes';
+import { useNotFoundStore } from './hooks/useNotFoundStore';
 
 export default function NotFoundPage() {
-  const { t } = useTranslation();
-  useDocumentTitle(`404 — ${t('errorPages.notFoundTitle')}`);
-  const navigate = useNavigate();
+  const { t, handleGoHome } = useNotFoundStore();
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, textAlign: 'center' }}>
@@ -51,7 +46,7 @@ export default function NotFoundPage() {
           variant="contained"
           size="large"
           startIcon={<HomeIcon />}
-          onClick={() => navigate(PATHS.HOME)}
+          onClick={handleGoHome}
           sx={{ mt: 1 }}
         >
           {t('errorPages.backToHome')}

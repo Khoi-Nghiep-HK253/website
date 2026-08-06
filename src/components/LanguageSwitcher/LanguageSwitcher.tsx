@@ -11,8 +11,9 @@ import {
 } from '@mui/material';
 import TranslateIcon from '@mui/icons-material/Translate';
 import CheckIcon from '@mui/icons-material/Check';
+import type { LanguageSwitcherProps } from './LanguageSwitcher.types';
 
-export const LanguageSwitcher: React.FC = () => {
+export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = () => {
   const { i18n, t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 

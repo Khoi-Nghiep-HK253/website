@@ -1,4 +1,4 @@
-import { axiosClient, type ApiResponse } from '@/services/api/axiosClient';
+import { axiosClient, type ApiResponse } from '@/core/config/axiosClient';
 import type { PageResponse } from '@/services/groupService';
 import type { DebtUserInfo } from '@/services/debtService';
 

@@ -1,11 +1,6 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-
-export interface CustomTabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+import type { CustomTabPanelProps } from './CustomTabPanel.types';
 
 export const CustomTabPanel: React.FC<CustomTabPanelProps> = (props) => {
   const { children, value, index, ...other } = props;

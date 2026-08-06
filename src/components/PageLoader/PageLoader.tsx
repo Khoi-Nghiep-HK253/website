@@ -1,9 +1,11 @@
+import React from 'react';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
+import type { PageLoaderProps } from './PageLoader.types';
 
-export const PageLoader = ({ label }: { label?: string }) => {
+export const PageLoader: React.FC<PageLoaderProps> = ({ label, minHeight = '60vh' }) => {
   const { t } = useTranslation();
   const displayLabel = label || t('common.pageLoading');
 
@@ -14,7 +16,7 @@ export const PageLoader = ({ label }: { label?: string }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '60vh',
+        minHeight,
         gap: 2,
         width: '100%',
       }}

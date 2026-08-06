@@ -1,10 +1,13 @@
 import React from 'react';
 import type { Preview } from '@storybook/react';
-import { FluentProvider } from '@fluentui/react-components';
 import { MemoryRouter } from 'react-router-dom';
-import { QueryProvider } from '../src/providers/QueryProvider';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { QueryProvider } from '../src/core/providers/QueryProvider';
 import { AuthProvider } from '../src/context/AuthContext';
 import { customLightTheme, customDarkTheme } from '../src/theme';
+import '../src/index.css';
+import '../src/i18n';
 
 const preview: Preview = {
   parameters: {
@@ -17,14 +20,14 @@ const preview: Preview = {
   },
   globalTypes: {
     theme: {
-      description: 'Global Custom Fluent UI Theme for components',
+      description: 'Global MUI Theme for components',
       defaultValue: 'light',
       toolbar: {
         title: 'Theme',
         icon: 'circlehollow',
         items: [
-          { value: 'light', icon: 'circlehollow', title: 'Custom Light Theme' },
-          { value: 'dark', icon: 'circle', title: 'Custom Dark Theme' },
+          { value: 'light', icon: 'circlehollow', title: 'MUI Light Theme' },
+          { value: 'dark', icon: 'circle', title: 'MUI Dark Theme' },
         ],
         dynamicTitle: true,
       },
@@ -36,17 +39,18 @@ const preview: Preview = {
       const currentTheme = isDark ? customDarkTheme : customLightTheme;
 
       return (
-        <FluentProvider theme={currentTheme}>
-          <QueryProvider>
-            <AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <MuiThemeProvider theme={currentTheme}>
+              <CssBaseline />
               <MemoryRouter>
                 <div style={{ padding: '24px', minHeight: '300px' }}>
                   <Story />
                 </div>
               </MemoryRouter>
-            </AuthProvider>
-          </QueryProvider>
-        </FluentProvider>
+            </MuiThemeProvider>
+          </AuthProvider>
+        </QueryProvider>
       );
     },
   ],
