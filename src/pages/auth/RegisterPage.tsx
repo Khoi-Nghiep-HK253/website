@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -36,52 +36,59 @@ export default function RegisterPage() {
   const { register, isAuthenticated, isRegistering, registerError } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setErrorMsg(null);
 
-    if (!username.trim()) {
-      setErrorMsg(t('auth.valUsernameRequired'));
-      return;
-    }
-
-    if (!email.trim()) {
-      setErrorMsg(t('auth.valEmailRequired'));
-      return;
-    }
-
-    if (!password) {
-      setErrorMsg(t('auth.valPasswordRequired'));
-      return;
-    }
-
-    if (password.length < 6) {
-      setErrorMsg(t('auth.valPasswordMinLength'));
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setErrorMsg(t('auth.valPasswordMismatch'));
-      return;
-    }
-
-    register(
-      {
-        username,
-        email,
-        password,
-        firstname: firstname.trim() || undefined,
-        lastname: lastname.trim() || undefined,
-        phone: phone.trim() || undefined,
-      },
-      () => {
-        navigate(PATHS.GROUPS, { replace: true });
-      },
-      (err) => {
-        setErrorMsg(err.message || t('auth.regFailed'));
+      if (!username.trim()) {
+        setErrorMsg(t('auth.valUsernameRequired'));
+        return;
       }
-    );
-  };
+
+      if (!email.trim()) {
+        setErrorMsg(t('auth.valEmailRequired'));
+        return;
+      }
+
+      if (!password) {
+        setErrorMsg(t('auth.valPasswordRequired'));
+        return;
+      }
+
+      if (password.length < 6) {
+        setErrorMsg(t('auth.valPasswordMinLength'));
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setErrorMsg(t('auth.valPasswordMismatch'));
+        return;
+      }
+
+      register(
+        {
+          username,
+          email,
+          password,
+          firstname: firstname.trim() || undefined,
+          lastname: lastname.trim() || undefined,
+          phone: phone.trim() || undefined,
+        },
+        () => {
+          navigate(PATHS.GROUPS.LIST, { replace: true });
+        },
+        (err) => {
+          setErrorMsg(err.message || t('auth.regFailed'));
+        }
+      );
+    },
+    [username, email, password, confirmPassword, firstname, lastname, phone, register, navigate, t]
+  );
+
+  const handleGoToGroups = useCallback(() => {
+    navigate(PATHS.GROUPS.LIST);
+  }, [navigate]);
 
   if (isAuthenticated) {
     return (
@@ -95,7 +102,7 @@ export default function RegisterPage() {
         <Button
           variant="contained"
           endIcon={<ArrowForwardIcon />}
-          onClick={() => navigate(PATHS.GROUPS)}
+          onClick={handleGoToGroups}
           sx={{ borderRadius: 3, fontWeight: 700 }}
         >
           {t('auth.goToGroupsBtn')}
@@ -121,27 +128,30 @@ export default function RegisterPage() {
 
       {(errorMsg || registerError) && (
         <Box sx={{ mb: 2 }}>
-          <Alert intent="error">{errorMsg || registerError?.message}</Alert>
+          <Alert intent="error" title={t('auth.regErrorAlertTitle')}>
+            {errorMsg || registerError?.message || t('auth.regFailed')}
+          </Alert>
         </Box>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box component="form" onSubmit={handleSubmit} noValidate>
         <TextField
-          id="username-input"
-          label={t('auth.username')}
-          type="text"
-          variant="outlined"
-          fullWidth
+          margin="dense"
           required
+          fullWidth
+          id="username"
+          label={t('auth.usernameLabel')}
+          name="username"
+          autoComplete="username"
+          autoFocus
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder={t('auth.usernamePlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonIcon color="primary" />
+                  <PersonIcon color="action" />
                 </InputAdornment>
               ),
             },
@@ -149,64 +159,62 @@ export default function RegisterPage() {
         />
 
         <TextField
-          id="register-email-input"
-          label={t('auth.email')}
-          type="email"
-          variant="outlined"
-          fullWidth
+          margin="dense"
           required
+          fullWidth
+          id="email"
+          label={t('auth.emailLabel')}
+          name="email"
+          type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder={t('auth.emailPlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <MailIcon color="primary" />
+                  <MailIcon color="action" />
                 </InputAdornment>
               ),
             },
           }}
         />
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
           <TextField
-            id="firstname-input"
-            label={t('auth.firstname')}
-            type="text"
-            variant="outlined"
+            margin="dense"
             fullWidth
-            value={firstname}
-            onChange={(e) => setFirstname(e.target.value)}
-            placeholder="..."
+            id="lastname"
+            label={t('auth.lastnameLabel')}
+            name="lastname"
+            value={lastname}
+            onChange={(e) => setLastname(e.target.value)}
             disabled={isRegistering}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <BadgeIcon color="primary" />
+                    <BadgeIcon color="action" />
                   </InputAdornment>
                 ),
               },
             }}
           />
-
           <TextField
-            id="lastname-input"
-            label={t('auth.lastname')}
-            type="text"
-            variant="outlined"
+            margin="dense"
             fullWidth
-            value={lastname}
-            onChange={(e) => setLastname(e.target.value)}
-            placeholder="..."
+            id="firstname"
+            label={t('auth.firstnameLabel')}
+            name="firstname"
+            value={firstname}
+            onChange={(e) => setFirstname(e.target.value)}
             disabled={isRegistering}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <BadgeIcon color="primary" />
+                    <BadgeIcon color="action" />
                   </InputAdornment>
                 ),
               },
@@ -215,20 +223,19 @@ export default function RegisterPage() {
         </Box>
 
         <TextField
-          id="phone-input"
-          label={t('auth.phone')}
-          type="tel"
-          variant="outlined"
+          margin="dense"
           fullWidth
+          id="phone"
+          label={t('auth.phoneLabel')}
+          name="phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="0912345678"
           disabled={isRegistering}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <PhoneIcon color="primary" />
+                  <PhoneIcon color="action" />
                 </InputAdornment>
               ),
             },
@@ -236,21 +243,21 @@ export default function RegisterPage() {
         />
 
         <TextField
-          id="password-input"
-          label={t('auth.password')}
-          type="password"
-          variant="outlined"
-          fullWidth
+          margin="dense"
           required
+          fullWidth
+          name="password"
+          label={t('auth.passwordLabel')}
+          type="password"
+          id="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={t('auth.passwordMinPlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockOutlinedIcon color="primary" />
+                  <LockOutlinedIcon color="action" />
                 </InputAdornment>
               ),
             },
@@ -258,21 +265,21 @@ export default function RegisterPage() {
         />
 
         <TextField
-          id="confirm-password-input"
-          label={t('auth.confirmPassword')}
-          type="password"
-          variant="outlined"
-          fullWidth
+          margin="dense"
           required
+          fullWidth
+          name="confirmPassword"
+          label={t('auth.confirmPasswordLabel')}
+          type="password"
+          id="confirmPassword"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder={t('auth.confirmPasswordPlaceholder')}
           disabled={isRegistering}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockOutlinedIcon color="primary" />
+                  <LockOutlinedIcon color="action" />
                 </InputAdornment>
               ),
             },
@@ -281,27 +288,27 @@ export default function RegisterPage() {
 
         <Button
           type="submit"
+          fullWidth
           variant="contained"
           size="large"
-          endIcon={isRegistering ? <CircularProgress size={20} color="inherit" /> : <ArrowForwardIcon />}
           disabled={isRegistering}
-          sx={{ mt: 1, borderRadius: 3, fontWeight: 700 }}
+          sx={{ mt: 3, mb: 2, py: 1.2, borderRadius: 3, fontWeight: 700 }}
         >
-          {isRegistering ? t('auth.registering') : t('auth.registerBtn')}
+          {isRegistering ? <CircularProgress size={24} color="inherit" /> : t('auth.regSubmit')}
         </Button>
-      </Box>
 
-      <Box sx={{ mt: 3, textAlign: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-        {t('auth.hasAccount')}{' '}
-        <Typography
-          component="span"
-          variant="body2"
-          color="primary"
-          sx={{ fontWeight: 'bold', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-          onClick={() => navigate(PATHS.LOGIN)}
-        >
-          {t('auth.loginBtn')}
-        </Typography>
+        <Box sx={{ textAlign: 'center', mt: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            {t('auth.alreadyHaveAccountPrompt')}{' '}
+            <Button
+              color="primary"
+              onClick={() => navigate(PATHS.AUTH.LOGIN)}
+              sx={{ fontWeight: 'bold', p: 0, minWidth: 'auto', textTransform: 'none' }}
+            >
+              {t('auth.loginNowLink')}
+            </Button>
+          </Typography>
+        </Box>
       </Box>
     </Card>
   );

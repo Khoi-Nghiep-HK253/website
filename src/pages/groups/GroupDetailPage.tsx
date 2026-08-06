@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -42,7 +42,7 @@ import { useSendInvitationMutation } from '@/hooks/query/useInvitationQuery';
 import { useToast } from '@/hooks/common/useToast';
 import type { CreateExpensePayload } from '@/services/expenseService';
 import type { CreateSettlementPayload } from '@/services/settlementService';
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { PATHS } from '@/router/routes';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { Alert, CustomTabPanel } from '@/components';
@@ -55,6 +55,7 @@ import {
   AddMemberModal,
   RecordSettlementModal,
   ExpenseDetailModal,
+  GroupShareLinkModal,
 } from './components';
 
 export default function GroupDetailPage() {
@@ -87,11 +88,132 @@ export default function GroupDetailPage() {
   // Modals state
   const [openExpenseModal, setOpenExpenseModal] = useState(false);
   const [openMemberModal, setOpenMemberModal] = useState(false);
+  const [openShareLinkModal, setOpenShareLinkModal] = useState(false);
   const [openSettleModal, setOpenSettleModal] = useState(false);
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [selectedExpenseId, setSelectedExpenseId] = useState<number | null>(null);
   const [selectedDebtId, setSelectedDebtId] = useState<number | null>(null);
   const [selectedDebtAmount, setSelectedDebtAmount] = useState<number>(0);
+
+  const expensesList = useMemo(() => expensesData?.content || [], [expensesData]);
+  const settlementsList = useMemo(() => settlementsData?.content || [], [settlementsData]);
+
+  const currentUserMember = useMemo(
+    () => members.find((m) => m.user?.id === user?.id || m.userId === user?.id),
+    [members, user?.id]
+  );
+  const isOwner = currentUserMember?.role === 'OWNER';
+
+  const handleCreateExpenseSubmit = useCallback(
+    (payload: CreateExpensePayload) => {
+      createExpenseMutation.mutate(
+        { groupId, payload },
+        {
+          onSuccess: () => {
+            setOpenExpenseModal(false);
+            showSuccess(t('groupDetail.createExpenseSuccess'));
+          },
+          onError: (err: Error) => {
+            showError(`${t('groupDetail.createExpenseFailed')}: ${err.message || ''}`);
+          },
+        }
+      );
+    },
+    [createExpenseMutation, groupId, showError, showSuccess, t]
+  );
+
+  const handleAddMemberSubmit = useCallback(
+    (payload: { userId: number; message?: string; expiresAt?: string }) => {
+      sendInvitationMutation.mutate(
+        {
+          groupId,
+          payload: {
+            inviteeId: payload.userId,
+            message: payload.message,
+            expiresAt: payload.expiresAt,
+          },
+        },
+        {
+          onSuccess: () => {
+            setOpenMemberModal(false);
+            showSuccess(t('groupDetail.sendInviteSuccess'));
+          },
+          onError: (err: Error) => {
+            showError(`${t('groupDetail.sendInviteFailed')}: ${err.message || ''}`);
+          },
+        }
+      );
+    },
+    [groupId, sendInvitationMutation, showError, showSuccess, t]
+  );
+
+  const handleOpenSettleModal = useCallback((debtId: number, amount: number) => {
+    setSelectedDebtId(debtId);
+    setSelectedDebtAmount(amount);
+    setOpenSettleModal(true);
+  }, []);
+
+  const handleOpenExpenseDetail = useCallback((expenseId: number) => {
+    setSelectedExpenseId(expenseId);
+    setOpenDetailModal(true);
+  }, []);
+
+  const handleDeleteExpense = useCallback(
+    (expenseId: number) => {
+      deleteExpenseMutation.mutate(
+        { groupId, expenseId },
+        {
+          onSuccess: () => {
+            showSuccess(t('groupDetail.deleteExpenseSuccess'));
+          },
+          onError: (err: Error) => {
+            showError(`${t('groupDetail.deleteExpenseFailed')}: ${err.message || ''}`);
+          },
+        }
+      );
+    },
+    [deleteExpenseMutation, groupId, showError, showSuccess, t]
+  );
+
+  const handleRemoveMember = useCallback(
+    (memberId: number) => {
+      removeMemberMutation.mutate(
+        { groupId, memberId },
+        {
+          onSuccess: () => {
+            showSuccess(t('groupDetail.removeMemberSuccess'));
+          },
+          onError: (err: Error) => {
+            showError(`${t('groupDetail.removeMemberFailed')}: ${err.message || ''}`);
+          },
+        }
+      );
+    },
+    [groupId, removeMemberMutation, showError, showSuccess, t]
+  );
+
+  const handleSettleSubmit = useCallback(
+    (payload: CreateSettlementPayload) => {
+      createSettlementMutation.mutate(
+        { groupId, payload },
+        {
+          onSuccess: () => {
+            setOpenSettleModal(false);
+            setSelectedDebtId(null);
+            showSuccess(t('groupDetail.recordSettlementSuccess'));
+          },
+          onError: (err: Error) => {
+            showError(`${t('groupDetail.recordSettlementFailed')}: ${err.message || ''}`);
+          },
+        }
+      );
+    },
+    [createSettlementMutation, groupId, showError, showSuccess, t]
+  );
+
+  const handleBackToList = useCallback(() => {
+    navigate(PATHS.GROUPS.LIST);
+  }, [navigate]);
 
   if (isGroupPending) {
     return (
@@ -107,118 +229,18 @@ export default function GroupDetailPage() {
         <Alert intent="error" title={t('groupDetail.groupNotFound')}>
           {groupError?.message || t('groupDetail.groupNotFoundSub')}
         </Alert>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(PATHS.GROUPS)} sx={{ mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} onClick={handleBackToList} sx={{ mt: 2 }}>
           {t('groupDetail.backToList')}
         </Button>
       </Box>
     );
   }
 
-  const handleCreateExpenseSubmit = (payload: CreateExpensePayload) => {
-    createExpenseMutation.mutate(
-      { groupId, payload },
-      {
-        onSuccess: () => {
-          setOpenExpenseModal(false);
-          showSuccess(t('groupDetail.createExpenseSuccess'));
-        },
-        onError: (err: Error) => {
-          showError(`${t('groupDetail.createExpenseFailed')}: ${err.message || ''}`);
-        },
-      }
-    );
-  };
-
-  const handleAddMemberSubmit = (payload: { userId: number; message?: string; expiresAt?: string }) => {
-    sendInvitationMutation.mutate(
-      {
-        groupId,
-        payload: {
-          inviteeId: payload.userId,
-          message: payload.message,
-          expiresAt: payload.expiresAt,
-        },
-      },
-      {
-        onSuccess: () => {
-          setOpenMemberModal(false);
-          showSuccess(t('groupDetail.sendInviteSuccess'));
-        },
-        onError: (err: Error) => {
-          showError(`${t('groupDetail.sendInviteFailed')}: ${err.message || ''}`);
-        },
-      }
-    );
-  };
-
-  const handleOpenSettleModal = (debtId: number, amount: number) => {
-    setSelectedDebtId(debtId);
-    setSelectedDebtAmount(amount);
-    setOpenSettleModal(true);
-  };
-
-  const handleOpenExpenseDetail = (expenseId: number) => {
-    setSelectedExpenseId(expenseId);
-    setOpenDetailModal(true);
-  };
-
-  const handleDeleteExpense = (expenseId: number) => {
-    deleteExpenseMutation.mutate(
-      { groupId, expenseId },
-      {
-        onSuccess: () => {
-          showSuccess(t('groupDetail.deleteExpenseSuccess'));
-        },
-        onError: (err: Error) => {
-          showError(`${t('groupDetail.deleteExpenseFailed')}: ${err.message || ''}`);
-        },
-      }
-    );
-  };
-
-  const handleRemoveMember = (memberId: number) => {
-    removeMemberMutation.mutate(
-      { groupId, memberId },
-      {
-        onSuccess: () => {
-          showSuccess(t('groupDetail.removeMemberSuccess'));
-        },
-        onError: (err: Error) => {
-          showError(`${t('groupDetail.removeMemberFailed')}: ${err.message || ''}`);
-        },
-      }
-    );
-  };
-
-  const handleSettleSubmit = (payload: CreateSettlementPayload) => {
-    createSettlementMutation.mutate(
-      { groupId, payload },
-      {
-        onSuccess: () => {
-          setOpenSettleModal(false);
-          setSelectedDebtId(null);
-          showSuccess(t('groupDetail.recordSettlementSuccess'));
-        },
-        onError: (err: Error) => {
-          showError(`${t('groupDetail.recordSettlementFailed')}: ${err.message || ''}`);
-        },
-      }
-    );
-  };
-
-  const expensesList = expensesData?.content || [];
-  const settlementsList = settlementsData?.content || [];
-
-  const currentUserMember = members.find(
-    (m) => m.user?.id === user?.id || m.userId === user?.id
-  );
-  const isOwner = currentUserMember?.role === 'OWNER';
-
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header Bar */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(PATHS.GROUPS)} color="inherit">
+        <Button startIcon={<ArrowBackIcon />} onClick={handleBackToList} color="inherit">
           {t('groupDetail.backToList')}
         </Button>
       </Box>
@@ -310,6 +332,7 @@ export default function GroupDetailPage() {
           <MembersTabContent
             members={members}
             onOpenAddMemberModal={() => setOpenMemberModal(true)}
+            onOpenShareLinkModal={() => setOpenShareLinkModal(true)}
             onRemoveMember={handleRemoveMember}
             isOwner={isOwner}
           />
@@ -357,6 +380,13 @@ export default function GroupDetailPage() {
         }}
         groupId={groupId}
         expenseId={selectedExpenseId}
+      />
+
+      <GroupShareLinkModal
+        open={openShareLinkModal}
+        onClose={() => setOpenShareLinkModal(false)}
+        groupId={groupId}
+        isOwner={isOwner}
       />
     </Box>
   );

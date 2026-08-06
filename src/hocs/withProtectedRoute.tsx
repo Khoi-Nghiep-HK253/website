@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { PATHS } from '@/constants';
 import { PageLoader } from '@/components/PageLoader';
 

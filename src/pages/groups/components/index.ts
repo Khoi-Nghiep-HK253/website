@@ -8,3 +8,4 @@ export * from './DebtsTabContent';
 export * from './MembersTabContent';
 export * from './SettlementsTabContent';
 export * from './ExpenseDetailModal';
+export * from './GroupShareLinkModal';

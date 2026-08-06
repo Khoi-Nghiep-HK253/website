@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useInvitationByToken, useAcceptInvitationByTokenMutation } from '@/hooks/query/useInvitationQuery';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { useToast } from '@/hooks/common/useToast';
 import { PATHS } from '@/constants/routes';
 
@@ -40,27 +40,38 @@ export const AcceptInvitationPage: React.FC = () => {
   const { data: invitation, isLoading, isError, error } = useInvitationByToken(token);
   const acceptMutation = useAcceptInvitationByTokenMutation();
 
-  const handleAccept = () => {
+  const handleAccept = useCallback(() => {
     if (!token) return;
     acceptMutation.mutate(token, {
       onSuccess: (res) => {
         showSuccess(t('invitation.acceptSuccess'));
         const groupId = res.invitation?.group?.id || invitation?.group?.id;
         if (groupId) {
-          navigate(`/groups/${groupId}`, { replace: true });
+          navigate(PATHS.GROUPS.DETAIL(groupId), { replace: true });
         } else {
-          navigate(PATHS.GROUPS, { replace: true });
+          navigate(PATHS.GROUPS.LIST, { replace: true });
         }
       },
       onError: (err: Error) => {
         showError(err.message || t('invitation.acceptError'));
       },
     });
-  };
+  }, [token, acceptMutation, showSuccess, t, invitation?.group?.id, navigate, showError]);
 
-  const inviterName = invitation?.inviter
-    ? `${invitation.inviter.firstname || ''} ${invitation.inviter.lastname || ''}`.trim() || invitation.inviter.username
-    : 'User';
+  const handleLoginRedirect = useCallback(() => {
+    const returnUrl = encodeURIComponent(`${location.pathname}${location.search}`);
+    navigate(`${PATHS.LOGIN}?returnUrl=${returnUrl}`);
+  }, [location.pathname, location.search, navigate]);
+
+  const handleBackHome = useCallback(() => {
+    navigate(PATHS.HOME);
+  }, [navigate]);
+
+  const inviterName = useMemo(() => {
+    if (!invitation?.inviter) return 'User';
+    const fullname = `${invitation.inviter.firstname || ''} ${invitation.inviter.lastname || ''}`.trim();
+    return fullname || invitation.inviter.username;
+  }, [invitation?.inviter]);
 
   return (
     <Container maxWidth="sm" sx={{ py: 6 }}>
@@ -88,186 +99,124 @@ export const AcceptInvitationPage: React.FC = () => {
         </Avatar>
 
         <Typography variant="h5" color="text.primary" gutterBottom sx={{ fontWeight: 'bold' }}>
-          {t('invitation.acceptTitle')}
+          {t('invitation.acceptHeader')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          {t('invitation.appSubtitle')}
+          {t('invitation.acceptSub')}
         </Typography>
 
+        {/* Loading state */}
         {isLoading && (
-          <Box sx={{ py: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-            <CircularProgress color="primary" />
-            <Typography variant="body2" color="text.secondary">
-              {t('invitation.verifyingLoading')}
+          <Box sx={{ py: 4 }}>
+            <CircularProgress />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              {t('invitation.loadingInfo')}
             </Typography>
           </Box>
         )}
 
-        {(!token || isError) && !isLoading && (
-          <Box sx={{ py: 2 }}>
-            <Alert severity="error" sx={{ mb: 3, textAlign: 'left' }}>
-              {error?.message || t('invitation.tokenInvalid')}
+        {/* Error state */}
+        {isError && (
+          <Box sx={{ mb: 3 }}>
+            <Alert severity="error" sx={{ borderRadius: 2, textAlign: 'left' }}>
+              {error?.message || t('invitation.fetchError')}
             </Alert>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(PATHS.HOME)}
-            >
-              {t('invitation.goHome')}
+            <Button variant="outlined" color="primary" startIcon={<ArrowBackIcon />} onClick={handleBackHome} sx={{ mt: 2 }}>
+              {t('common.backToHome')}
             </Button>
           </Box>
         )}
 
-        {invitation && !isLoading && (
+        {/* Invitation detail content */}
+        {!isLoading && !isError && invitation && (
           <Box>
             <Paper
               variant="outlined"
               sx={{
-                p: 3,
+                p: 2.5,
                 mb: 3,
                 borderRadius: 2,
-                bgcolor: '#ffffff',
+                bgcolor: '#f1f5f9',
                 textAlign: 'left',
               }}
             >
-              <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: '#e0e7ff', color: '#4f46e5' }}>
+              <Stack direction="row" spacing={1.5} sx={{ mb: 1.5, alignItems: 'center' }}>
+                <Avatar sx={{ bgcolor: '#3b82f6', width: 40, height: 40 }}>
                   <GroupIcon />
                 </Avatar>
+
                 <Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-                    {t('invitation.groupName')}
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }} color="text.primary">
+                    {invitation.group?.name || t('common.user')}
                   </Typography>
-                  <Typography variant="h6" color="#1e1b4b" sx={{ fontWeight: 'bold' }}>
-                    {invitation.group?.name || 'Group'}
+                  <Typography variant="caption" color="text.secondary">
+                    {t('invitation.invitedBy')}: <strong>{inviterName}</strong>
                   </Typography>
                 </Box>
               </Stack>
 
-              <Divider sx={{ my: 1.5 }} />
-
-              <Typography variant="body2" color="text.secondary">
-                {t('invitation.inviterName')}: <strong>{inviterName}</strong>
-              </Typography>
-
               {invitation.message && (
-                <Box
-                  sx={{
-                    mt: 2,
-                    p: 2,
-                    borderRadius: 1.5,
-                    bgcolor: '#f9fafb',
-                    borderLeft: '4px solid #4f46e5',
-                    fontStyle: 'italic',
-                    color: '#374151',
-                  }}
-                >
-                  "{invitation.message}"
-                </Box>
+                <>
+                  <Divider sx={{ my: 1.5 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    "{invitation.message}"
+                  </Typography>
+                </>
               )}
 
-              {invitation.status && invitation.status !== 'PENDING' && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} gutterBottom>
-                    {t('invitation.statusLabel')}
-                  </Typography>
-                  {invitation.status === 'ACCEPTED' && (
-                    <Chip label={t('invitation.accepted')} color="success" icon={<CheckCircleIcon />} />
-                  )}
-                  {invitation.status === 'EXPIRED' && (
-                    <Chip label={t('invitation.expired')} color="error" />
-                  )}
-                  {invitation.status === 'DECLINED' && (
-                    <Chip label={t('invitation.declined')} color="default" />
-                  )}
-                  {invitation.status === 'REVOKED' && (
-                    <Chip label={t('invitation.revoked')} color="warning" />
-                  )}
-                </Box>
-              )}
+              <Box sx={{ mt: 1.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Chip
+                  label={`Trạng thái: ${invitation.status}`}
+                  color={invitation.status === 'PENDING' ? 'warning' : 'default'}
+                  size="small"
+                  sx={{ fontWeight: 600 }}
+                />
+              </Box>
             </Paper>
 
-            {/* Actions depending on status & auth */}
-            {invitation.status === 'ACCEPTED' && (
+            {/* If not logged in, prompt user to log in first */}
+            {!isAuthenticated ? (
+              <Box>
+                <Alert severity="info" sx={{ mb: 2, textAlign: 'left', borderRadius: 2 }}>
+                  {t('invitation.loginPromptInfo')}
+                </Alert>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  size="large"
+                  startIcon={<LoginIcon />}
+                  onClick={handleLoginRedirect}
+                  sx={{ py: 1.3, borderRadius: 2.5, fontWeight: 700 }}
+                >
+                  {t('invitation.loginToAcceptBtn')}
+                </Button>
+              </Box>
+            ) : (
+              /* Logged in: Accept button */
               <Button
                 variant="contained"
-                size="large"
+                color="primary"
                 fullWidth
-                onClick={() => navigate(`/groups/${invitation.group.id}`)}
-                sx={{
-                  bgcolor: '#4f46e5',
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  '&:hover': { bgcolor: '#4338ca' },
-                }}
-              >
-                {t('invitation.enterGroupDetail')}
-              </Button>
-            )}
-
-            {invitation.status !== 'PENDING' && invitation.status !== 'ACCEPTED' && (
-              <Button
-                variant="outlined"
                 size="large"
-                fullWidth
-                onClick={() => navigate(PATHS.GROUPS)}
-                sx={{ py: 1.5 }}
+                disabled={acceptMutation.isPending || invitation.status !== 'PENDING'}
+                startIcon={
+                  acceptMutation.isPending ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <CheckCircleIcon />
+                  )
+                }
+                onClick={handleAccept}
+                sx={{ py: 1.3, borderRadius: 2.5, fontWeight: 700 }}
               >
-                {t('invitation.backToGroups')}
+                {acceptMutation.isPending
+                  ? t('invitation.acceptingBtn')
+                  : invitation.status === 'PENDING'
+                  ? t('invitation.acceptSubmitBtn')
+                  : `${t('invitation.statusLabel')}: ${invitation.status}`}
               </Button>
-            )}
-
-            {invitation.status === 'PENDING' && (
-              <Box>
-                {!isAuthenticated ? (
-                  <Box>
-                    <Alert severity="info" sx={{ mb: 2, textAlign: 'left' }}>
-                      {t('invitation.loginAlertMsg')}
-                    </Alert>
-                    <Button
-                      variant="contained"
-                      size="large"
-                      fullWidth
-                      startIcon={<LoginIcon />}
-                      onClick={() => navigate(PATHS.LOGIN, { state: { from: location } })}
-                      sx={{
-                        bgcolor: '#4f46e5',
-                        py: 1.5,
-                        fontWeight: 'bold',
-                        '&:hover': { bgcolor: '#4338ca' },
-                      }}
-                    >
-                      {t('invitation.loginToAcceptBtn')}
-                    </Button>
-                  </Box>
-                ) : (
-                  <Stack spacing={2}>
-                    <Button
-                      variant="contained"
-                      size="large"
-                      fullWidth
-                      disabled={acceptMutation.isPending}
-                      onClick={handleAccept}
-                      sx={{
-                        bgcolor: '#4f46e5',
-                        py: 1.5,
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                        '&:hover': { bgcolor: '#4338ca' },
-                      }}
-                    >
-                      {acceptMutation.isPending ? t('invitation.processing') : t('invitation.acceptBtn')}
-                    </Button>
-                    <Button
-                      variant="text"
-                      color="inherit"
-                      onClick={() => navigate(PATHS.GROUPS)}
-                    >
-                      {t('invitation.declineBtn')}
-                    </Button>
-                  </Stack>
-                )}
-              </Box>
             )}
           </Box>
         )}

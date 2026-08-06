@@ -317,5 +317,41 @@
     "payerMismatch": "Tổng tiền người ứng ({{payerTotal}}) chưa khớp với tổng chi phí ({{totalAmount}}). Vui lòng điều chỉnh.",
     "invalidShares": "Chia tiền chưa hợp lệ",
     "shareRequired": "Phải có ít nhất 1 người tham gia chia tiền."
+  },
+  "shareLink": {
+    "title": "Link Chia Sẻ Nhóm & Mã QR",
+    "createBtn": "Tạo Link Chia Sẻ",
+    "expireLabel": "Thời hạn liên kết",
+    "expireNever": "Không hết hạn",
+    "expire24h": "24 giờ",
+    "expire7d": "7 ngày",
+    "expire30d": "30 ngày",
+    "maxUsesLabel": "Giới hạn số lượt tham gia",
+    "maxUsesUnlimited": "Không giới hạn",
+    "maxUses10": "Tối đa 10 lượt",
+    "maxUses50": "Tối đa 50 lượt",
+    "generateBtn": "Tạo Link/QR Mới",
+    "activeLinksTitle": "Các Link Chia Sẻ Hiện Có",
+    "copySuccess": "Đã sao chép link tham gia vào bộ nhớ tạm!",
+    "copyBtn": "Sao Chép Link",
+    "qrTitle": "Mã QR Tham Gia Nhóm",
+    "qrInstruction": "Quét mã QR bằng camera hoặc ứng dụng di động để vào nhóm nhanh chóng.",
+    "revokeBtn": "Thu Hồi",
+    "revokeSuccess": "Đã thu hồi link chia sẻ thành công!",
+    "statusActive": "Hoạt động",
+    "statusExpired": "Hết hạn",
+    "statusRevoked": "Đã thu hồi",
+    "usedCount": "Lượt dùng: {{used}} / {{max}}"
+  },
+  "joinGroup": {
+    "previewTitle": "Lời Mời Tham Gia Nhóm Divvy",
+    "invalidTitle": "Liên Kết Không Hợp Lệ Hoặc Đã Hết Hạn",
+    "invalidMsg": "Link mời này không còn khả dụng hoặc đã bị vô hiệu hóa bởi Trưởng nhóm.",
+    "joinBtn": "Xác Nhận Tham Gia Nhóm",
+    "joining": "Đang xử lý...",
+    "loginToJoin": "Đăng Nhập Để Tham Gia Nhóm",
+    "memberCount": "{{count}} thành viên",
+    "createdBy": "Tạo bởi {{name}}",
+    "joinSuccess": "Chúc mừng bạn đã tham gia nhóm thành công!"
   }
 }

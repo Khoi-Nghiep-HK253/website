@@ -11,13 +11,15 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useTranslation } from 'react-i18next';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import type { GroupMemberResponse } from '@/services/groupService';
+import { useTranslation } from 'react-i18next';
+import { Delete } from '@mui/icons-material';
 
 interface MembersTabContentProps {
   members: GroupMemberResponse[];
   onOpenAddMemberModal: () => void;
+  onOpenShareLinkModal?: () => void;
   onRemoveMember: (memberId: number) => void;
   isOwner?: boolean;
 }
@@ -44,6 +46,7 @@ const getMemberDisplayName = (m: GroupMemberResponse): string => {
 export const MembersTabContent: React.FC<MembersTabContentProps> = ({
   members,
   onOpenAddMemberModal,
+  onOpenShareLinkModal,
   onRemoveMember,
   isOwner = false,
 }) => {
@@ -65,22 +68,40 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
           {t('groupDetail.tabMembers')} ({members.length})
         </Typography>
         {isOwner && (
-          <Button
-            size="medium"
-            variant="contained"
-            startIcon={<PersonAddIcon />}
-            onClick={onOpenAddMemberModal}
-            sx={{
-              whiteSpace: 'nowrap',
-              width: { xs: '100%', sm: 'auto' },
-              px: 2.5,
-              py: 0.8,
-              borderRadius: 2.5,
-              fontWeight: 700,
-            }}
-          >
-            {t('groupDetail.inviteMemberBtn')}
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            {onOpenShareLinkModal && (
+              <Button
+                size="medium"
+                variant="outlined"
+                startIcon={<QrCode2Icon />}
+                onClick={onOpenShareLinkModal}
+                sx={{
+                  whiteSpace: 'nowrap',
+                  px: 2,
+                  py: 0.8,
+                  borderRadius: 2.5,
+                  fontWeight: 700,
+                }}
+              >
+                {t('shareLink.createBtn')}
+              </Button>
+            )}
+            <Button
+              size="medium"
+              variant="contained"
+              startIcon={<PersonAddIcon />}
+              onClick={onOpenAddMemberModal}
+              sx={{
+                whiteSpace: 'nowrap',
+                px: 2.5,
+                py: 0.8,
+                borderRadius: 2.5,
+                fontWeight: 700,
+              }}
+            >
+              {t('groupDetail.inviteMemberBtn')}
+            </Button>
+          </Box>
         )}
       </Box>
 
@@ -98,7 +119,7 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
                 secondaryAction={
                   isOwner && m.role !== 'OWNER' && (
                     <IconButton color="error" onClick={() => onRemoveMember(m.id)}>
-                      <DeleteIcon />
+                      <Delete />
                     </IconButton>
                   )
                 }

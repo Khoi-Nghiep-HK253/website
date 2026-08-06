@@ -317,5 +317,41 @@
     "payerMismatch": "Payer total ({{payerTotal}}) does not match expense total ({{totalAmount}}). Please adjust.",
     "invalidShares": "Invalid split details",
     "shareRequired": "At least 1 member must participate in splitting."
+  },
+  "shareLink": {
+    "title": "Group Share Link & QR Code",
+    "createBtn": "Create Share Link",
+    "expireLabel": "Link Expiration",
+    "expireNever": "Never Expire",
+    "expire24h": "24 Hours",
+    "expire7d": "7 Days",
+    "expire30d": "30 Days",
+    "maxUsesLabel": "Max Participants Limit",
+    "maxUsesUnlimited": "Unlimited",
+    "maxUses10": "Max 10 Uses",
+    "maxUses50": "Max 50 Uses",
+    "generateBtn": "Generate Link/QR",
+    "activeLinksTitle": "Active Share Links",
+    "copySuccess": "Copied join link to clipboard!",
+    "copyBtn": "Copy Link",
+    "qrTitle": "Group QR Code",
+    "qrInstruction": "Scan QR Code using phone camera or mobile app to join instantly.",
+    "revokeBtn": "Revoke",
+    "revokeSuccess": "Share link revoked successfully!",
+    "statusActive": "Active",
+    "statusExpired": "Expired",
+    "statusRevoked": "Revoked",
+    "usedCount": "Used: {{used}} / {{max}}"
+  },
+  "joinGroup": {
+    "previewTitle": "Divvy Group Invitation",
+    "invalidTitle": "Invalid or Expired Link",
+    "invalidMsg": "This invite link is no longer available or was revoked by the group Owner.",
+    "joinBtn": "Confirm Join Group",
+    "joining": "Processing...",
+    "loginToJoin": "Sign In to Join Group",
+    "memberCount": "{{count}} members",
+    "createdBy": "Created by {{name}}",
+    "joinSuccess": "Congratulations! You have joined the group successfully!"
   }
 }

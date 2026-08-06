@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
@@ -15,7 +15,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 import EmailIcon from '@mui/icons-material/Email';
 
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { useToast } from '@/hooks/common/useToast';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useUpdateProfileMutation, useChangePasswordMutation } from '@/hooks/query/useUserQuery';
@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useTranslation } from 'react-i18next';
 import { CustomTabPanel } from '@/components';
+import { PATHS } from '@/constants/routes';
 import {
   PersonalInfoTabContent,
   MyGroupsTabContent,
@@ -64,113 +65,128 @@ export default function ProfilePage() {
   const acceptInvitationMutation = useAcceptInvitationMutation();
   const declineInvitationMutation = useDeclineInvitationMutation();
 
-  const groupsList = myGroupsData?.content || [];
+  const groupsList = useMemo(() => myGroupsData?.content || [], [myGroupsData]);
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id) return;
+  const handleUpdateProfile = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!user?.id) return;
 
-    updateProfileMutation.mutate(
-      {
-        id: user.id,
-        payload: {
-          firstname: firstname.trim() || undefined,
-          lastname: lastname.trim() || undefined,
-          phone: phone.trim() || undefined,
+      updateProfileMutation.mutate(
+        {
+          id: user.id,
+          payload: {
+            firstname: firstname.trim() || undefined,
+            lastname: lastname.trim() || undefined,
+            phone: phone.trim() || undefined,
+          },
         },
-      },
-      {
+        {
+          onSuccess: () => {
+            showSuccess(t('profile.profileUpdateSuccess'));
+          },
+          onError: (err) => {
+            showError(`${t('profile.profileUpdateFailed')}: ${err.message || 'Error'}`);
+          },
+        }
+      );
+    },
+    [user, updateProfileMutation, firstname, lastname, phone, showSuccess, t, showError]
+  );
+
+  const handleChangePassword = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!user?.id) return;
+
+      if (!currentPassword) {
+        showError(t('profile.valCurrentPasswordReq'));
+        return;
+      }
+      if (!newPassword || newPassword.length < 6) {
+        showError(t('profile.valNewPasswordMin'));
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showError(t('profile.valConfirmMismatch'));
+        return;
+      }
+
+      changePasswordMutation.mutate(
+        {
+          id: user.id,
+          payload: {
+            currentPassword,
+            newPassword,
+          },
+        },
+        {
+          onSuccess: () => {
+            showSuccess(t('profile.changePasswordSuccess'));
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+          },
+          onError: (err) => {
+            showError(`${t('profile.changePasswordFailed')}: ${err.message}`);
+          },
+        }
+      );
+    },
+    [user, currentPassword, newPassword, confirmPassword, changePasswordMutation, showSuccess, t, showError]
+  );
+
+  const handleAcceptInvite = useCallback(
+    (invitationId: number, groupName: string) => {
+      acceptInvitationMutation.mutate(invitationId, {
         onSuccess: () => {
-          showSuccess(t('profile.profileUpdateSuccess'));
+          showSuccess(`${t('profile.acceptInviteSuccess')} ("${groupName}")`);
         },
         onError: (err) => {
-          showError(`${t('profile.profileUpdateFailed')}: ${err.message || 'Error'}`);
+          showError(`Error: ${err.message}`);
         },
-      }
-    );
-  };
+      });
+    },
+    [acceptInvitationMutation, showSuccess, t, showError]
+  );
 
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id) return;
-
-    if (!currentPassword) {
-      showError(t('profile.valCurrentPasswordReq'));
-      return;
-    }
-    if (!newPassword || newPassword.length < 6) {
-      showError(t('profile.valNewPasswordMin'));
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      showError(t('profile.valConfirmMismatch'));
-      return;
-    }
-
-    changePasswordMutation.mutate(
-      {
-        id: user.id,
-        payload: {
-          currentPassword,
-          newPassword,
-        },
-      },
-      {
+  const handleDeclineInvite = useCallback(
+    (invitationId: number) => {
+      declineInvitationMutation.mutate(invitationId, {
         onSuccess: () => {
-          showSuccess(t('profile.changePasswordSuccess'));
-          setCurrentPassword('');
-          setNewPassword('');
-          setConfirmPassword('');
+          showSuccess(t('profile.declineInviteSuccess'));
         },
         onError: (err) => {
-          showError(`${t('profile.changePasswordFailed')}: ${err.message}`);
+          showError(`Error: ${err.message}`);
         },
+      });
+    },
+    [declineInvitationMutation, showSuccess, t, showError]
+  );
+
+  const handleNavigateToGroup = useCallback(
+    (groupId: number) => {
+      if (groupId > 0) {
+        navigate(PATHS.GROUPS.DETAIL(groupId));
+      } else {
+        navigate(PATHS.GROUPS.LIST);
       }
-    );
-  };
+    },
+    [navigate]
+  );
 
-  const handleAcceptInvite = (invitationId: number, groupName: string) => {
-    acceptInvitationMutation.mutate(invitationId, {
-      onSuccess: () => {
-        showSuccess(`${t('profile.acceptInviteSuccess')} ("${groupName}")`);
-      },
-      onError: (err) => {
-        showError(`Error: ${err.message}`);
-      },
-    });
-  };
-
-  const handleDeclineInvite = (invitationId: number) => {
-    declineInvitationMutation.mutate(invitationId, {
-      onSuccess: () => {
-        showSuccess(t('profile.declineInviteSuccess'));
-      },
-      onError: (err) => {
-        showError(`Error: ${err.message}`);
-      },
-    });
-  };
-
-  const handleNavigateToGroup = (groupId: number) => {
-    if (groupId > 0) {
-      navigate(`/groups/${groupId}`);
-    } else {
-      navigate('/groups');
-    }
-  };
-
-  const getUserInitial = (): string => {
+  const userInitial = useMemo(() => {
     if (user?.username) return user.username.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return 'U';
-  };
+  }, [user]);
 
-  const getDisplayName = (): string => {
+  const displayName = useMemo(() => {
     if (firstname || lastname) {
       return `${lastname} ${firstname}`.trim();
     }
     return user?.username || 'Member';
-  };
+  }, [firstname, lastname, user]);
 
   return (
     <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -178,66 +194,57 @@ export default function ProfilePage() {
       <Card
         sx={{
           p: { xs: 2.5, md: 3.5 },
-          borderRadius: 5,
-          boxShadow: '0 8px 24px -8px rgba(16, 185, 129, 0.15)',
-          background: (theme) =>
-            theme.palette.mode === 'dark'
-              ? 'rgba(16, 185, 129, 0.08)'
-              : 'rgba(16, 185, 129, 0.06)',
-          border: 'none',
+          borderRadius: 4,
+          boxShadow: 3,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'center', sm: 'flex-start' },
+          gap: 3,
+          background: 'linear-gradient(135deg, rgba(79,70,229,0.05) 0%, rgba(99,102,241,0.12) 100%)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, md: 2.5 }, justifyContent: 'space-between', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-          {/* Left: Avatar */}
-          <Avatar
-            sx={{
-              width: 70,
-              height: 70,
-              bgcolor: 'primary.main',
-              fontSize: '2rem',
-              fontWeight: 'bold',
-              boxShadow: '0 4px 12px -4px rgba(16, 185, 129, 0.3)',
-              flexShrink: 0,
-            }}
-          >
-            {getUserInitial()}
-          </Avatar>
+        <Avatar
+          sx={{
+            width: { xs: 72, md: 88 },
+            height: { xs: 72, md: 88 },
+            bgcolor: 'primary.main',
+            fontSize: { xs: '2rem', md: '2.5rem' },
+            fontWeight: 'bold',
+            boxShadow: '0 8px 24px rgba(79,70,229,0.3)',
+          }}
+        >
+          {userInitial}
+        </Avatar>
 
-          {/* Center: User Info */}
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mb: 0.75 }}>
-              <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                {getDisplayName()}
-              </Typography>
+        <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>
+              {displayName}
+            </Typography>
+            {user?.role && (
               <Chip
-                label={user?.role || 'MEMBER'}
+                label={user.role}
                 color="primary"
                 size="small"
-                sx={{ fontWeight: 700, borderRadius: 1.5, height: 24, fontSize: '0.75rem' }}
+                sx={{ fontWeight: 700, borderRadius: 2 }}
               />
-            </Box>
-
-            <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <EmailIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-              <span>{user?.email}</span>
-              {user?.username && <span>• @{user.username}</span>}
-            </Typography>
+            )}
           </Box>
 
-          {/* Right: Stats */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
-            <Typography variant="h6" color="primary" sx={{ fontWeight: 800, lineHeight: 1 }}>
-              {groupsList.length}
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+            <EmailIcon fontSize="small" /> {user?.email}
+          </Typography>
+
+          {user?.username && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+              Username: <strong>@{user.username}</strong>
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
-              {t('profile.joinedGroupsCount')}
-            </Typography>
-          </Box>
+          )}
         </Box>
       </Card>
 
-      {/* ── MAIN PROFILE NAVIGATION TABS ─────────────────────────────────── */}
-      <Paper sx={{ borderRadius: 4, overflow: 'hidden' }}>
+      {/* ── TABS NAVIGATION ─────────────────────────────────────────────── */}
+      <Paper sx={{ borderRadius: 4, overflow: 'hidden', boxShadow: 2 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
           <Tabs
             value={activeTab}
@@ -247,13 +254,13 @@ export default function ProfilePage() {
             scrollButtons="auto"
             allowScrollButtonsMobile
           >
-            <Tab icon={<PersonIcon />} label={t('profile.personalInfoTab')} iconPosition="start" />
-            <Tab icon={<GroupIcon />} label={t('profile.myGroupsTab')} iconPosition="start" />
-            <Tab icon={<MarkEmailUnreadIcon />} label={t('profile.invitationsTab')} iconPosition="start" />
+            <Tab icon={<PersonIcon />} label={t('profile.tabPersonalInfo')} iconPosition="start" />
+            <Tab icon={<GroupIcon />} label={`${t('profile.tabMyGroups')} (${groupsList.length})`} iconPosition="start" />
+            <Tab icon={<MarkEmailUnreadIcon />} label={`${t('profile.tabInvitations')} (${invitations.length})`} iconPosition="start" />
           </Tabs>
         </Box>
 
-        {/* TAB 0: THÔNG TIN CÁ NHÂN & BẢO MẬT */}
+        {/* TAB 1: THÔNG TIN CÁ NHÂN & ĐỔI MẬT KHẨU */}
         <CustomTabPanel value={activeTab} index={0}>
           <PersonalInfoTabContent
             user={user}
@@ -276,15 +283,12 @@ export default function ProfilePage() {
           />
         </CustomTabPanel>
 
-        {/* TAB 1: NHÓM CỦA TÔI */}
+        {/* TAB 2: DANH SÁCH NHÓM CỦA TÔI */}
         <CustomTabPanel value={activeTab} index={1}>
-          <MyGroupsTabContent
-            groupsList={groupsList}
-            onNavigateToGroup={handleNavigateToGroup}
-          />
+          <MyGroupsTabContent groupsList={groupsList} onNavigateToGroup={handleNavigateToGroup} />
         </CustomTabPanel>
 
-        {/* TAB 2: LỜI MỜI VÀO NHÓM */}
+        {/* TAB 3: DANH SÁCH LỜI MỜI THAM GIA NHÓM */}
         <CustomTabPanel value={activeTab} index={2}>
           <InvitationsTabContent
             invitations={invitations}

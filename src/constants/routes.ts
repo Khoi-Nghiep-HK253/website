@@ -3,25 +3,33 @@
  */
 export const PATHS = {
   HOME: '/',
-  GROUPS: '/groups',
-  GROUP_DETAIL: '/groups/:groupId',
-  LOGIN: '/login',
-  REGISTER: '/register',
+
+  // Group routes
+  GROUPS: {
+    LIST: '/groups',
+    DETAIL: (groupId?: number | string) => (groupId ? `/groups/${groupId}` : '/groups/:groupId'),
+  },
+
+  // Auth routes
+  AUTH: {
+    LOGIN: '/login',
+    REGISTER: '/register',
+  },
+
+  // Invitation routes
+  INVITATION: {
+    ACCEPT: '/invitations/accept',
+    JOIN: (inviteCode?: string) => (inviteCode ? `/join/${inviteCode}` : '/join/:inviteCode'),
+  },
+
   PROFILE: '/profile',
   SETTINGS: '/settings',
-  INVITATION_ACCEPT: '/invitations/accept',
   NOT_FOUND: '*',
-} as const;
+
+  // Backward-compatible top-level aliases
+  LOGIN: '/login',
+  REGISTER: '/register',
+  INVITATION_ACCEPT: '/invitations/accept',
+};
 
 export type RoutePath = (typeof PATHS)[keyof typeof PATHS];
-
-export interface NavigationItem {
-  path: string;
-  label: string;
-  isProtected?: boolean;
-}
-
-export const NAV_ITEMS: NavigationItem[] = [
-  { path: PATHS.HOME, label: 'Trang chủ' },
-  { path: PATHS.GROUPS, label: 'Danh sách nhóm', isProtected: true },
-];

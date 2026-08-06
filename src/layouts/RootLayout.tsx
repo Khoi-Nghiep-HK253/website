@@ -33,7 +33,7 @@ import {
 
 import { useTranslation } from 'react-i18next';
 import { PATHS } from '@/router/routes';
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
@@ -129,7 +129,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                 )}
               </NavLink>
 
-              <NavLink to={PATHS.GROUPS} style={{ textDecoration: 'none' }}>
+              <NavLink to={PATHS.GROUPS.LIST} style={{ textDecoration: 'none' }}>
                 {({ isActive }) => (
                   <Button
                     startIcon={isActive ? <GroupIcon /> : <GroupOutlinedIcon />}
@@ -330,7 +330,7 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => {
-                navigate(PATHS.GROUPS);
+                navigate(PATHS.GROUPS.LIST);
                 setMobileOpen(false);
               }}
             >

@@ -6,3 +6,4 @@ export * from './useDebtQuery';
 export * from './useSettlementQuery';
 export * from './useMasterQuery';
 export * from './useInvitationQuery';
+export * from './useGroupShareLinkQuery';

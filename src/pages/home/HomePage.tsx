@@ -23,7 +23,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PATHS } from '@/router/routes';
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { DebtSimulator } from '@/components/DivvySimulator/DebtSimulator';
 
@@ -88,7 +88,7 @@ export default function HomePage() {
             size="large"
             color="primary"
             endIcon={<ArrowForwardIcon />}
-            onClick={() => navigate(PATHS.GROUPS)}
+            onClick={() => navigate(PATHS.GROUPS.LIST)}
             sx={{ px: 4, py: 1.5, borderRadius: 3, fontSize: '1.05rem', fontWeight: 700 }}
           >
             {isAuthenticated ? t('home.enterGroups') : t('home.exploreGroups')}
@@ -302,7 +302,7 @@ export default function HomePage() {
         <Button
           variant="contained"
           size="large"
-          onClick={() => navigate(PATHS.GROUPS)}
+          onClick={() => navigate(PATHS.GROUPS.LIST)}
           sx={{ bgcolor: '#ffffff', color: 'primary.main', fontWeight: 800, px: 4, py: 1.5, borderRadius: 3, '&:hover': { bgcolor: '#f0fdf4' } }}
         >
           {t('home.ctaBtn')}

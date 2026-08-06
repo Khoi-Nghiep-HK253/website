@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -13,7 +13,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/common/useAuth';
+import { useAuth } from '@/hooks/common';
 import { useToast } from '@/hooks/common/useToast';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { PATHS } from '@/router/routes';
@@ -22,6 +22,7 @@ import { Alert } from '@/components';
 export default function LoginPage() {
   const { t } = useTranslation();
   useDocumentTitle(t('nav.login'));
+
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -31,34 +32,43 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || PATHS.GROUPS;
+  const from = useMemo(() => {
+    return (location.state as { from?: { pathname: string } })?.from?.pathname || PATHS.GROUPS.LIST;
+  }, [location.state]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setErrorMsg(null);
 
-    if (!usernameOrEmail.trim()) {
-      setErrorMsg(t('auth.valUsernameOrEmailRequired'));
-      return;
-    }
-    if (!password) {
-      setErrorMsg(t('auth.valPasswordRequired'));
-      return;
-    }
-
-    login(
-      { usernameOrEmail, password },
-      () => {
-        showSuccess(t('auth.loginSuccess'));
-        navigate(from, { replace: true });
-      },
-      (err) => {
-        const msg = err.message || t('auth.loginFailed');
-        setErrorMsg(msg);
-        showError(msg);
+      if (!usernameOrEmail.trim()) {
+        setErrorMsg(t('auth.valUsernameOrEmailRequired'));
+        return;
       }
-    );
-  };
+      if (!password) {
+        setErrorMsg(t('auth.valPasswordRequired'));
+        return;
+      }
+
+      login(
+        { usernameOrEmail, password },
+        () => {
+          showSuccess(t('auth.loginSuccess'));
+          navigate(from, { replace: true });
+        },
+        (err) => {
+          const msg = err.message || t('auth.loginFailed');
+          setErrorMsg(msg);
+          showError(msg);
+        }
+      );
+    },
+    [usernameOrEmail, password, login, showSuccess, t, navigate, from, showError]
+  );
+
+  const handleGoToGroups = useCallback(() => {
+    navigate(PATHS.GROUPS.LIST);
+  }, [navigate]);
 
   if (isAuthenticated) {
     return (
@@ -72,7 +82,7 @@ export default function LoginPage() {
         <Button
           variant="contained"
           endIcon={<ArrowForwardIcon />}
-          onClick={() => navigate(PATHS.GROUPS)}
+          onClick={handleGoToGroups}
           sx={{ borderRadius: 3, fontWeight: 700 }}
         >
           {t('auth.goToGroupsBtn')}
@@ -98,49 +108,52 @@ export default function LoginPage() {
 
       {(errorMsg || loginError) && (
         <Box sx={{ mb: 2 }}>
-          <Alert intent="error">{errorMsg || loginError?.message}</Alert>
+          <Alert intent="error" title={t('auth.errorAlertTitle')}>
+            {errorMsg || loginError?.message || t('auth.loginFailed')}
+          </Alert>
         </Box>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+      <Box component="form" onSubmit={handleSubmit} noValidate>
         <TextField
-          id="username-or-email-input"
-          label={t('auth.usernameOrEmail')}
-          type="text"
-          variant="outlined"
-          fullWidth
+          margin="normal"
           required
+          fullWidth
+          id="usernameOrEmail"
+          label={t('auth.usernameOrEmailLabel')}
+          name="usernameOrEmail"
+          autoComplete="username"
+          autoFocus
           value={usernameOrEmail}
           onChange={(e) => setUsernameOrEmail(e.target.value)}
-          placeholder={t('auth.usernameOrEmailPlaceholder')}
           disabled={isLoggingIn}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonIcon color="primary" />
+                  <PersonIcon color="action" />
                 </InputAdornment>
               ),
             },
           }}
         />
-
         <TextField
-          id="password-input"
-          label={t('auth.password')}
-          type="password"
-          variant="outlined"
-          fullWidth
+          margin="normal"
           required
+          fullWidth
+          name="password"
+          label={t('auth.passwordLabel')}
+          type="password"
+          id="password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={t('auth.passwordPlaceholder')}
           disabled={isLoggingIn}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockOutlinedIcon color="primary" />
+                  <LockOutlinedIcon color="action" />
                 </InputAdornment>
               ),
             },
@@ -149,27 +162,27 @@ export default function LoginPage() {
 
         <Button
           type="submit"
+          fullWidth
           variant="contained"
           size="large"
-          endIcon={isLoggingIn ? <CircularProgress size={20} color="inherit" /> : <ArrowForwardIcon />}
           disabled={isLoggingIn}
-          sx={{ mt: 1, borderRadius: 3, fontWeight: 700 }}
+          sx={{ mt: 3, mb: 2, py: 1.2, borderRadius: 3, fontWeight: 700 }}
         >
-          {isLoggingIn ? t('auth.loggingIn') : t('auth.loginBtn')}
+          {isLoggingIn ? <CircularProgress size={24} color="inherit" /> : t('auth.loginSubmit')}
         </Button>
-      </Box>
 
-      <Box sx={{ mt: 3, textAlign: 'center', fontSize: '0.875rem', color: 'text.secondary' }}>
-        {t('auth.noAccount')}{' '}
-        <Typography
-          component="span"
-          variant="body2"
-          color="primary"
-          sx={{ fontWeight: 'bold', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-          onClick={() => navigate(PATHS.REGISTER)}
-        >
-          {t('auth.registerBtn')}
-        </Typography>
+        <Box sx={{ textAling: 'center', mt: 1 }}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            {t('auth.noAccountPrompt')}{' '}
+            <Button
+              color="primary"
+              onClick={() => navigate(PATHS.AUTH.REGISTER)}
+              sx={{ fontWeight: 'bold', p: 0, minWidth: 'auto', textTransform: 'none' }}
+            >
+              {t('auth.registerNowLink')}
+            </Button>
+          </Typography>
+        </Box>
       </Box>
     </Card>
   );
