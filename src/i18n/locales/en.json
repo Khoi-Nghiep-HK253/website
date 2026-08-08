@@ -119,7 +119,12 @@
     "subTitle": "Create groups, invite friends, and manage shared expenses transparently with Divvy",
     "createGroup": "Create New Group",
     "createFirstGroup": "Create First Group",
-    "searchPlaceholder": "Search by group name or note...",
+    "searchPlaceholder": "Search by group name, note, creator...",
+    "filterCategory": "Category",
+    "filterCreator": "Creator",
+    "allCategories": "All categories",
+    "allCreators": "All creators",
+    "clearFilters": "Clear filters",
     "emptyTitle": "No expense groups yet",
     "emptySub": "Create a new group to start tracking shared dining, trips, and living expenses with friends!",
     "createdBy": "Created by",
@@ -142,7 +147,11 @@
       "debts": "Balances",
       "members": "Members",
       "settlements": "Settlements"
-    }
+    },
+    "noGroupFound": "No matching group found.",
+    "tryAnotherSearch": "Please try searching with a different keyword or adjust the filters.",
+    "createBtn": "New Group",
+    "noSettlements": "No settlements recorded in this group yet."
   },
   "invitation": {
     "acceptTitle": "Group Invitation",
@@ -181,6 +190,9 @@
     "personalInfo": "Personal Info",
     "myGroups": "My Groups",
     "invitations": "Received Invitations",
+    "tabPersonalInfo": "Personal Info",
+    "tabMyGroups": "My Groups",
+    "tabInvitations": "Invitations",
     "updateProfile": "Update Profile",
     "changePassword": "Change Password",
     "personalInfoTab": "Personal Info & Security",
@@ -344,6 +356,8 @@
     "usedCount": "Used: {{used}} / {{max}}"
   },
   "joinGroup": {
+    "documentTitleWithGroup": "Join {{groupName}} – Divvy",
+    "documentTitleFallback": "Divvy – Join Group",
     "previewTitle": "Divvy Group Invitation",
     "invalidTitle": "Invalid or Expired Link",
     "invalidMsg": "This invite link is no longer available or was revoked by the group Owner.",
@@ -352,6 +366,19 @@
     "loginToJoin": "Sign In to Join Group",
     "memberCount": "{{count}} members",
     "createdBy": "Created by {{name}}",
-    "joinSuccess": "Congratulations! You have joined the group successfully!"
+    "joinSuccess": "Congratulations! You have joined the group successfully."
+  },
+  "recordSettlementModal": {
+    "title": "Record Debt Settlement",
+    "amountLabel": "Settlement Amount",
+    "methodLabel": "Payment Method",
+    "cash": "Cash (CASH)",
+    "bankTransfer": "Bank Transfer (BANK_TRANSFER)",
+    "noteLabel": "Payment Note",
+    "notePlaceholder": "Enter note (e.g. Bank transfer via VCB)...",
+    "invalidAmount": "Invalid settlement amount.",
+    "cancel": "Cancel",
+    "submit": "Confirm Settlement",
+    "submitting": "Processing..."
   }
 }

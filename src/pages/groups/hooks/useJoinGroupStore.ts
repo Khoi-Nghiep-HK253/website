@@ -20,7 +20,11 @@ export function useJoinGroupStore() {
   const { data: preview, isPending: loading } = useGroupPreview(inviteCode);
   const joinGroupMutation = useJoinGroupViaLinkMutation();
 
-  useDocumentTitle(preview?.groupName ? `Tham gia ${preview.groupName}` : 'Divvy – Join Group');
+  useDocumentTitle(
+    preview?.groupName
+      ? t('joinGroup.documentTitleWithGroup', { groupName: preview.groupName })
+      : t('joinGroup.documentTitleFallback')
+  );
 
   const handleJoinGroup = useCallback(() => {
     if (!isAuthenticated) {

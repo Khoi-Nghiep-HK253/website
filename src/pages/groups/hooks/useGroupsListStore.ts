@@ -5,7 +5,7 @@ import { useMyGroups, useCreateGroupMutation } from '@/hooks/query/useGroupQuery
 import { useCategories } from '@/hooks/query/useMasterQuery';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useToast } from '@/hooks/common/useToast';
-import { PATHS } from '@/router/routes';
+import { PATHS } from '@/constants/routes';
 
 export function useGroupsListStore() {
   const { t } = useTranslation();
@@ -19,20 +19,66 @@ export function useGroupsListStore() {
 
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'ALL'>('ALL');
+  const [selectedCreatorId, setSelectedCreatorId] = useState<number | 'ALL'>('ALL');
 
   const groupsList = useMemo(() => {
     return myGroupsData?.content || [];
   }, [myGroupsData]);
 
+  // Extract unique creators from groupsList for filter dropdown
+  const uniqueCreators = useMemo(() => {
+    const map = new Map<number, { id: number; username: string }>();
+    groupsList.forEach((g) => {
+      if (g.createdBy?.id && g.createdBy?.username) {
+        map.set(g.createdBy.id, g.createdBy);
+      }
+    });
+    return Array.from(map.values());
+  }, [groupsList]);
+
+  // Multi-facet filtering logic
   const filteredGroups = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return groupsList;
-    return groupsList.filter(
-      (g) =>
+
+    return groupsList.filter((g) => {
+      // 1. Keyword search (Name, Note, Creator username, Category name)
+      const categoryName = g.category?.name || g.categoryName || '';
+      const creatorName = g.createdBy?.username || '';
+      const matchesQuery =
+        !q ||
         g.name.toLowerCase().includes(q) ||
-        (g.note && g.note.toLowerCase().includes(q))
+        (g.note && g.note.toLowerCase().includes(q)) ||
+        creatorName.toLowerCase().includes(q) ||
+        categoryName.toLowerCase().includes(q);
+
+      // 2. Category filter
+      const groupCatId = g.categoryId || g.category?.id;
+      const matchesCategory =
+        selectedCategoryId === 'ALL' || groupCatId === selectedCategoryId;
+
+      // 3. Creator filter
+      const groupCreatorId = g.createdBy?.id;
+      const matchesCreator =
+        selectedCreatorId === 'ALL' || groupCreatorId === selectedCreatorId;
+
+      return matchesQuery && matchesCategory && matchesCreator;
+    });
+  }, [groupsList, searchQuery, selectedCategoryId, selectedCreatorId]);
+
+  const isFiltered = useMemo(() => {
+    return (
+      searchQuery.trim() !== '' ||
+      selectedCategoryId !== 'ALL' ||
+      selectedCreatorId !== 'ALL'
     );
-  }, [groupsList, searchQuery]);
+  }, [searchQuery, selectedCategoryId, selectedCreatorId]);
+
+  const handleClearFilters = useCallback(() => {
+    setSearchQuery('');
+    setSelectedCategoryId('ALL');
+    setSelectedCreatorId('ALL');
+  }, []);
 
   const handleNavigateDetail = useCallback(
     (groupId: number) => {
@@ -76,9 +122,17 @@ export function useGroupsListStore() {
     isPending,
     error,
     categories,
+    uniqueCreators,
+    groupsList,
     filteredGroups,
     searchQuery,
     setSearchQuery,
+    selectedCategoryId,
+    setSelectedCategoryId,
+    selectedCreatorId,
+    setSelectedCreatorId,
+    isFiltered,
+    handleClearFilters,
     openCreateDialog,
     handleNavigateDetail,
     handleCreateGroupSubmit,

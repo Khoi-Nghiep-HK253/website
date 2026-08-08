@@ -14,7 +14,7 @@
     "appTagline": "Sổ quỹ thông minh cho nhóm",
     "footerTagline": "Quản lý chi tiêu chung minh bạch, tự động chia tiền & cấn trừ công nợ © 2026",
     "loading": "Đang tải...",
-    "pageLoding": "Đang tải trang...",
+    "pageLoading": "Đang tải trang...",
     "checkingSession": "Đang kiểm tra phiên đăng nhập...",
     "user": "Người dùng",
     "save": "Lưu",
@@ -119,7 +119,12 @@
     "subTitle": "Tạo nhóm, mời bạn bè và quản lý khoản chi chung minh bạch cùng Divvy",
     "createGroup": "Tạo Nhóm Mới",
     "createFirstGroup": "Tạo Nhóm Đầu Tiên",
-    "searchPlaceholder": "Tìm kiếm theo tên nhóm hoặc ghi chú...",
+    "searchPlaceholder": "Tìm theo tên nhóm, ghi chú, người tạo...",
+    "filterCategory": "Danh mục",
+    "filterCreator": "Người tạo",
+    "allCategories": "Tất cả danh mục",
+    "allCreators": "Tất cả người tạo",
+    "clearFilters": "Xóa bộ lọc",
     "emptyTitle": "Chưa có nhóm chi tiêu nào",
     "emptySub": "Tạo nhóm mới để bắt đầu ghi nhận các khoản ăn uống, du lịch, sinh hoạt chung cùng bạn bè!",
     "createdBy": "Tạo bởi",
@@ -142,7 +147,11 @@
       "debts": "Công nợ",
       "members": "Thành viên",
       "settlements": "Thanh toán"
-    }
+    },
+    "noGroupFound": "Không tìm thấy nhóm phù hợp.",
+    "tryAnotherSearch": "Vui lòng thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc.",
+    "createBtn": "Tạo nhóm",
+    "noSettlements": "Chưa có giao dịch thanh toán nợ nào được ghi nhận."
   },
   "invitation": {
     "acceptTitle": "Lời mời tham gia nhóm",
@@ -181,6 +190,9 @@
     "personalInfo": "Thông tin cá nhân",
     "myGroups": "Nhóm của tôi",
     "invitations": "Lời mời nhận được",
+    "tabPersonalInfo": "Thông tin cá nhân",
+    "tabMyGroups": "Nhóm của tôi",
+    "tabInvitations": "Hộp thư",
     "updateProfile": "Cập nhật thông tin",
     "changePassword": "Đổi mật khẩu",
     "personalInfoTab": "Thông Tin Cá Nhân & Bảo Mật",
@@ -344,6 +356,8 @@
     "usedCount": "Lượt dùng: {{used}} / {{max}}"
   },
   "joinGroup": {
+    "documentTitleWithGroup": "Tham gia {{groupName}} – Divvy",
+    "documentTitleFallback": "Divvy – Tham gia nhóm",
     "previewTitle": "Lời Mời Tham Gia Nhóm Divvy",
     "invalidTitle": "Liên Kết Không Hợp Lệ Hoặc Đã Hết Hạn",
     "invalidMsg": "Link mời này không còn khả dụng hoặc đã bị vô hiệu hóa bởi Trưởng nhóm.",
@@ -353,5 +367,18 @@
     "memberCount": "{{count}} thành viên",
     "createdBy": "Tạo bởi {{name}}",
     "joinSuccess": "Chúc mừng bạn đã tham gia nhóm thành công!"
+  },
+  "recordSettlementModal": {
+    "title": "Ghi Nhận Trả Nợ / Thanh Toán",
+    "amountLabel": "Số tiền thanh toán",
+    "methodLabel": "Phương thức thanh toán",
+    "cash": "Tiền mặt (CASH)",
+    "bankTransfer": "Chuyển khoản (BANK_TRANSFER)",
+    "noteLabel": "Ghi chú thanh toán",
+    "notePlaceholder": "Nhập ghi chú (VD: Đã chuyển khoản Vietcombank)...",
+    "invalidAmount": "Số tiền thanh toán không hợp lệ.",
+    "cancel": "Hủy",
+    "submit": "Xác Nhận Thanh Toán",
+    "submitting": "Đang xử lý..."
   }
 }

@@ -69,6 +69,13 @@ export default function ProfilePage() {
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.95rem',
+              },
+            }}
           >
             <Tab icon={<PersonIcon />} label={t('profile.tabPersonalInfo')} iconPosition="start" />
             <Tab icon={<GroupIcon />} label={`${t('profile.tabMyGroups')} (${groupsList.length})`} iconPosition="start" />

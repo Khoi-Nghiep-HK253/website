@@ -12,36 +12,13 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
-import type { GroupMemberResponse } from '@/services/groupService';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
-import { Delete } from '@mui/icons-material';
 
-interface MembersTabContentProps {
-  members: GroupMemberResponse[];
-  onOpenAddMemberModal: () => void;
-  onOpenShareLinkModal?: () => void;
-  onRemoveMember: (memberId: number) => void;
-  isOwner?: boolean;
-}
+import type { MembersTabContentProps } from './MembersTabContent.types';
+import { getMemberInitial, getMemberDisplayName } from './MembersTabContent.helpers';
 
-const getMemberUsername = (m: GroupMemberResponse): string => {
-  return m.user?.username || m.username || (m.userId ? `User #${m.userId}` : 'Member');
-};
-
-const getMemberInitial = (m: GroupMemberResponse): string => {
-  const uname = getMemberUsername(m);
-  return (uname && uname.length > 0 ? uname.charAt(0) : 'M').toUpperCase();
-};
-
-const getMemberDisplayName = (m: GroupMemberResponse): string => {
-  const uname = getMemberUsername(m);
-  const fname = m.user?.firstname || m.firstname;
-  const lname = m.user?.lastname || m.lastname;
-  if (fname) {
-    return `${uname} (${fname} ${lname || ''})`.trim();
-  }
-  return uname;
-};
+export type * from './MembersTabContent.types';
 
 export const MembersTabContent: React.FC<MembersTabContentProps> = ({
   members,
@@ -119,7 +96,7 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
                 secondaryAction={
                   isOwner && m.role !== 'OWNER' && (
                     <IconButton color="error" onClick={() => onRemoveMember(m.id)}>
-                      <Delete />
+                      <DeleteIcon />
                     </IconButton>
                   )
                 }
@@ -148,3 +125,5 @@ export const MembersTabContent: React.FC<MembersTabContentProps> = ({
     </Box>
   );
 };
+
+export default MembersTabContent;

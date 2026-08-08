@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -42,6 +42,21 @@ interface AddMemberModalProps {
   existingMemberUserIds?: number[];
 }
 
+// ── Static Member Display Helpers ────────────────────────────────────────────
+const getDisplayName = (u: UserResponse): string => {
+  const fullName = `${u.firstname || ''} ${u.lastname || ''}`.trim();
+  if (fullName) {
+    return `${u.username} (${fullName})`;
+  }
+  return u.username;
+};
+
+const getInitial = (u: UserResponse): string => {
+  if (u.username) return u.username.charAt(0).toUpperCase();
+  if (u.email) return u.email.charAt(0).toUpperCase();
+  return 'U';
+};
+
 export const AddMemberModal: React.FC<AddMemberModalProps> = ({
   open,
   onClose,
@@ -59,80 +74,81 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
   const { data: allUsers = [], isPending: isLoadingUsers } = useAllUsers();
 
-  // Filter out users already in the group by ID, username, or email
-  const availableUsers = allUsers.filter((u) => {
-    // 1. Check legacy ID array
-    if (existingMemberUserIds.includes(u.id)) {
-      return false;
-    }
+  // 1. Filter out users already in the group (memoized with useMemo)
+  const availableUsers = useMemo(() => {
+    return allUsers.filter((u) => {
+      // Check legacy ID array
+      if (existingMemberUserIds.includes(u.id)) {
+        return false;
+      }
 
-    // 2. Check existing members list by ID, username, or email
-    const isAlreadyMember = existingMembers.some((m) => {
-      const memberUserId = m.user?.id || m.userId;
-      if (memberUserId && Number(memberUserId) === Number(u.id)) {
-        return true;
-      }
-      const memberUsername = m.user?.username || m.username;
-      if (memberUsername && memberUsername.toLowerCase() === u.username?.toLowerCase()) {
-        return true;
-      }
-      const memberEmail = m.user?.email || m.email;
-      if (memberEmail && u.email && memberEmail.toLowerCase() === u.email?.toLowerCase()) {
-        return true;
-      }
-      return false;
+      // Check existing members list by ID, username, or email
+      const isAlreadyMember = existingMembers.some((m) => {
+        const memberUserId = m.user?.id || m.userId;
+        if (memberUserId && Number(memberUserId) === Number(u.id)) {
+          return true;
+        }
+        const memberUsername = m.user?.username || m.username;
+        if (memberUsername && memberUsername.toLowerCase() === u.username?.toLowerCase()) {
+          return true;
+        }
+        const memberEmail = m.user?.email || m.email;
+        if (memberEmail && u.email && memberEmail.toLowerCase() === u.email?.toLowerCase()) {
+          return true;
+        }
+        return false;
+      });
+
+      return !isAlreadyMember;
     });
+  }, [allUsers, existingMembers, existingMemberUserIds]);
 
-    return !isAlreadyMember;
-  });
-
-  // Search filter matching name, username or email
-  const filteredUsers = availableUsers.filter((u) => {
-    if (!searchQuery.trim()) return true;
+  // 2. Search filter matching name, username or email (memoized with useMemo)
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return availableUsers;
     const query = searchQuery.toLowerCase().trim();
-    const displayName = `${u.username} ${u.firstname || ''} ${u.lastname || ''}`.toLowerCase();
-    const email = (u.email || '').toLowerCase();
-    return displayName.includes(query) || email.includes(query);
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setMemberError(null);
-
-    if (!selectedUser) {
-      setMemberError(t('invitation.selectUserMsg'));
-      return;
-    }
-
-    onSubmit({
-      userId: selectedUser.id,
-      message: invitationMessage.trim() || undefined,
-      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+    return availableUsers.filter((u) => {
+      const displayName = `${u.username} ${u.firstname || ''} ${u.lastname || ''}`.toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      return displayName.includes(query) || email.includes(query);
     });
-  };
+  }, [availableUsers, searchQuery]);
 
-  const handleCloseModal = () => {
+  // 3. User select callback (memoized with useCallback)
+  const handleSelectUser = useCallback((u: UserResponse) => {
+    setSelectedUser(u);
+    setMemberError(null);
+  }, []);
+
+  // 4. Modal submit handler (memoized with useCallback)
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setMemberError(null);
+
+      if (!selectedUser) {
+        setMemberError(t('invitation.selectUserMsg'));
+        return;
+      }
+
+      onSubmit({
+        userId: selectedUser.id,
+        message: invitationMessage.trim() || undefined,
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+      });
+    },
+    [expiresAt, invitationMessage, onSubmit, selectedUser, t]
+  );
+
+  // 5. Modal close reset handler (memoized with useCallback)
+  const handleCloseModal = useCallback(() => {
     setSearchQuery('');
     setSelectedUser(null);
     setInvitationMessage('');
     setExpiresAt('');
     setMemberError(null);
     onClose();
-  };
-
-  const getDisplayName = (u: UserResponse): string => {
-    const fullName = `${u.firstname || ''} ${u.lastname || ''}`.trim();
-    if (fullName) {
-      return `${u.username} (${fullName})`;
-    }
-    return u.username;
-  };
-
-  const getInitial = (u: UserResponse): string => {
-    if (u.username) return u.username.charAt(0).toUpperCase();
-    if (u.email) return u.email.charAt(0).toUpperCase();
-    return 'U';
-  };
+  }, [onClose]);
 
   return (
     <Dialog open={open} onClose={handleCloseModal} maxWidth="sm" fullWidth>
@@ -141,7 +157,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
           <PersonAddIcon color="primary" />
           {t('groupDetail.inviteMemberBtn')}
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
           {memberError && <Alert intent="error">{memberError}</Alert>}
 
           <Typography variant="body2" color="text.secondary">
@@ -191,10 +207,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                       {idx > 0 && <Divider component="li" />}
                       <ListItemButton
                         selected={isSelected}
-                        onClick={() => {
-                          setSelectedUser(u);
-                          setMemberError(null);
-                        }}
+                        onClick={() => handleSelectUser(u)}
                         sx={{
                           py: 1.2,
                           px: 2,

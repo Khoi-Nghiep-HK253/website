@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
@@ -16,6 +16,58 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
 import type { Member, CalculatedDebt, DebtSimulatorProps } from './DebtSimulator.types';
 
+/**
+ * Pure algorithm for debt calculation & netting
+ */
+const calculateInitialDebts = (mList: Member[], total: number): CalculatedDebt[] => {
+  const shareEach = total / (mList.length || 1);
+  const balances = mList.map((m) => ({
+    ...m,
+    share: shareEach,
+    net: m.paid - shareEach,
+  }));
+
+  const debtors = balances.filter((b) => b.net < 0).map((b) => ({ ...b, net: Math.abs(b.net) }));
+  const creditors = balances.filter((b) => b.net > 0).map((b) => ({ ...b, net: b.net }));
+
+  const result: CalculatedDebt[] = [];
+  let dIdx = 0;
+  let cIdx = 0;
+
+  while (dIdx < debtors.length && cIdx < creditors.length) {
+    const debtor = debtors[dIdx];
+    const creditor = creditors[cIdx];
+    const transferAmount = Math.min(debtor.net, creditor.net);
+
+    if (transferAmount > 0) {
+      result.push({
+        id: `d_${dIdx}_${cIdx}`,
+        fromName: debtor.name,
+        toName: creditor.name,
+        amount: transferAmount,
+        status: 'PENDING',
+      });
+    }
+
+    debtor.net -= transferAmount;
+    creditor.net -= transferAmount;
+
+    if (debtor.net <= 0.01) dIdx++;
+    if (creditor.net <= 0.01) cIdx++;
+  }
+
+  return result;
+};
+
+const getAvatarInitial = (name: string): string => {
+  const clean = name.trim();
+  if (!clean) return 'M';
+  const parts = clean.split(' ');
+  const firstWord = parts[0] || '';
+  if (firstWord.length > 0) return firstWord.charAt(0).toUpperCase();
+  return clean.charAt(0).toUpperCase();
+};
+
 export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
   initialDescription = 'Ăn lẩu thái cùng nhóm',
   initialTotalAmount = 1000000,
@@ -30,81 +82,43 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
   const [totalAmount, setTotalAmount] = useState<number>(initialTotalAmount);
   const [members, setMembers] = useState<Member[]>(initialMembers);
 
-  const calculateInitialDebts = (mList: Member[], total: number): CalculatedDebt[] => {
-    const shareEach = total / (mList.length || 1);
-    const balances = mList.map((m) => ({
-      ...m,
-      share: shareEach,
-      net: m.paid - shareEach,
-    }));
-
-    const debtors = balances.filter((b) => b.net < 0).map((b) => ({ ...b, net: Math.abs(b.net) }));
-    const creditors = balances.filter((b) => b.net > 0).map((b) => ({ ...b, net: b.net }));
-
-    const result: CalculatedDebt[] = [];
-    let dIdx = 0;
-    let cIdx = 0;
-
-    while (dIdx < debtors.length && cIdx < creditors.length) {
-      const debtor = debtors[dIdx];
-      const creditor = creditors[cIdx];
-      const transferAmount = Math.min(debtor.net, creditor.net);
-
-      if (transferAmount > 0) {
-        result.push({
-          id: `d_${dIdx}_${cIdx}`,
-          fromName: debtor.name,
-          toName: creditor.name,
-          amount: transferAmount,
-          status: 'PENDING',
-        });
-      }
-
-      debtor.net -= transferAmount;
-      creditor.net -= transferAmount;
-
-      if (debtor.net <= 0.01) dIdx++;
-      if (creditor.net <= 0.01) cIdx++;
-    }
-
-    return result;
-  };
-
   const [debts, setDebts] = useState<CalculatedDebt[]>(() =>
     calculateInitialDebts(initialMembers, initialTotalAmount)
   );
 
-  const handleUpdatePaid = (id: string, newPaid: number) => {
-    const updated = members.map((m) => (m.id === id ? { ...m, paid: newPaid } : m));
-    setMembers(updated);
-    recalculate(updated, totalAmount);
-  };
+  const sharePerMember = useMemo(() => {
+    return totalAmount / (members.length || 1);
+  }, [totalAmount, members.length]);
 
-  const handleTotalChange = (val: number) => {
-    setTotalAmount(val);
-    const equalShare = val / (members.length || 1);
-    const updated = members.map((m) => ({ ...m, share: equalShare }));
-    setMembers(updated);
-    recalculate(updated, val);
-  };
+  const handleUpdatePaid = useCallback(
+    (id: string, newPaid: number) => {
+      setMembers((prevMembers) => {
+        const updated = prevMembers.map((m) => (m.id === id ? { ...m, paid: newPaid } : m));
+        setDebts(calculateInitialDebts(updated, totalAmount));
+        return updated;
+      });
+    },
+    [totalAmount]
+  );
 
-  const recalculate = (currentMembers: Member[], total: number) => {
-    const newDebts = calculateInitialDebts(currentMembers, total);
-    setDebts(newDebts);
-  };
+  const handleTotalChange = useCallback(
+    (val: number) => {
+      setTotalAmount(val);
+      setMembers((prevMembers) => {
+        const equalShare = val / (prevMembers.length || 1);
+        const updated = prevMembers.map((m) => ({ ...m, share: equalShare }));
+        setDebts(calculateInitialDebts(updated, val));
+        return updated;
+      });
+    },
+    []
+  );
 
-  const handleSettle = (debtId: string) => {
-    setDebts(debts.map((d) => (d.id === debtId ? { ...d, status: 'SETTLED' } : d)));
-  };
-
-  const getAvatarInitial = (name: string): string => {
-    const clean = name.trim();
-    if (!clean) return 'M';
-    const parts = clean.split(' ');
-    const firstWord = parts[0] || '';
-    if (firstWord.length > 0) return firstWord.charAt(0).toUpperCase();
-    return clean.charAt(0).toUpperCase();
-  };
+  const handleSettle = useCallback((debtId: string) => {
+    setDebts((prevDebts) =>
+      prevDebts.map((d) => (d.id === debtId ? { ...d, status: 'SETTLED' } : d))
+    );
+  }, []);
 
   return (
     <Card
@@ -241,7 +255,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Hệ thống tự động tính toán đối trừ phần ứng tiền và phần tiền phải chịu (
-            <strong>{(totalAmount / (members.length || 1)).toLocaleString()}đ/người</strong>):
+            <strong>{sharePerMember.toLocaleString()}đ/người</strong>):
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flexGrow: 1 }}>

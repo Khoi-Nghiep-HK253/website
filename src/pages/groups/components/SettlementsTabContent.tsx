@@ -37,7 +37,7 @@ export const SettlementsTabContent: React.FC<SettlementsTabContentProps> = ({ se
       {settlements.length === 0 ? (
         <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
           <PaymentsIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-          <Typography variant="body1">{t('groups.noSettlements', { defaultValue: 'Chưa có giao dịch thanh toán nợ nào được ghi nhận.' })}</Typography>
+          <Typography variant="body1">{t('groups.noSettlements')}</Typography>
         </Box>
       ) : (
         <List disablePadding>

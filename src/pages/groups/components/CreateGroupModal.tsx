@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -42,29 +42,44 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [endDate, setEndDate] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
+  // Memoized form submission handler with useCallback
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setFormError(null);
 
-    if (!formName.trim()) {
-      setFormError(t('createGroupModal.nameRequired'));
-      return;
-    }
+      if (!formName.trim()) {
+        setFormError(t('createGroupModal.nameRequired'));
+        return;
+      }
 
-    onSubmit({
-      name: formName.trim(),
-      categoryId: selectedCategoryId ? Number(selectedCategoryId) : undefined,
-      note: formNote.trim() || undefined,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-    });
-  };
+      onSubmit({
+        name: formName.trim(),
+        categoryId: selectedCategoryId ? Number(selectedCategoryId) : undefined,
+        note: formNote.trim() || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      });
+    },
+    [formName, selectedCategoryId, formNote, startDate, endDate, onSubmit, t]
+  );
+
+  // Memoized category dropdown options with useMemo
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((cat) => (
+        <MenuItem key={cat.id} value={cat.id}>
+          {cat.name}
+        </MenuItem>
+      )),
+    [categories]
+  );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontWeight: 'bold' }}>{t('createGroupModal.title')}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+        <DialogTitle sx={{ fontWeight: 'bold', pb: 1 }}>{t('createGroupModal.title')}</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: '20px !important' }}>
           {formError && <Alert intent="error">{formError}</Alert>}
 
           <TextField
@@ -85,11 +100,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
           >
             <MenuItem value="">{t('createGroupModal.noCategory')}</MenuItem>
-            {categories.map((cat) => (
-              <MenuItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </MenuItem>
-            ))}
+            {categoryOptions}
           </TextField>
 
           <Box sx={{ display: 'flex', gap: 2 }}>

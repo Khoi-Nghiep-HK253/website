@@ -22,101 +22,18 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
-import type { CurrencyResponse } from '@/services/currencyService';
-import type { GroupMemberResponse } from '@/services/groupService';
-import type { CreateExpensePayload, ExpenseSharePayload } from '@/services/expenseService';
+import type { ExpenseSharePayload } from '@/services/expenseService';
 import { Alert } from '@/components';
+import { SPLIT_TYPE_VALUE, type SplitType, getSplitTypesConfig } from '@/constants';
+import type { CreateExpenseModalProps, PayerEntry, ShareEntry } from './CreateExpenseModal.types';
+import {
+  getMemberUsername,
+  getMemberDisplayName,
+  getMemberUserId,
+  previewShares,
+} from './CreateExpenseModal.helpers';
 
-// ── Types ────────────────────────────────────────────────────────────────────
-type SplitType = 'EQUAL' | 'EXACT' | 'PERCENTAGE' | 'SHARES' | 'ADJUSTMENT';
-
-interface PayerEntry {
-  userId: number;
-  amount: number;
-}
-
-interface ShareEntry {
-  userId: number;
-  amount?: number;
-  percentage?: number;
-  ratio?: number;
-  adjustment?: number;
-}
-
-interface CreateExpenseModalProps {
-  open: boolean;
-  onClose: () => void;
-  currencies: CurrencyResponse[];
-  members: GroupMemberResponse[];
-  currentUserId?: number;
-  onSubmit: (payload: CreateExpensePayload) => void;
-  isPending: boolean;
-}
-
-// ── Member Helpers ────────────────────────────────────────────────────────────
-const getMemberUsername = (m: GroupMemberResponse): string =>
-  m.user?.username || m.username || `User #${m.userId || m.id}`;
-
-const getMemberDisplayName = (m: GroupMemberResponse): string => {
-  const uname = getMemberUsername(m);
-  const fname = m.user?.firstname || m.firstname;
-  const lname = m.user?.lastname || m.lastname;
-  return fname ? `${uname} (${fname} ${lname || ''})`.trim() : uname;
-};
-
-const getMemberUserId = (m: GroupMemberResponse): number =>
-  m.user?.id || m.userId || m.id;
-
-// ── Client-side amount preview calculator ────────────────────────────────────
-function previewShares(
-  splitType: SplitType,
-  totalAmount: number,
-  shareEntries: ShareEntry[]
-): Map<number, number> {
-  const result = new Map<number, number>();
-  const count = shareEntries.length;
-  if (count === 0) return result;
-
-  switch (splitType) {
-    case 'EQUAL': {
-      const equal = Math.floor((totalAmount / count) * 100) / 100;
-      const remainder = Math.round((totalAmount - equal * count) * 100) / 100;
-      shareEntries.forEach((e, i) => result.set(e.userId, i === 0 ? equal + remainder : equal));
-      break;
-    }
-    case 'EXACT': {
-      shareEntries.forEach((e) => result.set(e.userId, e.amount ?? 0));
-      break;
-    }
-    case 'PERCENTAGE': {
-      shareEntries.forEach((e) => {
-        const amt = Math.round(totalAmount * (e.percentage ?? 0)) / 100;
-        result.set(e.userId, amt);
-      });
-      break;
-    }
-    case 'SHARES': {
-      const totalRatio = shareEntries.reduce((sum, e) => sum + (e.ratio ?? 0), 0);
-      if (totalRatio > 0) {
-        shareEntries.forEach((e) => {
-          const amt = Math.round((totalAmount * (e.ratio ?? 0)) / totalRatio * 100) / 100;
-          result.set(e.userId, amt);
-        });
-      }
-      break;
-    }
-    case 'ADJUSTMENT': {
-      const base = Math.floor((totalAmount / count) * 100) / 100;
-      const baseRemainder = Math.round((totalAmount - base * count) * 100) / 100;
-      shareEntries.forEach((e, i) => {
-        const adj = e.adjustment ?? 0;
-        result.set(e.userId, base + adj + (i === 0 ? baseRemainder : 0));
-      });
-      break;
-    }
-  }
-  return result;
-}
+export type * from './CreateExpenseModal.types';
 
 // ── Component ────────────────────────────────────────────────────────────────
 export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
@@ -130,44 +47,15 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // Dynamic split types definition with i18n
-  const splitTypes: { value: SplitType; label: string; desc: string }[] = useMemo(
-    () => [
-      {
-        value: 'EQUAL',
-        label: t('createExpenseModal.splitType.equalLabel'),
-        desc: t('createExpenseModal.splitType.equalDesc'),
-      },
-      {
-        value: 'EXACT',
-        label: t('createExpenseModal.splitType.exactLabel'),
-        desc: t('createExpenseModal.splitType.exactDesc'),
-      },
-      {
-        value: 'PERCENTAGE',
-        label: t('createExpenseModal.splitType.percentageLabel'),
-        desc: t('createExpenseModal.splitType.percentageDesc'),
-      },
-      {
-        value: 'SHARES',
-        label: t('createExpenseModal.splitType.sharesLabel'),
-        desc: t('createExpenseModal.splitType.sharesDesc'),
-      },
-      {
-        value: 'ADJUSTMENT',
-        label: t('createExpenseModal.splitType.adjustmentLabel'),
-        desc: t('createExpenseModal.splitType.adjustmentDesc'),
-      },
-    ],
-    [t]
-  );
+  // Dynamic split types definition with i18n from constants
+  const splitTypes = useMemo(() => getSplitTypesConfig(t), [t]);
 
   // Basic info
   const [description, setDescription] = useState('');
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [currencyId, setCurrencyId] = useState<number>(currencies[0]?.id ?? 1);
   const [expenseDate, setExpenseDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [splitType, setSplitType] = useState<SplitType>('EQUAL');
+  const [splitType, setSplitType] = useState<SplitType>(SPLIT_TYPE_VALUE.EQUAL);
 
   // Payers
   const [payers, setPayers] = useState<PayerEntry[]>([]);
@@ -199,7 +87,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
       setTotalAmount(0);
       setDescription('');
       setExpenseDate(new Date().toISOString().slice(0, 10));
-      setSplitType('EQUAL');
+      setSplitType(SPLIT_TYPE_VALUE.EQUAL);
       setCurrencyId(currencies[0]?.id ?? 1);
       setSubmitError(null);
     }
@@ -261,19 +149,19 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
   const shareValidation = useMemo(() => {
     switch (splitType) {
-      case 'EXACT': {
+      case SPLIT_TYPE_VALUE.EXACT: {
         const sum = shareEntries.reduce((s, e) => s + (e.amount ?? 0), 0);
         return { ok: Math.abs(sum - totalAmount) < 0.01, hint: `Total: ${sum.toLocaleString()} / ${totalAmount.toLocaleString()}` };
       }
-      case 'PERCENTAGE': {
+      case SPLIT_TYPE_VALUE.PERCENTAGE: {
         const sum = shareEntries.reduce((s, e) => s + (e.percentage ?? 0), 0);
         return { ok: Math.abs(sum - 100) < 0.01, hint: `Total %: ${sum.toFixed(1)}% / 100%` };
       }
-      case 'SHARES': {
+      case SPLIT_TYPE_VALUE.SHARES: {
         const sum = shareEntries.reduce((s, e) => s + (e.ratio ?? 0), 0);
         return { ok: sum > 0 && shareEntries.every((e) => (e.ratio ?? 0) > 0), hint: `Total ratio: ${sum}` };
       }
-      case 'ADJUSTMENT': {
+      case SPLIT_TYPE_VALUE.ADJUSTMENT: {
         const sum = shareEntries.reduce((s, e) => s + (e.adjustment ?? 0), 0);
         return { ok: Math.abs(sum) < 0.01, hint: `Total adjustment: ${sum > 0 ? '+' : ''}${sum.toLocaleString()}` };
       }
@@ -299,10 +187,10 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
 
     const sharesPayload: ExpenseSharePayload[] = shareEntries.map((e) => {
       const base: ExpenseSharePayload = { userId: e.userId };
-      if (splitType === 'EXACT') base.amount = e.amount;
-      if (splitType === 'PERCENTAGE') base.percentage = e.percentage;
-      if (splitType === 'SHARES') base.ratio = e.ratio;
-      if (splitType === 'ADJUSTMENT') base.adjustment = e.adjustment;
+      if (splitType === SPLIT_TYPE_VALUE.EXACT) base.amount = e.amount;
+      if (splitType === SPLIT_TYPE_VALUE.PERCENTAGE) base.percentage = e.percentage;
+      if (splitType === SPLIT_TYPE_VALUE.SHARES) base.ratio = e.ratio;
+      if (splitType === SPLIT_TYPE_VALUE.ADJUSTMENT) base.adjustment = e.adjustment;
       return base;
     });
 
@@ -328,7 +216,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
           {t('createExpenseModal.title')}
         </DialogTitle>
 
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1, px: { xs: 2, sm: 3 } }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '20px !important', px: { xs: 2, sm: 3 } }}>
           {submitError && <Alert intent="error">{submitError}</Alert>}
 
           {/* ── SECTION 1: Thông tin cơ bản ───────────────────────────────── */}
@@ -517,7 +405,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
             </Box>
 
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-              {splitType === 'EQUAL' ? (
+              {splitType === SPLIT_TYPE_VALUE.EQUAL ? (
                 /* EQUAL: Simple checkboxes */
                 <FormGroup>
                   <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
@@ -544,10 +432,10 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 /* EXACT / PERCENTAGE / SHARES / ADJUSTMENT: Input per member */
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                    {splitType === 'EXACT' && t('createExpenseModal.exactHint')}
-                    {splitType === 'PERCENTAGE' && t('createExpenseModal.percentageHint')}
-                    {splitType === 'SHARES' && t('createExpenseModal.sharesHint')}
-                    {splitType === 'ADJUSTMENT' && t('createExpenseModal.adjustmentHint')}
+                    {splitType === SPLIT_TYPE_VALUE.EXACT && t('createExpenseModal.exactHint')}
+                    {splitType === SPLIT_TYPE_VALUE.PERCENTAGE && t('createExpenseModal.percentageHint')}
+                    {splitType === SPLIT_TYPE_VALUE.SHARES && t('createExpenseModal.sharesHint')}
+                    {splitType === SPLIT_TYPE_VALUE.ADJUSTMENT && t('createExpenseModal.adjustmentHint')}
                   </Typography>
 
                   {/* Add/Remove members toggle */}
@@ -592,7 +480,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                         </Typography>
 
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flex: 1 }}>
-                          {splitType === 'EXACT' && (
+                          {splitType === SPLIT_TYPE_VALUE.EXACT && (
                             <TextField
                               label={t('createExpenseModal.exactLabel', { symbol: currencySymbol })}
                               type="number"
@@ -604,7 +492,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                             />
                           )}
 
-                          {splitType === 'PERCENTAGE' && (
+                          {splitType === SPLIT_TYPE_VALUE.PERCENTAGE && (
                             <TextField
                               label={t('createExpenseModal.percentageLabel')}
                               type="number"
@@ -616,7 +504,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                             />
                           )}
 
-                          {splitType === 'SHARES' && (
+                          {splitType === SPLIT_TYPE_VALUE.SHARES && (
                             <TextField
                               label={t('createExpenseModal.sharesLabel')}
                               type="number"
@@ -628,7 +516,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                             />
                           )}
 
-                          {splitType === 'ADJUSTMENT' && (
+                          {splitType === SPLIT_TYPE_VALUE.ADJUSTMENT && (
                             <TextField
                               label={t('createExpenseModal.adjustmentLabel', { symbol: currencySymbol })}
                               type="number"
@@ -712,3 +600,5 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
     </Dialog>
   );
 };
+
+export default CreateExpenseModal;

@@ -1,16 +1,23 @@
+import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
-import Avatar from '@mui/material/Avatar';
 import InputAdornment from '@mui/material/InputAdornment';
 import Paper from '@mui/material/Paper';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Tooltip from '@mui/material/Tooltip';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SearchIcon from '@mui/icons-material/Search';
+import CategoryIcon from '@mui/icons-material/Category';
+import PersonIcon from '@mui/icons-material/Person';
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { Alert } from '@/components';
 import { useGroupsListStore } from './hooks/useGroupsListStore';
-import { GroupCardItem, CreateGroupModal } from './components';
+import { GroupCardItem, CreateGroupModal, GroupsListEmptyState } from './components';
 
 export default function GroupsListPage() {
   const {
@@ -18,9 +25,16 @@ export default function GroupsListPage() {
     isPending,
     error,
     categories,
+    uniqueCreators,
     filteredGroups,
     searchQuery,
     setSearchQuery,
+    selectedCategoryId,
+    setSelectedCategoryId,
+    selectedCreatorId,
+    setSelectedCreatorId,
+    isFiltered,
+    handleClearFilters,
     openCreateDialog,
     handleNavigateDetail,
     handleCreateGroupSubmit,
@@ -28,6 +42,67 @@ export default function GroupsListPage() {
     handleCloseCreateDialog,
     isCreatePending,
   } = useGroupsListStore();
+
+  // Priority state rendering mapping array memoized with useMemo
+  const activeContentState = useMemo(() => {
+    return [
+      {
+        condition: isPending,
+        render: () => (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress size={44} />
+          </Box>
+        ),
+      },
+      {
+        condition: Boolean(error),
+        render: () => (
+          <Alert intent="error" title={t('groups.errorAlertTitle') || t('common.error')}>
+            {error?.message || t('groups.loadFailed')}
+          </Alert>
+        ),
+      },
+      {
+        condition: filteredGroups.length === 0,
+        render: () => (
+          <GroupsListEmptyState
+            isFiltered={isFiltered}
+            onClearFilters={handleClearFilters}
+            onCreateGroup={handleOpenCreateDialog}
+          />
+        ),
+      },
+      {
+        condition: true,
+        render: () => (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+              },
+              gap: 3,
+            }}
+          >
+            {filteredGroups.map((group) => (
+              <GroupCardItem key={group.id} group={group} onNavigateDetail={handleNavigateDetail} />
+            ))}
+          </Box>
+        ),
+      },
+    ].find((state) => state.condition);
+  }, [
+    isPending,
+    error,
+    filteredGroups,
+    isFiltered,
+    handleClearFilters,
+    handleOpenCreateDialog,
+    handleNavigateDetail,
+    t,
+  ]);
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -49,12 +124,23 @@ export default function GroupsListPage() {
           onClick={handleOpenCreateDialog}
           sx={{ borderRadius: 3, px: 3, py: 1.2, fontWeight: 700 }}
         >
-          {t('groups.createBtn')}
+          {t('groups.createBtn') || t('groups.createGroup')}
         </Button>
       </Box>
 
-      {/* Search Bar */}
-      <Paper sx={{ p: 2, borderRadius: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
+      {/* Multi-facet Filter Bar (Keyword, Category, Creator) */}
+      <Paper
+        sx={{
+          p: 2,
+          borderRadius: 4,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          gap: 2,
+          boxShadow: 2,
+        }}
+      >
+        {/* Keyword Search */}
         <TextField
           fullWidth
           size="small"
@@ -70,76 +156,74 @@ export default function GroupsListPage() {
               ),
             },
           }}
-          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
+          sx={{ flex: 2, '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
         />
+
+        {/* Category Filter Dropdown */}
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', md: 180 }, flex: 1 }}>
+          <Select
+            value={selectedCategoryId}
+            onChange={(e) => setSelectedCategoryId(e.target.value as number | 'ALL')}
+            startAdornment={
+              <InputAdornment position="start">
+                <CategoryIcon fontSize="small" color="action" />
+              </InputAdornment>
+            }
+            sx={{ borderRadius: 3 }}
+          >
+            <MenuItem value="ALL">
+              <em>{t('groups.allCategories')}</em>
+            </MenuItem>
+            {categories.map((cat) => (
+              <MenuItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* Creator Filter Dropdown */}
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', md: 180 }, flex: 1 }}>
+          <Select
+            value={selectedCreatorId}
+            onChange={(e) => setSelectedCreatorId(e.target.value as number | 'ALL')}
+            startAdornment={
+              <InputAdornment position="start">
+                <PersonIcon fontSize="small" color="action" />
+              </InputAdornment>
+            }
+            sx={{ borderRadius: 3 }}
+          >
+            <MenuItem value="ALL">
+              <em>{t('groups.allCreators')}</em>
+            </MenuItem>
+            {uniqueCreators.map((creator) => (
+              <MenuItem key={creator.id} value={creator.id}>
+                @{creator.username}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* Reset / Clear Filters Button */}
+        {isFiltered && (
+          <Tooltip title={t('groups.clearFilters')}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              size="small"
+              onClick={handleClearFilters}
+              startIcon={<FilterAltOffIcon />}
+              sx={{ borderRadius: 3, py: 0.8, px: 2, whiteSpace: 'nowrap' }}
+            >
+              {t('groups.clearFilters')}
+            </Button>
+          </Tooltip>
+        )}
       </Paper>
 
-      {/* Loading state */}
-      {isPending && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress size={44} />
-        </Box>
-      )}
-
-      {/* Error state */}
-      {error && !isPending && (
-        <Alert intent="error" title={t('groups.errorAlertTitle')}>
-          {error.message || t('groups.loadFailed')}
-        </Alert>
-      )}
-
-      {/* Empty State */}
-      {!isPending && !error && filteredGroups.length === 0 && (
-        <Paper
-          sx={{
-            p: 6,
-            textAlign: 'center',
-            borderRadius: 4,
-            bgcolor: 'action.hover',
-            border: '2px dashed',
-            borderColor: 'divider',
-          }}
-        >
-          <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.light', mx: 'auto', mb: 2 }}>
-            <GroupAddIcon sx={{ fontSize: 36, color: 'primary.main' }} />
-          </Avatar>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-            {searchQuery ? t('groups.noGroupFound') : t('groups.emptyTitle')}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {searchQuery ? t('groups.tryAnotherSearch') : t('groups.emptySub')}
-          </Typography>
-          {!searchQuery && (
-            <Button
-              variant="contained"
-              startIcon={<GroupAddIcon />}
-              onClick={handleOpenCreateDialog}
-              sx={{ borderRadius: 3, fontWeight: 700 }}
-            >
-              {t('groups.createBtn')}
-            </Button>
-          )}
-        </Paper>
-      )}
-
-      {/* Groups Grid */}
-      {!isPending && !error && filteredGroups.length > 0 && (
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-            },
-            gap: 3,
-          }}
-        >
-          {filteredGroups.map((group) => (
-            <GroupCardItem key={group.id} group={group} onNavigateDetail={handleNavigateDetail} />
-          ))}
-        </Box>
-      )}
+      {/* Dynamic Content (Loading / Error / Empty / Grid) */}
+      {activeContentState?.render()}
 
       {/* Create Group Modal */}
       <CreateGroupModal

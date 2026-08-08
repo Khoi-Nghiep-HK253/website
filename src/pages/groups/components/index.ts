@@ -10,3 +10,5 @@ export * from './SettlementsTabContent';
 export * from './ExpenseDetailModal';
 export * from './GroupShareLinkModal';
 export * from './GroupDetailHeader';
+export * from './GroupsListEmptyState';
+
