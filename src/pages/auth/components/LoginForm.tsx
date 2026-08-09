@@ -67,7 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           required
           fullWidth
           id="usernameOrEmail"
-          label={t('auth.usernameOrEmailLabel')}
+          label={t('auth.usernameOrEmail')}
           name="usernameOrEmail"
           autoComplete="username"
           autoFocus
@@ -89,7 +89,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           required
           fullWidth
           name="password"
-          label={t('auth.passwordLabel')}
+          label={t('auth.password')}
           type="password"
           id="password"
           autoComplete="current-password"

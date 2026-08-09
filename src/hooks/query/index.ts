@@ -7,3 +7,4 @@ export * from './useSettlementQuery';
 export * from './useMasterQuery';
 export * from './useInvitationQuery';
 export * from './useGroupShareLinkQuery';
+export * from './useMediaQuery';

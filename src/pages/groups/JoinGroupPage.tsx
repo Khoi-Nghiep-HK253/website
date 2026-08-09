@@ -148,7 +148,7 @@ export default function JoinGroupPage() {
           />
           {preview.createdByUsername && (
             <Chip
-              label={t('joinGroup.createdBy', { name: preview.createdByUsername })}
+              label={t('joinGroup.createdBy', { name: `@${preview.createdByUsername.toUpperCase()}` })}
               variant="outlined"
               size="small"
               sx={{ fontWeight: 600, borderColor: 'divider' }}

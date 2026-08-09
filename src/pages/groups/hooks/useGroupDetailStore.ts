@@ -23,7 +23,8 @@ import { useCurrencies } from '@/hooks/query/useMasterQuery';
 import { useSendInvitationMutation } from '@/hooks/query/useInvitationQuery';
 import { useToast } from '@/hooks/common/useToast';
 import { useAuth } from '@/hooks/common';
-import { PATHS } from '@/router/routes';
+import { PATHS } from '@/constants/routes';
+import { mediaService } from '@/services/mediaService';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import type { CreateExpensePayload } from '@/services/expenseService';
 import type { CreateSettlementPayload } from '@/services/settlementService';
@@ -107,19 +108,23 @@ export function useGroupDetailStore(groupId: number) {
 
   // Submit Handlers
   const handleCreateExpenseSubmit = useCallback(
-    (payload: CreateExpensePayload) => {
-      createExpenseMutation.mutate(
-        { groupId, payload },
-        {
-          onSuccess: () => {
-            closeModal();
-            showSuccess(t('groupDetail.createExpenseSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.createExpenseFailed')}: ${err.message || ''}`);
-          },
+    async (payload: CreateExpensePayload, files?: File[]) => {
+      try {
+        const newExpense = await createExpenseMutation.mutateAsync({ groupId, payload });
+        if (files && files.length > 0) {
+          await Promise.all(
+            files.map((file) =>
+              mediaService.uploadMedia(file, 'EXPENSE', newExpense.id).catch((uploadErr) => {
+                console.error('Failed to upload expense receipt image:', uploadErr);
+              })
+            )
+          );
         }
-      );
+        closeModal();
+        showSuccess(t('groupDetail.createExpenseSuccess'));
+      } catch (err: any) {
+        showError(`${t('groupDetail.createExpenseFailed')}: ${err?.message || ''}`);
+      }
     },
     [createExpenseMutation, groupId, closeModal, showError, showSuccess, t]
   );
@@ -184,20 +189,24 @@ export function useGroupDetailStore(groupId: number) {
   );
 
   const handleSettleSubmit = useCallback(
-    (payload: CreateSettlementPayload) => {
-      createSettlementMutation.mutate(
-        { groupId, payload },
-        {
-          onSuccess: () => {
-            closeModal();
-            setSelectedDebtId(null);
-            showSuccess(t('groupDetail.recordSettlementSuccess'));
-          },
-          onError: (err: Error) => {
-            showError(`${t('groupDetail.recordSettlementFailed')}: ${err.message || ''}`);
-          },
+    async (payload: CreateSettlementPayload, files?: File[]) => {
+      try {
+        const newSettlement = await createSettlementMutation.mutateAsync({ groupId, payload });
+        if (files && files.length > 0) {
+          await Promise.all(
+            files.map((file) =>
+              mediaService.uploadMedia(file, 'SETTLEMENT', newSettlement.id).catch((uploadErr) => {
+                console.error('Failed to upload settlement proof image:', uploadErr);
+              })
+            )
+          );
         }
-      );
+        closeModal();
+        setSelectedDebtId(null);
+        showSuccess(t('groupDetail.recordSettlementSuccess'));
+      } catch (err: any) {
+        showError(`${t('groupDetail.recordSettlementFailed')}: ${err?.message || ''}`);
+      }
     },
     [createSettlementMutation, groupId, closeModal, showError, showSuccess, t]
   );

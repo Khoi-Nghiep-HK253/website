@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -21,6 +21,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import type { ExpenseSharePayload } from '@/services/expenseService';
 import { Alert } from '@/components';
@@ -64,6 +66,48 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
   const [shareEntries, setShareEntries] = useState<ShareEntry[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Multiple File Attachments
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+
+      const validFiles: File[] = [];
+      const newUrls: string[] = [];
+
+      for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) {
+          setSubmitError(t('media.fileTooLarge'));
+          return;
+        }
+        if (!file.type.startsWith('image/')) {
+          setSubmitError(t('media.invalidFileType'));
+          return;
+        }
+        validFiles.push(file);
+        newUrls.push(URL.createObjectURL(file));
+      }
+
+      setSubmitError(null);
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+      setPreviewUrls((prev) => [...prev, ...newUrls]);
+    },
+    [t]
+  );
+
+  const handleRemoveFile = useCallback((index: number) => {
+    setPreviewUrls((prevUrls) => {
+      const targetUrl = prevUrls[index];
+      if (targetUrl) URL.revokeObjectURL(targetUrl);
+      return prevUrls.filter((_, i) => i !== index);
+    });
+    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  }, []);
+
   const [prevOpen, setPrevOpen] = useState(open);
 
   if (open && !prevOpen) {
@@ -89,6 +133,9 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
       setExpenseDate(new Date().toISOString().slice(0, 10));
       setSplitType(SPLIT_TYPE_VALUE.EQUAL);
       setCurrencyId(currencies[0]?.id ?? 1);
+      setSelectedFiles([]);
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      setPreviewUrls([]);
       setSubmitError(null);
     }
   } else if (!open && prevOpen) {
@@ -194,15 +241,18 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
       return base;
     });
 
-    onSubmit({
-      description: description.trim(),
-      totalAmount,
-      currencyId,
-      expenseDate,
-      splitType,
-      payers: payers.map((p) => ({ userId: p.userId, amount: p.amount })),
-      shares: sharesPayload,
-    });
+    onSubmit(
+      {
+        description: description.trim(),
+        totalAmount,
+        currencyId,
+        expenseDate,
+        splitType,
+        payers: payers.map((p) => ({ userId: p.userId, amount: p.amount })),
+        shares: sharesPayload,
+      },
+      selectedFiles
+    );
   };
 
   const selectedCurr = currencies.find((c) => c.id === currencyId);
@@ -290,6 +340,94 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
               ))}
             </TextField>
+
+            {/* Receipt / Invoice Image Upload (Multiple Optional) */}
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 0.5, color: 'text.secondary' }}>
+                {t('createExpenseModal.sectionReceiptImage')}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                {t('createExpenseModal.receiptImageHint')}
+              </Typography>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/png,image/jpeg,image/webp"
+                style={{ display: 'none' }}
+                onChange={handleFileSelect}
+              />
+
+              {previewUrls.length > 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5, minWidth: 0 }}>
+                    {previewUrls.map((url, idx) => {
+                      const file = selectedFiles[idx];
+                      return (
+                        <Paper
+                          key={idx}
+                          variant="outlined"
+                          sx={{
+                            p: 1.5,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            borderRadius: 3,
+                            bgcolor: 'action.hover',
+                            minWidth: 0,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                            <Box
+                              component="img"
+                              src={url}
+                              alt={`Receipt preview ${idx + 1}`}
+                              sx={{ width: 48, height: 48, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
+                            />
+                            <Box sx={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                                {file?.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {(file?.size ? file.size / 1024 / 1024 : 0).toFixed(2)} MB
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <IconButton onClick={() => handleRemoveFile(idx)} color="error" size="small" sx={{ flexShrink: 0, ml: 1 }}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Paper>
+                      );
+                    })}
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      size="small"
+                      startIcon={<AddPhotoAlternateIcon />}
+                      onClick={() => fileInputRef.current?.click()}
+                      sx={{ borderRadius: 2, textTransform: 'none', borderStyle: 'dashed' }}
+                    >
+                      + {t('createExpenseModal.selectReceiptImage')}
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<AddPhotoAlternateIcon />}
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{ borderRadius: 2.5, textTransform: 'none', borderStyle: 'dashed', py: 1 }}
+                >
+                  {t('createExpenseModal.selectReceiptImage')}
+                </Button>
+              )}
+            </Box>
           </Box>
 
           <Divider />

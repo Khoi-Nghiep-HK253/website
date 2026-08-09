@@ -21,6 +21,6 @@ export interface CreateExpenseModalProps {
   currencies: CurrencyResponse[];
   members: GroupMemberResponse[];
   currentUserId?: number;
-  onSubmit: (payload: CreateExpensePayload) => void;
+  onSubmit: (payload: CreateExpensePayload, files?: File[]) => void | Promise<void>;
   isPending: boolean;
 }

@@ -70,7 +70,7 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({ group, onNavigateD
       <Box sx={{ pt: 2, borderTop: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box>
           <Typography variant="caption" color="text.secondary">
-            {t('groups.createdBy')}: {group.createdBy?.username || '—'}
+            {t('groups.createdBy')}: {group.createdBy?.username ? `@${group.createdBy.username.toUpperCase()}` : '—'}
           </Typography>
         </Box>
         <Button

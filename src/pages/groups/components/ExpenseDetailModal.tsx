@@ -23,6 +23,7 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import { useTranslation } from 'react-i18next';
 import { useExpenseDetail } from '@/hooks/query/useExpenseQuery';
 import { Alert } from '@/components';
+import { MediaGalleryContainer, MediaUploaderContainer } from '@/containers';
 
 interface ExpenseDetailModalProps {
   open: boolean;
@@ -167,6 +168,14 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
                   ))}
                 </List>
               </Paper>
+            </Box>
+
+            {/* Section 3: Media & Receipt Attachments */}
+            <Box>
+              <MediaGalleryContainer entityType="EXPENSE" entityId={expense.id} />
+              <Box sx={{ mt: 2 }}>
+                <MediaUploaderContainer entityType="EXPENSE" entityId={expense.id} />
+              </Box>
             </Box>
           </>
         )}

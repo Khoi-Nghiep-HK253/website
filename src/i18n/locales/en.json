@@ -69,7 +69,22 @@
     "valPasswordMismatch": "Confirmation password does not match.",
     "loginSuccess": "Signed in successfully!",
     "loginFailed": "Sign in failed. Please check your credentials.",
-    "regFailed": "Registration failed. Please check your information."
+    "regFailed": "Registration failed. Please check your information.",
+    "loginSubmit": "Sign In",
+    "noAccountPrompt": "Don't have an account?",
+    "registerNowLink": "Register now",
+    "regSubmit": "Create Account",
+    "alreadyHaveAccountPrompt": "Already have an account?",
+    "loginNowLink": "Sign in now",
+    "usernameLabel": "Username",
+    "emailLabel": "Email Address",
+    "lastnameLabel": "Last Name",
+    "firstnameLabel": "First Name",
+    "phoneLabel": "Phone Number",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "errorAlertTitle": "Error Alert",
+    "regErrorAlertTitle": "Registration Error"
   },
   "home": {
     "badge": "#1 Transparent Group Expense Management App",
@@ -235,6 +250,23 @@
     "submitting": "Creating...",
     "nameRequired": "Please enter a group name."
   },
+  "editGroupModal": {
+    "title": "Edit Group Details",
+    "nameLabel": "Group Name",
+    "namePlaceholder": "Enter group name...",
+    "categoryLabel": "Group Category",
+    "noCategory": "-- No category selected --",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "noteLabel": "Group Note",
+    "notePlaceholder": "Enter group note...",
+    "cancel": "Cancel",
+    "submit": "Save Changes",
+    "submitting": "Saving...",
+    "nameRequired": "Group name is required.",
+    "updateSuccess": "Group details updated successfully!",
+    "updateFailed": "Failed to update group details:"
+  },
   "errorPages": {
     "notFoundTitle": "Page Not Found (404)",
     "notFoundSub": "The page you are looking for does not exist or has been moved.",
@@ -328,7 +360,11 @@
     "currencyRequired": "Please select a currency.",
     "payerMismatch": "Payer total ({{payerTotal}}) does not match expense total ({{totalAmount}}). Please adjust.",
     "invalidShares": "Invalid split details",
-    "shareRequired": "At least 1 member must participate in splitting."
+    "shareRequired": "At least 1 member must participate in splitting.",
+    "sectionReceiptImage": "Receipt / Invoice Attachment (Optional)",
+    "receiptImageHint": "Upload photo of receipt, invoice, or payment proof for this expense.",
+    "selectReceiptImage": "Choose Receipt / Invoice Photo",
+    "removeImage": "Remove Photo"
   },
   "shareLink": {
     "title": "Group Share Link & QR Code",
@@ -379,6 +415,34 @@
     "invalidAmount": "Invalid settlement amount.",
     "cancel": "Cancel",
     "submit": "Confirm Settlement",
-    "submitting": "Processing..."
+    "submitting": "Processing...",
+    "sectionProofImage": "Payment Proof / Receipt (Optional)",
+    "proofImageHint": "Upload screenshot of bank transfer or payment proof receipt.",
+    "selectProofImage": "Choose Payment Proof Photo"
+  },
+  "media": {
+    "title": "Attachments / Receipts",
+    "uploadReceipt": "Upload Receipt / Invoice",
+    "uploadProof": "Upload Transfer Proof",
+    "selectFile": "Upload Image File",
+    "uploadCoverTitle": "Manage Group Cover Photo",
+    "uploadCoverLabel": "Upload new cover photo for group",
+    "uploadAvatarTitle": "Manage Group Avatar Photo",
+    "uploadAvatarLabel": "Upload new avatar photo for group",
+    "manageCoverTooltip": "Manage group cover photo",
+    "manageAvatarTooltip": "Change group avatar photo",
+    "dragDropHint": "Drag & drop file here or click to browse",
+    "supportedFormats": "Supports PNG, JPG, WEBP formats (Max 10MB)",
+    "fileTooLarge": "File size exceeds the 10MB limit.",
+    "invalidFileType": "Only image files (PNG, JPG, WEBP) are allowed.",
+    "uploading": "Uploading...",
+    "uploadSuccess": "Image uploaded to Cloudinary successfully!",
+    "deleteSuccess": "Attachment deleted successfully!",
+    "deleteConfirmTitle": "Confirm Delete File",
+    "deleteConfirmMsg": "Are you sure you want to delete this media attachment?",
+    "noAttachments": "No media attachments or receipts uploaded yet.",
+    "viewAttachment": "View Enlarge Image",
+    "uploadedBy": "Uploaded by",
+    "uploadError": "Failed to upload file. Please try again."
   }
 }
