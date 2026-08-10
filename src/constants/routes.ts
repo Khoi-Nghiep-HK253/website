@@ -3,6 +3,7 @@
  */
 export const PATHS = {
   HOME: '/',
+  DASHBOARD: '/dashboard',
 
   // Group routes
   GROUPS: {

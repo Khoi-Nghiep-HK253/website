@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "Trang chủ",
+    "dashboard": "Bảng Điều Khiển",
     "groups": "Danh sách nhóm",
     "profile": "Hồ sơ cá nhân",
     "profileAndInvitations": "Trang cá nhân & Lời mời",
@@ -447,5 +448,68 @@
     "viewAttachment": "Xem ảnh lớn",
     "uploadedBy": "Đăng bởi",
     "uploadError": "Tải tệp lên thất bại. Vui lòng thử lại."
+  },
+  "debtSimulator": {
+    "title": "Mô Phỏng Bộ Tính Công Nợ Tự Động Divvy",
+    "subtitle": "Thử thay đổi thông tin khoản chi để xem thuật toán Divvy tự động cấn trừ \"Ai nợ Ai\"!",
+    "section1Title": "1. Thông tin Khoản chi",
+    "descLabel": "Mô tả khoản chi",
+    "totalLabel": "Tổng tiền hóa đơn (VNĐ)",
+    "payersTitle": "Người đứng ra thanh toán (Expense Payers):",
+    "paidLabel": "Ứng trước",
+    "section2Title": "2. Kết quả Công nợ (Debts)",
+    "debtsCount": "{{count}} khoản nợ cần xử lý",
+    "nettingHint": "Hệ thống tự động tính toán đối trừ phần ứng tiền và phần tiền phải chịu ({{amount}}đ/người):",
+    "allBalanced": "Tất cả thành viên đã hòa tiền! Không có công nợ.",
+    "settledStatus": "Đã thanh toán",
+    "settleBtn": "Trả nợ (Settle)",
+    "footerTip": "💡 Divvy tối ưu thuật toán giảm thiểu tối đa số giao dịch cần chuyển tiền giữa các thành viên.",
+    "defaultDescription": "Ăn lẩu thái cùng nhóm",
+    "defaultMemberA": "Bạn A (Ứng chính)",
+    "defaultMemberB": "Bạn B (Góp thêm)",
+    "defaultMemberC": "Bạn C",
+    "defaultMemberD": "Bạn D"
+  },
+  "dashboard": {
+    "title": "Bảng Điều Khiển & Phân Tích Tài Chính",
+    "subtitle": "Theo dõi tổng quan ngân sách, cơ cấu chi tiêu theo danh mục và xu hướng chi tiêu nhóm",
+    "filterScopeAll": "Tất cả các nhóm",
+    "startDateLabel": "Từ ngày giờ",
+    "endDateLabel": "Đến ngày giờ",
+    "filterTimeRange": "Khoảng thời gian",
+    "rangeToday": "Hôm nay",
+    "rangeWeek": "Tuần này",
+    "rangeMonth": "Tháng này",
+    "rangeLastMonth": "Tháng trước",
+    "rangeYear": "Năm nay",
+    "groupByDay": "Theo ngày",
+    "groupByWeek": "Theo tuần",
+    "groupByMonth": "Theo tháng",
+    "kpiPersonalShare": "Tổng Thực Chi Cá Nhân",
+    "kpiGroupExpense": "Tổng Chi Tiêu Nhóm",
+    "kpiOwedToMe": "Tiền Nợ Cần Thu",
+    "kpiUserOwes": "Tiền Nợ Phải Trả",
+    "categoryTitle": "Chi Tiêu Theo Danh Mục",
+    "categorySub": "Cơ cấu tỷ lệ phần trăm phân bổ ngân sách",
+    "trendTitle": "Xu Hướng Chi Tiêu Theo Thời Gian",
+    "trendSub": "Biến động tổng tiền chi tiêu qua các mốc thời gian",
+    "topExpensesTitle": "Top Khoản Chi Đắt Đỏ Nhất",
+    "categoryTableTitle": "Thống Kê Danh Mục Chi Tiết",
+    "categoryCol": "Danh Mục",
+    "countCol": "Số Khoản Chi",
+    "amountCol": "Tổng Số Tiền",
+    "pctCol": "Tỷ Lệ %",
+    "noData": "Chưa có dữ liệu chi tiêu trong khoảng thời gian này.",
+    "viewGroup": "Xem nhóm"
+  },
+  "dataTable": {
+    "searchPlaceholder": "Tìm kiếm...",
+    "exportCsv": "Xuất CSV",
+    "rowCount_one": "{{count}} dòng",
+    "rowCount_other": "{{count}} dòng",
+    "noData": "Không có dữ liệu"
+  },
+  "chart": {
+    "noData": "Không có dữ liệu"
   }
 }

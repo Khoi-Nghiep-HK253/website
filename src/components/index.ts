@@ -4,3 +4,5 @@ export * from './CustomTabPanel';
 export * from './LanguageSwitcher';
 export * from './DivvySimulator';
 export * from './Media';
+export * from './DataTable';
+export * from './AgChart';

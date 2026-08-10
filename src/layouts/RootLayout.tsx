@@ -22,6 +22,8 @@ import {
   HomeOutlined as HomeOutlinedIcon,
   Group as GroupIcon,
   GroupOutlined as GroupOutlinedIcon,
+  Dashboard as DashboardIcon,
+  DashboardOutlined as DashboardOutlinedIcon,
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
   Person as PersonIcon,
@@ -128,6 +130,26 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
                   </Button>
                 )}
               </NavLink>
+
+              {isAuthenticated && (
+                <NavLink to={PATHS.DASHBOARD} style={{ textDecoration: 'none' }}>
+                  {({ isActive }) => (
+                    <Button
+                      startIcon={isActive ? <DashboardIcon /> : <DashboardOutlinedIcon />}
+                      sx={{
+                        color: isActive ? 'primary.main' : 'text.secondary',
+                        fontWeight: isActive ? 700 : 500,
+                        borderBottom: isActive ? 2 : 0,
+                        borderColor: 'primary.main',
+                        borderRadius: 0,
+                        whitespace: 'nowrap',
+                      }}
+                    >
+                      {t('nav.dashboard')}
+                    </Button>
+                  )}
+                </NavLink>
+              )}
 
               <NavLink to={PATHS.GROUPS.LIST} style={{ textDecoration: 'none' }}>
                 {({ isActive }) => (
@@ -326,6 +348,25 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
               />
             </ListItemButton>
           </ListItem>
+
+          {isAuthenticated && (
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  navigate(PATHS.DASHBOARD);
+                  setMobileOpen(false);
+                }}
+              >
+                <ListItemIcon>
+                  <DashboardIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('nav.dashboard')}
+                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                />
+              </ListItemButton>
+            </ListItem>
+          )}
 
           <ListItem disablePadding>
             <ListItemButton

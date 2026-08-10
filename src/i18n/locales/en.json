@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "Home",
+    "dashboard": "Dashboard",
     "groups": "My Groups",
     "profile": "Profile",
     "profileAndInvitations": "Profile & Invitations",
@@ -444,5 +445,68 @@
     "viewAttachment": "View Enlarge Image",
     "uploadedBy": "Uploaded by",
     "uploadError": "Failed to upload file. Please try again."
+  },
+  "debtSimulator": {
+    "title": "Divvy Automated Debt Calculation Simulator",
+    "subtitle": "Try tweaking expense details to see how Divvy algorithm automatically nets \"Who owes Whom\"!",
+    "section1Title": "1. Expense Information",
+    "descLabel": "Expense Description",
+    "totalLabel": "Total Invoice Amount (VND)",
+    "payersTitle": "Expense Payers:",
+    "paidLabel": "Paid Advance",
+    "section2Title": "2. Calculated Debts",
+    "debtsCount": "{{count}} pending debts",
+    "nettingHint": "System automatically balances advance payments and share per person ({{amount}} VND/person):",
+    "allBalanced": "All members are settled! No outstanding debts.",
+    "settledStatus": "Paid",
+    "settleBtn": "Settle Debt",
+    "footerTip": "💡 Divvy optimizes algorithms to minimize total transfer transactions among members.",
+    "defaultDescription": "Group Hotpot Dinner",
+    "defaultMemberA": "Member A (Primary Payer)",
+    "defaultMemberB": "Member B (Co-Payer)",
+    "defaultMemberC": "Member C",
+    "defaultMemberD": "Member D"
+  },
+  "dashboard": {
+    "title": "Dashboard & Financial Analytics",
+    "subtitle": "Overview of personal & group budgets, category breakdown, and spending trends",
+    "filterScopeAll": "All Groups",
+    "startDateLabel": "Start Date & Time",
+    "endDateLabel": "End Date & Time",
+    "filterTimeRange": "Time Range",
+    "rangeToday": "Today",
+    "rangeWeek": "This Week",
+    "rangeMonth": "This Month",
+    "rangeLastMonth": "Last Month",
+    "rangeYear": "This Year",
+    "groupByDay": "By Day",
+    "groupByWeek": "By Week",
+    "groupByMonth": "By Month",
+    "kpiPersonalShare": "My Personal Share",
+    "kpiGroupExpense": "Total Group Expense",
+    "kpiOwedToMe": "Owed To Me (Collect)",
+    "kpiUserOwes": "I Owe (Pay Out)",
+    "categoryTitle": "Spending by Category",
+    "categorySub": "Percentage breakdown of budget allocation",
+    "trendTitle": "Spending Trend over Time",
+    "trendSub": "Fluctuations of total expense amounts across time periods",
+    "topExpensesTitle": "Top Highest Expenses",
+    "categoryTableTitle": "Detailed Category Statistics",
+    "categoryCol": "Category",
+    "countCol": "Expense Count",
+    "amountCol": "Total Amount",
+    "pctCol": "Percentage (%)",
+    "noData": "No spending data available in this time period.",
+    "viewGroup": "View Group"
+  },
+  "dataTable": {
+    "searchPlaceholder": "Search...",
+    "exportCsv": "Export CSV",
+    "rowCount_one": "{{count}} row",
+    "rowCount_other": "{{count}} rows",
+    "noData": "No data available"
+  },
+  "chart": {
+    "noData": "No data available"
   }
 }

@@ -13,6 +13,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import { useTranslation } from 'react-i18next';
 
 import type { Member, CalculatedDebt, DebtSimulatorProps } from './DebtSimulator.types';
 
@@ -69,21 +70,33 @@ const getAvatarInitial = (name: string): string => {
 };
 
 export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
-  initialDescription = 'Ăn lẩu thái cùng nhóm',
+  initialDescription,
   initialTotalAmount = 1000000,
-  initialMembers = [
-    { id: '1', name: 'Bạn A (Ứng chính)', avatarColor: '#10b981', paid: 800000, share: 250000 },
-    { id: '2', name: 'Bạn B (Góp thêm)', avatarColor: '#6366f1', paid: 200000, share: 250000 },
-    { id: '3', name: 'Bạn C', avatarColor: '#f59e0b', paid: 0, share: 250000 },
-    { id: '4', name: 'Bạn D', avatarColor: '#ec4899', paid: 0, share: 250000 },
-  ],
+  initialMembers,
 }) => {
-  const [description, setDescription] = useState(initialDescription);
+  const { t } = useTranslation();
+
+  const defaultDesc = useMemo(
+    () => initialDescription || t('debtSimulator.defaultDescription'),
+    [initialDescription, t]
+  );
+
+  const defaultMembers = useMemo(() => {
+    if (initialMembers) return initialMembers;
+    return [
+      { id: '1', name: t('debtSimulator.defaultMemberA'), avatarColor: '#10b981', paid: 800000, share: 250000 },
+      { id: '2', name: t('debtSimulator.defaultMemberB'), avatarColor: '#6366f1', paid: 200000, share: 250000 },
+      { id: '3', name: t('debtSimulator.defaultMemberC'), avatarColor: '#f59e0b', paid: 0, share: 250000 },
+      { id: '4', name: t('debtSimulator.defaultMemberD'), avatarColor: '#ec4899', paid: 0, share: 250000 },
+    ];
+  }, [initialMembers, t]);
+
+  const [description, setDescription] = useState(defaultDesc);
   const [totalAmount, setTotalAmount] = useState<number>(initialTotalAmount);
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [members, setMembers] = useState<Member[]>(defaultMembers);
 
   const [debts, setDebts] = useState<CalculatedDebt[]>(() =>
-    calculateInitialDebts(initialMembers, initialTotalAmount)
+    calculateInitialDebts(defaultMembers, initialTotalAmount)
   );
 
   const sharePerMember = useMemo(() => {
@@ -137,10 +150,10 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
         </Avatar>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            Mô Phỏng Bộ Tính Công Nợ Tự Động Divvy
+            {t('debtSimulator.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Thử thay đổi thông tin khoản chi để xem thuật toán Divvy tự động cấn trừ "Ai nợ Ai"!
+            {t('debtSimulator.subtitle')}
           </Typography>
         </Box>
       </Box>
@@ -157,13 +170,13 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <ReceiptLongIcon color="primary" />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              1. Thông tin Khoản chi
+              {t('debtSimulator.section1Title')}
             </Typography>
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
-              label="Mô tả khoản chi"
+              label={t('debtSimulator.descLabel')}
               size="small"
               fullWidth
               value={description}
@@ -171,7 +184,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
             />
 
             <TextField
-              label="Tổng tiền hóa đơn (VNĐ)"
+              label={t('debtSimulator.totalLabel')}
               type="number"
               size="small"
               fullWidth
@@ -182,7 +195,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
             <Divider sx={{ my: 1 }} />
 
             <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 'bold' }}>
-              Người đứng ra thanh toán (Expense Payers):
+              {t('debtSimulator.payersTitle')}
             </Typography>
 
             {members.map((member) => {
@@ -213,7 +226,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
                     <TextField
                       size="small"
                       type="number"
-                      label="Ứng trước"
+                      label={t('debtSimulator.paidLabel')}
                       value={member.paid}
                       onChange={(e) => handleUpdatePaid(member.id, Number(e.target.value))}
                       sx={{ width: 130 }}
@@ -247,22 +260,21 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <AccountBalanceIcon color="secondary" />
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                2. Kết quả Công nợ (Debts)
+                {t('debtSimulator.section2Title')}
               </Typography>
             </Box>
-            <Chip label={`${debts.length} khoản nợ cần xử lý`} color="secondary" size="small" />
+            <Chip label={t('debtSimulator.debtsCount', { count: debts.length })} color="secondary" size="small" />
           </Box>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Hệ thống tự động tính toán đối trừ phần ứng tiền và phần tiền phải chịu (
-            <strong>{sharePerMember.toLocaleString()}đ/người</strong>):
+            {t('debtSimulator.nettingHint', { amount: sharePerMember.toLocaleString() })}
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flexGrow: 1 }}>
             {debts.length === 0 ? (
               <Box sx={{ py: 4, textAlign: 'center', color: 'text.secondary' }}>
                 <CheckCircleIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
-                <Typography variant="body2">Tất cả thành viên đã hòa tiền! Không có công nợ.</Typography>
+                <Typography variant="body2">{t('debtSimulator.allBalanced')}</Typography>
               </Box>
             ) : (
               debts.map((debt) => (
@@ -295,7 +307,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
                   {debt.status === 'SETTLED' ? (
                     <Chip
                       icon={<CheckCircleIcon />}
-                      label="Đã thanh toán"
+                      label={t('debtSimulator.settledStatus')}
                       color="success"
                       size="small"
                       sx={{ fontWeight: 'bold' }}
@@ -308,7 +320,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
                       onClick={() => handleSettle(debt.id)}
                       sx={{ fontSize: '0.75rem', borderRadius: 2 }}
                     >
-                      Trả nợ (Settle)
+                      {t('debtSimulator.settleBtn')}
                     </Button>
                   )}
                 </Paper>
@@ -318,7 +330,7 @@ export const DebtSimulator: React.FC<DebtSimulatorProps> = ({
 
           <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
             <Typography variant="caption" color="text.secondary">
-              💡 Divvy tối ưu thuật toán giảm thiểu tối đa số giao dịch cần chuyển tiền giữa các thành viên.
+              {t('debtSimulator.footerTip')}
             </Typography>
           </Box>
         </Paper>
