@@ -76,7 +76,7 @@ axiosClient.interceptors.response.use(
           break;
       }
     } else if (error.request) {
-      errorMessage = 'Unable to connect to backend server at http://localhost:8080';
+      errorMessage = 'Unable to connect to the backend server. Please check your connection.';
       console.error('[API Network Error] No response received from server:', error.request);
     } else {
       errorMessage = error.message;
