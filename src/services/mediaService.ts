@@ -1,6 +1,6 @@
 import { axiosClient, type ApiResponse } from '@/core/config/axiosClient';
 
-export type MediaEntityType = 'EXPENSE' | 'SETTLEMENT' | 'USER_AVATAR' | 'GROUP_AVATAR' | 'GROUP_COVER';
+export type MediaEntityType = 'EXPENSE' | 'SETTLEMENT' | 'USER_AVATAR' | 'GROUP_AVATAR' | 'GROUP_COVER' | 'USER_COVER';
 
 export interface MediaAttachmentResponse {
   id: number;
@@ -54,9 +54,20 @@ export const mediaService = {
   },
 
   /**
+   * Select a previously uploaded media attachment to make it active.
+   */
+  async selectMedia(id: number): Promise<MediaAttachmentResponse> {
+    const response = await axiosClient.post<unknown, ApiResponse<MediaAttachmentResponse>>(
+      `/media/${id}/select`
+    );
+    return response.data;
+  },
+
+  /**
    * Delete a media attachment by ID (only allowed for uploader).
    */
   async deleteAttachment(id: number): Promise<void> {
     await axiosClient.delete(`/media/${id}`);
   },
 };
+

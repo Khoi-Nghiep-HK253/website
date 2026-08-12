@@ -10,11 +10,14 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Tooltip from '@mui/material/Tooltip';
 import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DownloadIcon from '@mui/icons-material/Download';
 import CollectionsIcon from '@mui/icons-material/Collections';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import { useTranslation } from 'react-i18next';
 import type { MediaAttachmentResponse } from '@/services/mediaService';
 import { Alert } from '@/components/Alert';
@@ -27,6 +30,8 @@ export interface MediaGalleryProps {
   allowDelete?: boolean;
   onDeleteAttachment?: (id: number) => void;
   isDeleting?: boolean;
+  onSelectAttachment?: (id: number) => void;
+  isSelecting?: boolean;
 }
 
 export const MediaGallery: React.FC<MediaGalleryProps> = ({
@@ -37,6 +42,8 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
   allowDelete,
   onDeleteAttachment,
   isDeleting = false,
+  onSelectAttachment,
+  isSelecting = false,
 }) => {
   const { t } = useTranslation();
 
@@ -44,6 +51,13 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
   const [deleteTarget, setDeleteTarget] = useState<MediaAttachmentResponse | null>(null);
 
   const attachmentCount = useMemo(() => attachments.length, [attachments]);
+
+  // The latest attachment in the array is considered currently active
+  const activeAttachment = useMemo(
+    () => (attachments.length > 0 ? attachments[attachments.length - 1] : null),
+    [attachments]
+  );
+  const activeId = activeAttachment?.id;
 
   const handleDeleteConfirm = useCallback(() => {
     if (!deleteTarget || !onDeleteAttachment) return;
@@ -53,6 +67,14 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
       setSelectedImage(null);
     }
   }, [deleteTarget, onDeleteAttachment, selectedImage?.id]);
+
+  const handleSelectActive = useCallback(
+    (id: number) => {
+      if (!onSelectAttachment) return;
+      onSelectAttachment(id);
+    },
+    [onSelectAttachment]
+  );
 
   const handleCloseLightbox = useCallback(() => {
     setSelectedImage(null);
@@ -117,6 +139,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
       >
         {attachments.map((item) => {
           const isOwner = allowDelete !== undefined ? allowDelete : (!currentUsername || item.uploadedBy === currentUsername);
+          const isActive = item.id === activeId;
 
           return (
             <Paper
@@ -128,6 +151,9 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                 overflow: 'hidden',
                 aspectRatio: '1',
                 cursor: 'pointer',
+                border: isActive ? '2px solid' : '1px solid',
+                borderColor: isActive ? 'success.main' : 'divider',
+                boxShadow: isActive ? '0 0 0 2px rgba(16, 185, 129, 0.2)' : 'none',
                 '&:hover .overlay': {
                   opacity: 1,
                 },
@@ -145,6 +171,26 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                   display: 'block',
                 }}
               />
+
+              {/* Active Badge indicator on top corner */}
+              {onSelectAttachment && isActive && (
+                <Chip
+                  icon={<CheckCircleIcon sx={{ fontSize: '13px !important', color: 'white !important' }} />}
+                  label={t('media.currentlyActive') || 'Đang dùng'}
+                  color="success"
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: 6,
+                    left: 6,
+                    zIndex: 2,
+                    height: 22,
+                    fontSize: '0.675rem',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                  }}
+                />
+              )}
 
               {/* Hover Overlay */}
               <Box
@@ -166,6 +212,23 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                     <VisibilityIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
+
+                {/* Select as active button */}
+                {onSelectAttachment && !isActive && (
+                  <Tooltip title={t('media.selectAsActive') || 'Đặt làm ảnh đang sử dụng'}>
+                    <IconButton
+                      size="small"
+                      sx={{ color: 'white', bgcolor: 'rgba(16, 185, 129, 0.8)', '&:hover': { bgcolor: 'success.main' } }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectActive(item.id);
+                      }}
+                      disabled={isSelecting}
+                    >
+                      {isSelecting ? <CircularProgress size={16} color="inherit" /> : <CheckCircleOutlinedIcon fontSize="small" />}
+                    </IconButton>
+                  </Tooltip>
+                )}
 
                 {isOwner && onDeleteAttachment && (
                   <Tooltip title={t('common.delete')}>
@@ -205,9 +268,20 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
             pb: 1,
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            {selectedImage?.fileName || t('media.title')}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              {selectedImage?.fileName || t('media.title')}
+            </Typography>
+            {onSelectAttachment && selectedImage?.id === activeId && (
+              <Chip
+                icon={<CheckCircleIcon sx={{ fontSize: '14px !important' }} />}
+                label={t('media.currentlyActive') || 'Đang sử dụng'}
+                color="success"
+                size="small"
+                sx={{ height: 24, fontWeight: 700 }}
+              />
+            )}
+          </Box>
           <IconButton size="small" onClick={handleCloseLightbox}>
             <CloseIcon />
           </IconButton>
@@ -234,7 +308,24 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
             {selectedImage?.uploadedBy ? `${t('media.uploadedBy')}: ${selectedImage.uploadedBy}` : ''}
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            {onSelectAttachment && selectedImage && selectedImage.id !== activeId && (
+              <Button
+                size="small"
+                variant="contained"
+                color="success"
+                startIcon={isSelecting ? <CircularProgress size={16} color="inherit" /> : <CheckCircleIcon />}
+                disabled={isSelecting}
+                onClick={() => {
+                  handleSelectActive(selectedImage.id);
+                  handleCloseLightbox();
+                }}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                {t('media.selectAsActive') || 'Đặt làm ảnh đang dùng'}
+              </Button>
+            )}
+
             {selectedImage && (
               <Button
                 component="a"

@@ -280,6 +280,8 @@
   "groupDetail": {
     "backToList": "Back to List",
     "groupNotFound": "Group Not Found",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
     "groupNotFoundSub": "Group does not exist or you do not have access permission.",
     "addExpenseBtn": "Add New Expense",
     "inviteMemberBtn": "Invite Member",
@@ -444,7 +446,15 @@
     "noAttachments": "No media attachments or receipts uploaded yet.",
     "viewAttachment": "View Enlarge Image",
     "uploadedBy": "Uploaded by",
-    "uploadError": "Failed to upload file. Please try again."
+    "uploadError": "Failed to upload file. Please try again.",
+    "selectAsActive": "Set as active photo",
+    "currentlyActive": "In use",
+    "uploadUserCoverTitle": "Edit Profile Cover Photo",
+    "uploadUserCoverLabel": "Upload new profile cover photo",
+    "uploadUserAvatarTitle": "Edit Profile Avatar Photo",
+    "uploadUserAvatarLabel": "Upload new profile avatar photo",
+    "manageUserCoverTooltip": "Manage profile cover photo",
+    "manageUserAvatarTooltip": "Change profile avatar photo"
   },
   "debtSimulator": {
     "title": "Divvy Automated Debt Calculation Simulator",

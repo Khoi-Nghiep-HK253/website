@@ -280,6 +280,8 @@
   "groupDetail": {
     "backToList": "Trở về Danh sách",
     "groupNotFound": "Không tìm thấy nhóm",
+    "createdAt": "Ngày tạo",
+    "updatedAt": "Ngày cập nhật",
     "groupNotFoundSub": "Nhóm không tồn tại hoặc bạn chưa có quyền truy cập.",
     "addExpenseBtn": "Thêm Khoản Chi Mới",
     "inviteMemberBtn": "Mời Thành Viên",
@@ -447,7 +449,15 @@
     "noAttachments": "Chưa có hình ảnh/hóa đơn đính kèm.",
     "viewAttachment": "Xem ảnh lớn",
     "uploadedBy": "Đăng bởi",
-    "uploadError": "Tải tệp lên thất bại. Vui lòng thử lại."
+    "uploadError": "Tải tệp lên thất bại. Vui lòng thử lại.",
+    "selectAsActive": "Đặt làm ảnh đang dùng",
+    "currentlyActive": "Đang sử dụng",
+    "uploadUserCoverTitle": "Chỉnh sửa ảnh bìa cá nhân",
+    "uploadUserCoverLabel": "Tải ảnh bìa cá nhân mới lên",
+    "uploadUserAvatarTitle": "Chỉnh sửa ảnh đại diện cá nhân",
+    "uploadUserAvatarLabel": "Tải ảnh đại diện cá nhân mới lên",
+    "manageUserCoverTooltip": "Chỉnh sửa ảnh bìa cá nhân",
+    "manageUserAvatarTooltip": "Thay đổi ảnh đại diện"
   },
   "debtSimulator": {
     "title": "Mô Phỏng Bộ Tính Công Nợ Tự Động Divvy",

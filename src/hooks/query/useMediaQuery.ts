@@ -52,3 +52,21 @@ export function useDeleteMediaMutation() {
     },
   });
 }
+
+export function useSelectMediaMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    MediaAttachmentResponse,
+    Error,
+    { id: number; entityType: MediaEntityType; entityId: number }
+  >({
+    mutationFn: ({ id }) => mediaService.selectMedia(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: MEDIA_QUERY_KEYS.attachments(data.entityType, data.entityId),
+      });
+    },
+  });
+}
+

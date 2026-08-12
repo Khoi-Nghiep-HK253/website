@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { MediaGallery } from '@/components/Media/MediaGallery';
-import { useEntityAttachments, useDeleteMediaMutation } from '@/hooks/query/useMediaQuery';
+import { useEntityAttachments, useDeleteMediaMutation, useSelectMediaMutation } from '@/hooks/query/useMediaQuery';
 import type { MediaEntityType } from '@/services/mediaService';
 
 export interface MediaGalleryContainerProps {
@@ -18,6 +18,7 @@ export const MediaGalleryContainer: React.FC<MediaGalleryContainerProps> = ({
 }) => {
   const { data: attachments = [], isPending, error } = useEntityAttachments(entityType, entityId);
   const deleteMutation = useDeleteMediaMutation();
+  const selectMutation = useSelectMediaMutation();
 
   const handleDeleteAttachment = useCallback(
     (id: number) => {
@@ -25,6 +26,15 @@ export const MediaGalleryContainer: React.FC<MediaGalleryContainerProps> = ({
     },
     [deleteMutation, entityId, entityType]
   );
+
+  const handleSelectAttachment = useCallback(
+    (id: number) => {
+      selectMutation.mutate({ id, entityType, entityId });
+    },
+    [selectMutation, entityId, entityType]
+  );
+
+  const isAvatarOrCover = ['USER_AVATAR', 'GROUP_AVATAR', 'GROUP_COVER', 'USER_COVER'].includes(entityType);
 
   return (
     <MediaGallery
@@ -35,6 +45,9 @@ export const MediaGalleryContainer: React.FC<MediaGalleryContainerProps> = ({
       allowDelete={allowDelete}
       onDeleteAttachment={handleDeleteAttachment}
       isDeleting={deleteMutation.isPending}
+      onSelectAttachment={isAvatarOrCover ? handleSelectAttachment : undefined}
+      isSelecting={selectMutation.isPending}
     />
   );
 };
+
