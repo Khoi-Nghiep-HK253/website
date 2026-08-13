@@ -53,12 +53,36 @@ export function useGroupDetailStore(groupId: number) {
   const { data: group, isPending: isGroupPending, error: groupError } = useGroupDetail(groupId);
   useDocumentTitle(group?.name ? `${group.name}` : t('groups.title'));
 
-  const { data: members = [] } = useGroupMembers(groupId);
+  const { data: members = [], refetch: refetchMembers } = useGroupMembers(groupId);
   const { data: currencies = [] } = useCurrencies();
-  const { data: expensesData } = useGroupExpenses(groupId);
-  const { data: debtsSummary } = useGroupDebtSummary(groupId);
-  const { data: myDebts } = useMyDebts(groupId);
-  const { data: settlementsData } = useGroupSettlements(groupId);
+  const { data: expensesData, refetch: refetchExpenses } = useGroupExpenses(groupId);
+  const { data: debtsSummary, refetch: refetchDebtsSummary } = useGroupDebtSummary(groupId);
+  const { data: myDebts, refetch: refetchMyDebts } = useMyDebts(groupId);
+  const { data: settlementsData, refetch: refetchSettlements } = useGroupSettlements(groupId);
+
+  const handleTabChange = useCallback(
+    (newTab: number) => {
+      setActiveTab(newTab);
+      switch (newTab) {
+        case 0:
+          refetchExpenses();
+          break;
+        case 1:
+          refetchDebtsSummary();
+          refetchMyDebts();
+          break;
+        case 2:
+          refetchMembers();
+          break;
+        case 3:
+          refetchSettlements();
+          break;
+        default:
+          break;
+      }
+    },
+    [refetchExpenses, refetchDebtsSummary, refetchMyDebts, refetchMembers, refetchSettlements]
+  );
 
   // Mutations
   const createExpenseMutation = useCreateExpenseMutation();
@@ -226,7 +250,8 @@ export function useGroupDetailStore(groupId: number) {
     isOwner,
     user,
     activeTab,
-    setActiveTab,
+    setActiveTab: handleTabChange,
+    handleTabChange,
     activeModal,
     openModal,
     closeModal,

@@ -19,7 +19,6 @@ import Tooltip from '@mui/material/Tooltip';
 import {
   AccountBalanceWallet as WalletIcon,
   Home as HomeIcon,
-  HomeOutlined as HomeOutlinedIcon,
   Group as GroupIcon,
   GroupOutlined as GroupOutlinedIcon,
   Dashboard as DashboardIcon,
@@ -113,61 +112,45 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
 
             {/* Desktop Navigation Links */}
             <Box component="nav" sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, ml: 2 }}>
-              <NavLink to={PATHS.HOME} style={{ textDecoration: 'none' }}>
-                {({ isActive }) => (
-                  <Button
-                    startIcon={isActive ? <HomeIcon /> : <HomeOutlinedIcon />}
-                    sx={{
-                      color: isActive ? 'primary.main' : 'text.secondary',
-                      fontWeight: isActive ? 700 : 500,
-                      borderBottom: isActive ? 2 : 0,
-                      borderColor: 'primary.main',
-                      borderRadius: 0,
-                      whitespace: 'nowrap',
-                    }}
-                  >
-                    {t('nav.home')}
-                  </Button>
-                )}
-              </NavLink>
-
               {isAuthenticated && (
-                <NavLink to={PATHS.DASHBOARD} style={{ textDecoration: 'none' }}>
-                  {({ isActive }) => (
-                    <Button
-                      startIcon={isActive ? <DashboardIcon /> : <DashboardOutlinedIcon />}
-                      sx={{
-                        color: isActive ? 'primary.main' : 'text.secondary',
-                        fontWeight: isActive ? 700 : 500,
-                        borderBottom: isActive ? 2 : 0,
-                        borderColor: 'primary.main',
-                        borderRadius: 0,
-                        whitespace: 'nowrap',
-                      }}
-                    >
-                      {t('nav.dashboard')}
-                    </Button>
-                  )}
-                </NavLink>
-              )}
+                <>
+                  <NavLink to={PATHS.DASHBOARD} style={{ textDecoration: 'none' }}>
+                    {({ isActive }) => (
+                      <Button
+                        startIcon={isActive ? <DashboardIcon /> : <DashboardOutlinedIcon />}
+                        sx={{
+                          color: isActive ? 'primary.main' : 'text.secondary',
+                          fontWeight: isActive ? 700 : 500,
+                          borderBottom: isActive ? 2 : 0,
+                          borderColor: 'primary.main',
+                          borderRadius: 0,
+                          whitespace: 'nowrap',
+                        }}
+                      >
+                        {t('nav.dashboard')}
+                      </Button>
+                    )}
+                  </NavLink>
 
-              <NavLink to={PATHS.GROUPS.LIST} style={{ textDecoration: 'none' }}>
-                {({ isActive }) => (
-                  <Button
-                    startIcon={isActive ? <GroupIcon /> : <GroupOutlinedIcon />}
-                    sx={{
-                      color: isActive ? 'primary.main' : 'text.secondary',
-                      fontWeight: isActive ? 700 : 500,
-                      borderBottom: isActive ? 2 : 0,
-                      borderColor: 'primary.main',
-                      borderRadius: 0,
-                      whitespace: 'nowrap',
-                    }}
-                  >
-                    {t('nav.groups')}
-                  </Button>
-                )}
-              </NavLink>
+                  <NavLink to={PATHS.GROUPS.LIST} style={{ textDecoration: 'none' }}>
+                    {({ isActive }) => (
+                      <Button
+                        startIcon={isActive ? <GroupIcon /> : <GroupOutlinedIcon />}
+                        sx={{
+                          color: isActive ? 'primary.main' : 'text.secondary',
+                          fontWeight: isActive ? 700 : 500,
+                          borderBottom: isActive ? 2 : 0,
+                          borderColor: 'primary.main',
+                          borderRadius: 0,
+                          whitespace: 'nowrap',
+                        }}
+                      >
+                        {t('nav.groups')}
+                      </Button>
+                    )}
+                  </NavLink>
+                </>
+              )}
             </Box>
           </Box>
 
@@ -350,40 +333,42 @@ export const RootLayout: React.FC<RootLayoutProps> = () => {
           </ListItem>
 
           {isAuthenticated && (
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  navigate(PATHS.DASHBOARD);
-                  setMobileOpen(false);
-                }}
-              >
-                <ListItemIcon>
-                  <DashboardIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={t('nav.dashboard')}
-                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
-                />
-              </ListItemButton>
-            </ListItem>
-          )}
+            <>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    navigate(PATHS.DASHBOARD);
+                    setMobileOpen(false);
+                  }}
+                >
+                  <ListItemIcon>
+                    <DashboardIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={t('nav.dashboard')}
+                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  />
+                </ListItemButton>
+              </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => {
-                navigate(PATHS.GROUPS.LIST);
-                setMobileOpen(false);
-              }}
-            >
-              <ListItemIcon>
-                <GroupIcon color="primary" />
-              </ListItemIcon>
-              <ListItemText
-                primary={t('nav.groups')}
-                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
-              />
-            </ListItemButton>
-          </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    navigate(PATHS.GROUPS.LIST);
+                    setMobileOpen(false);
+                  }}
+                >
+                  <ListItemIcon>
+                    <GroupIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={t('nav.groups')}
+                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
 
           {isAuthenticated && (
             <ListItem disablePadding>

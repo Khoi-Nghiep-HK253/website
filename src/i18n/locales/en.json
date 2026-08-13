@@ -89,8 +89,8 @@
   },
   "home": {
     "badge": "#1 Transparent Group Expense Management App",
-    "heroTitle": "Divvy – Smart Ledger For Every Friend Group & Family",
-    "heroSub": "Manage shared expenses transparently, automatically, and conveniently. Automatically balance debts between members, eliminate confusion and settle money disputes after every trip, dining, or group activity.",
+    "heroTitle": "Split Fairly, Stay Friends Forever with Divvy",
+    "heroSub": "The smart group ledger that automatically calculates debt settlements for trips, housemates, and friends — eliminate the worry of miscalculations and make debt collection easy.",
     "welcomeUser": "Welcome {{username}}! You are ready to manage groups.",
     "enterGroups": "Go to My Groups",
     "exploreGroups": "Explore Expense Groups",
@@ -518,5 +518,40 @@
   },
   "chart": {
     "noData": "No data available"
+  },
+  "welcome": {
+    "badge": "Welcome to Divvy!",
+    "heroTitle": "Welcome {{username}} to Divvy! 🎉",
+    "heroTitleGuest": "Welcome to Divvy! 🎉",
+    "heroSub": "Thank you for choosing Divvy to split expenses fairly and keep the fun alive. Take 1 minute to complete the brief survey below to help us serve you best!",
+    "surveyTitle": "📋 User Onboarding Survey",
+    "q1Label": "1. What is your primary use case?",
+    "goalTravel": "Trips & Vacations",
+    "goalDining": "Dining with Friends",
+    "goalHomemates": "Housemates / Roommates",
+    "goalSports": "Sports & Clubs",
+    "goalOther": "Other Purpose",
+    "q2Label": "2. How many members are usually in your group?",
+    "sizeSmall": "2 - 5 members",
+    "sizeMedium": "6 - 10 members",
+    "sizeLarge": "Over 10 members",
+    "q3Label": "3. What was your biggest challenge with group expenses before?",
+    "pain1": "Awkward to ask for money or forgetting to collect debt",
+    "pain2": "Complex debt calculations prone to mistakes",
+    "pain3": "Time-consuming manual record keeping",
+    "pain4": "Lack of transparency among members",
+    "q4Label": "4. Rate your initial impression of Divvy",
+    "q5Label": "5. Any feedback or features you would like to request?",
+    "feedbackPlaceholder": "Enter your feedback or suggestions here...",
+    "submitBtn": "Complete & Submit Survey",
+    "submitting": "Submitting survey...",
+    "submitError": "Failed to submit survey. Please try again."
+  },
+  "thankYou": {
+    "title": "Thank You For Your Feedback! 🎉",
+    "sub": "Your valuable feedback drives the Divvy team to continuously improve our platform. We are committed to giving you a fair, transparent, and effortless expense splitting experience!",
+    "btnCreateGroup": "Create First Expense Group",
+    "btnDashboard": "Go to Dashboard",
+    "btnHome": "Home Page"
   }
 }

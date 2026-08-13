@@ -25,6 +25,8 @@ export const PATHS = {
 
   PROFILE: '/profile',
   SETTINGS: '/settings',
+  WELCOME: '/welcome',
+  THANK_YOU: '/thank-you',
   NOT_FOUND: '*',
 
   // Backward-compatible top-level aliases

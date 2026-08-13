@@ -89,8 +89,8 @@
   },
   "home": {
     "badge": "Ứng dụng quản lý chi tiêu nhóm minh bạch #1",
-    "heroTitle": "Divvy – Sổ Quỹ Thông Minh Cho Mọi Nhóm Bạn & Gia Đình",
-    "heroSub": "Quản lý chi tiêu chung một cách minh bạch, tự động và tiện lợi. Tự động cấn trừ công nợ giữa các thành viên, xóa bỏ nhầm lẫn và dẹp tan tranh cãi tiền bạc sau mỗi chuyến du lịch, ăn uống hay sinh hoạt nhóm.",
+    "heroTitle": "Chia Tiền Sòng Phẳng, Giữ Trọn Cuộc Vui Cùng Divvy",
+    "heroSub": "Sổ quỹ thông minh giúp tự động cấn trừ công nợ và tính toán minh bạch cho mọi chuyến du lịch, nhóm bạn & gia đình — xóa tan lo ngại tính nhầm, dễ dàng thu nợ.",
     "welcomeUser": "Xin chào {{username}}! Bạn đã sẵn sàng quản lý nhóm.",
     "enterGroups": "Vào Danh Sách Nhóm",
     "exploreGroups": "Khám Phá Các Nhóm Chi Tiêu",
@@ -521,5 +521,40 @@
   },
   "chart": {
     "noData": "Không có dữ liệu"
+  },
+  "welcome": {
+    "badge": "Chào mừng bạn đến với Divvy!",
+    "heroTitle": "Chào mừng {{username}} gia nhập Divvy! 🎉",
+    "heroTitleGuest": "Chào mừng bạn gia nhập Divvy! 🎉",
+    "heroSub": "Cảm ơn bạn đã lựa chọn Divvy để chia tiền sòng phẳng và giữ trọn cuộc vui. Dành 1 phút hoàn thành cuộc khảo sát ngắn bên dưới để giúp chúng tôi mang lại trải nghiệm tốt nhất cho bạn nhé!",
+    "surveyTitle": "📋 Khảo sát trải nghiệm người dùng",
+    "q1Label": "1. Nhu cầu sử dụng chính của bạn là gì?",
+    "goalTravel": "Du lịch & Dã ngoại",
+    "goalDining": "Ăn uống bạn bè",
+    "goalHomemates": "Trọ / Ở chung nhà",
+    "goalSports": "CLB & Thể thao",
+    "goalOther": "Mục đích khác",
+    "q2Label": "2. Nhóm của bạn thường có bao nhiêu thành viên?",
+    "sizeSmall": "2 - 5 người",
+    "sizeMedium": "6 - 10 người",
+    "sizeLarge": "Trên 10 người",
+    "q3Label": "3. Trăn trở lớn nhất của bạn khi quản lý chi tiêu nhóm trước đây?",
+    "pain1": "Ngại đòi nợ hoặc hay bị quên đòi",
+    "pain2": "Tính toán cấn trừ phức tạp, dễ nhầm lẫn",
+    "pain3": "Mất nhiều thời gian ghi chép thủ công",
+    "pain4": "Thiếu minh bạch giữa các thành viên",
+    "q4Label": "4. Đánh giá ấn tượng ban đầu của bạn dành cho ứng dụng Divvy",
+    "q5Label": "5. Ý kiến đóng góp hoặc mong muốn thêm tính năng gì tại Divvy?",
+    "feedbackPlaceholder": "Nhập ý kiến đóng góp chân thành của bạn tại đây...",
+    "submitBtn": "Hoàn Tất & Gửi Khảo Sát",
+    "submitting": "Đang gửi khảo sát...",
+    "submitError": "Gửi khảo sát thất bại. Vui lòng thử lại."
+  },
+  "thankYou": {
+    "title": "Cảm Ơn Bạn Đã Gửi Khảo Sát! 🎉",
+    "sub": "Ý kiến quý báu của bạn là động lực rất lớn giúp đội ngũ Divvy liên tục cải tiến sản phẩm. Chúng tôi cam kết mang tới cho bạn trải nghiệm chia tiền nhóm sòng phẳng, minh bạch và tiện lợi nhất!",
+    "btnCreateGroup": "Tạo Nhóm Chi Tiêu Đầu Tiên",
+    "btnDashboard": "Vào Bảng Điều Khiển",
+    "btnHome": "Trang Chủ"
   }
 }
