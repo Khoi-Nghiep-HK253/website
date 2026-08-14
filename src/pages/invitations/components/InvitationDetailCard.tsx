@@ -42,7 +42,8 @@ export const InvitationDetailCard: React.FC<InvitationDetailCardProps> = ({
           p: 2.5,
           mb: 3,
           borderRadius: 2,
-          bgcolor: '#f1f5f9',
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc'),
+          borderColor: 'divider',
           textAlign: 'left',
         }}
       >
@@ -72,7 +73,7 @@ export const InvitationDetailCard: React.FC<InvitationDetailCardProps> = ({
 
         <Box sx={{ mt: 1.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Chip
-            label={`Trạng thái: ${invitation.status}`}
+            label={`${t('invitation.statusLabel')}: ${t(`invitation.${invitation.status.toLowerCase()}`, { defaultValue: invitation.status })}`}
             color={invitation.status === 'PENDING' ? 'warning' : 'default'}
             size="small"
             sx={{ fontWeight: 600 }}

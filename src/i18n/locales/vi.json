@@ -170,6 +170,14 @@
     "noSettlements": "Chưa có giao dịch thanh toán nợ nào được ghi nhận."
   },
   "invitation": {
+    "acceptHeader": "Lời mời tham gia nhóm",
+    "acceptSub": "Bạn đã nhận được lời mời tham gia nhóm chi tiêu từ thành viên Divvy.",
+    "invitedBy": "Người mời",
+    "loadingInfo": "Đang xác thực và tải thông tin lời mời...",
+    "fetchError": "Không thể tải thông tin lời mời. Vui lòng kiểm tra lại liên kết.",
+    "loginPromptInfo": "Vui lòng đăng nhập tài khoản Divvy để chấp nhận lời mời tham gia nhóm này.",
+    "acceptSubmitBtn": "Chấp Nhận Lời Mời",
+    "acceptingBtn": "Đang xử lý...",
     "acceptTitle": "Lời mời tham gia nhóm",
     "searchPrompt": "Tìm kiếm và chọn thành viên bên dưới để gửi lời mời tham gia nhóm chi tiêu.",
     "noUserFound": "Không tìm thấy người dùng phù hợp.",
@@ -184,7 +192,7 @@
     "groupName": "Tên nhóm",
     "inviterName": "Người mời",
     "messageLabel": "Lời nhắn cá nhân",
-    "statusLabel": "Trạng thái lời mời:",
+    "statusLabel": "Trạng thái",
     "acceptBtn": "Chấp nhận lời mời",
     "loginToAcceptBtn": "Đăng nhập để chấp nhận",
     "declineBtn": "Bỏ qua",

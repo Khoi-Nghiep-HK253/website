@@ -170,6 +170,14 @@
     "noSettlements": "No settlements recorded in this group yet."
   },
   "invitation": {
+    "acceptHeader": "Group Invitation",
+    "acceptSub": "You have received an invitation to join an expense group on Divvy.",
+    "invitedBy": "Invited by",
+    "loadingInfo": "Verifying and loading invitation details...",
+    "fetchError": "Unable to load invitation details. Please check the link.",
+    "loginPromptInfo": "Please sign in to your Divvy account to accept this group invitation.",
+    "acceptSubmitBtn": "Accept Invitation",
+    "acceptingBtn": "Joining...",
     "acceptTitle": "Group Invitation",
     "searchPrompt": "Search and select a member below to send an invitation to join the expense group.",
     "noUserFound": "No matching user found.",
@@ -184,7 +192,7 @@
     "groupName": "Group Name",
     "inviterName": "Invited by",
     "messageLabel": "Personal Message",
-    "statusLabel": "Invitation Status:",
+    "statusLabel": "Invitation Status",
     "acceptBtn": "Accept Invitation",
     "loginToAcceptBtn": "Sign In to Accept",
     "declineBtn": "Decline",

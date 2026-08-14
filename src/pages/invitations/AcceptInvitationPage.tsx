@@ -38,8 +38,13 @@ export const AcceptInvitationPage: React.FC = () => {
           p: { xs: 3, sm: 4 },
           borderRadius: 3,
           textAlign: 'center',
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          border: '1px solid #e2e8f0',
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: (theme) =>
+            theme.palette.mode === 'dark'
+              ? '0 10px 30px rgba(0, 0, 0, 0.5)'
+              : '0 10px 30px rgba(0, 0, 0, 0.08)',
         }}
       >
         <Avatar
